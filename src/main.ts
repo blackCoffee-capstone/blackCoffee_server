@@ -1,14 +1,15 @@
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { AppConfig } from './config/config.constant';
 import { setupSwagger } from './swagger';
 
 declare const module: any;
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
-
-	//TODO:
-	const port = 3000;
+	const appConfig = app.get(ConfigService).get<AppConfig>('appConfig');
+	const port = appConfig.listeningPort;
 
 	setupSwagger(app);
 	await app.listen(port);
