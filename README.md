@@ -58,15 +58,44 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+# How to run
+
+Make sure node.js 16 is installed
+
+## Run the application in local
+
+1. Git clone this repo and cd into the directory.
+2. Install dependencies.
+
+```bash
+npm install
+```
+
+3. Run.
+
+```bash
+npm run start:dev
+```
+
+## Nestjs on Docker for Development
+
+1. Make sure postgres is running if this app needs it.
+2. Git clone this repo and cd into the directory.
+3. Run with `docker-compose`. docker-compose.dev.yml is intended for development environments.
+
+```bash
+docker-compose -f docker-compose.dev.yml up
+```
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+-   Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
+-   Website - [https://nestjs.com](https://nestjs.com/)
+-   Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 
