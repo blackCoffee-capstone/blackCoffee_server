@@ -20,6 +20,21 @@ export type DatabaseConfig = {
 	dbname: string;
 };
 
+export type OauthConfig = {
+	kakao: {
+		clientId: string;
+		callbackUrl: string;
+	};
+};
+
+export type JwtConfig = {
+	jwtAccessTokenSecret: string;
+	jwtAccessTokenExpire: string;
+	jwtAccessTokenExpireAdmin: string;
+	jwtRefreshTokenSecret: string;
+	jwtRefreshTokenExpire: string;
+};
+
 export const appConfig = (): { appConfig: AppConfig } => ({
 	appConfig: {
 		env: process.env.NODE_ENV as NodeEnv,
@@ -37,5 +52,24 @@ export const databaseConfig = (): { databaseConfig: DatabaseConfig } => ({
 		host: process.env.DATABASE_HOST,
 		port: +process.env.DATABASE_PORT,
 		dbname: process.env.DATABASE_DB,
+	},
+});
+
+export const oauthConfig = (): { oauthConfig: OauthConfig } => ({
+	oauthConfig: {
+		kakao: {
+			clientId: process.env.KAKAO_CLIENT_ID,
+			callbackUrl: process.env.KAKAO_CALLBACK_URL,
+		},
+	},
+});
+
+export const jwtConfig = (): { jwtConfig: JwtConfig } => ({
+	jwtConfig: {
+		jwtAccessTokenSecret: process.env.JWT_ACCESS_TOKEN_SECRET,
+		jwtAccessTokenExpire: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
+		jwtAccessTokenExpireAdmin: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME_ADMIN,
+		jwtRefreshTokenSecret: process.env.JWT_REFRESH_TOKEN_SECRET,
+		jwtRefreshTokenExpire: process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
 	},
 });
