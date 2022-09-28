@@ -19,7 +19,6 @@ describe('AuthController', () => {
 			imports: [HttpModule],
 			controllers: [AuthController],
 			providers: [
-				// HttpService,
 				AuthService,
 				KakaoAuthStrategy,
 				{

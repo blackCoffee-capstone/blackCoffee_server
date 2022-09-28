@@ -46,15 +46,12 @@ export class AuthService {
 
 			if (kakaoUser) return new UserResponseDto(kakaoUser);
 			else {
-				const userType: UserType = UserType.Kakao;
-
 				kakaoUser = await this.usersRepository.save({
 					name: kakaoUserData.name,
 					nickname: kakaoUserData.name,
 					email: kakaoUserData.email,
 					socialId: kakaoUserData.kakaoId,
-					type: userType,
-					birthdate: kakaoUserData.birthdate,
+					type: UserType.Kakao,
 				});
 
 				return new UserResponseDto(kakaoUser);

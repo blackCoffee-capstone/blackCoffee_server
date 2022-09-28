@@ -19,7 +19,7 @@ export class UserResponseDto {
 	readonly type: UserType;
 
 	@ApiProperty({ description: '사용자 생년월일' })
-	readonly birthdate: Date;
+	readonly birthdate: Date | null;
 
 	constructor({ id, name, nickname, email, type, birthdate }) {
 		this.id = id;

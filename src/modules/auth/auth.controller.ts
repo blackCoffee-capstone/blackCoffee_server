@@ -13,7 +13,7 @@ export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
 	//Test
-	@Get('/kakao-login1')
+	@Get('/kakao-login')
 	@Header('Content-Type', 'text/html')
 	@Redirect()
 	@ApiDocs.getKakaoLoginPage('카카오 로그인 페이지로 리디렉트')

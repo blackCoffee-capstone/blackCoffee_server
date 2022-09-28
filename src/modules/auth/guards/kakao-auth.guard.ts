@@ -20,7 +20,6 @@ export class KakaoAuthGuard implements CanActivate {
 			name: kakaoAccount.profile.nickname,
 			kakaoId: validateTokenResult.id,
 			email: kakaoAccount.has_email && !kakaoAccount.email_needs_agreement ? kakaoAccount.email : null,
-			birthdate: null,
 		});
 		request.body = { kakaoUser: kakaoUser };
 

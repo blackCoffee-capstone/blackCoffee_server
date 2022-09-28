@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class KakaoUserDto {
 	@IsNotEmpty()
@@ -13,14 +13,9 @@ export class KakaoUserDto {
 	@IsString()
 	readonly email: string;
 
-	@IsNotEmpty()
-	@IsDateString()
-	readonly birthdate: Date;
-
-	constructor({ name, kakaoId, email, birthdate }) {
+	constructor({ name, kakaoId, email }) {
 		this.name = name;
 		this.kakaoId = kakaoId;
 		this.email = email;
-		this.birthdate = birthdate;
 	}
 }
