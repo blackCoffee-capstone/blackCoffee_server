@@ -20,6 +20,13 @@ export type DatabaseConfig = {
 	dbname: string;
 };
 
+export type OauthConfig = {
+	kakao: {
+		clientId: string;
+		callbackUrl: string;
+	};
+};
+
 export const appConfig = (): { appConfig: AppConfig } => ({
 	appConfig: {
 		env: process.env.NODE_ENV as NodeEnv,
@@ -37,5 +44,14 @@ export const databaseConfig = (): { databaseConfig: DatabaseConfig } => ({
 		host: process.env.DATABASE_HOST,
 		port: +process.env.DATABASE_PORT,
 		dbname: process.env.DATABASE_DB,
+	},
+});
+
+export const oauthConfig = (): { oauthConfig: OauthConfig } => ({
+	oauthConfig: {
+		kakao: {
+			clientId: process.env.KAKAO_CLIENT_ID,
+			callbackUrl: process.env.KAKAO_CALLBACK_URL,
+		},
 	},
 });

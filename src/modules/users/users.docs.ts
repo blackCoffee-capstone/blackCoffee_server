@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 
+import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { UsersController } from './users.controller';
 
 export const ApiDocs: SwaggerMethodDoc<UsersController> = {
