@@ -1,5 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
@@ -20,6 +21,12 @@ describe('AuthController', () => {
 			controllers: [AuthController],
 			providers: [
 				AuthService,
+				{
+					provide: JwtService,
+					useValue: {
+						sign: () => '',
+					},
+				},
 				KakaoAuthStrategy,
 				{
 					provide: getRepositoryToken(User),
@@ -29,7 +36,7 @@ describe('AuthController', () => {
 					provide: ConfigService,
 					useValue: {
 						get: jest.fn((key: string) => {
-							if (key === 'oauthConfig') {
+							if (key === 'jwtConfig' || key === 'oauthConfig') {
 								return 1;
 							}
 							return null;

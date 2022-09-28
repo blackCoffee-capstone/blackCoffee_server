@@ -1,5 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
@@ -14,6 +15,7 @@ describe('AuthService', () => {
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
+				AuthService,
 				{
 					provide: HttpService,
 					useValue: {
@@ -22,7 +24,12 @@ describe('AuthService', () => {
 						post: jest.fn(() => {}),
 					},
 				},
-				AuthService,
+				{
+					provide: JwtService,
+					useValue: {
+						sign: () => '',
+					},
+				},
 				{
 					provide: getRepositoryToken(User),
 					useClass: MockUsersRepository,
@@ -31,7 +38,7 @@ describe('AuthService', () => {
 					provide: ConfigService,
 					useValue: {
 						get: jest.fn((key: string) => {
-							if (key === 'oauthConfig') {
+							if (key === 'jwtConfig' || key === 'oauthConfig') {
 								return 1;
 							}
 							return null;
@@ -39,7 +46,6 @@ describe('AuthService', () => {
 					},
 				},
 			],
-			// imports: [HttpModule],
 		}).compile();
 
 		authService = module.get<AuthService>(AuthService);

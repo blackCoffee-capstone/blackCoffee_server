@@ -1,10 +1,12 @@
 import { Body, Controller, Get, Header, HttpCode, Post, Query, Redirect, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthUser } from 'src/decorators/auth.decorator';
 
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { ApiDocs } from './auth.docs';
 import { AuthService } from './auth.service';
 import { KakaoUserDto } from './dto/kakao-user.dto';
+import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 
 @Controller('auth')
@@ -38,6 +40,13 @@ export class AuthController {
 	@ApiDocs.kakaoLogin('카카오 로그인 회원가입&로그인 후 유저 정보, 토큰 반환')
 	async kakaoLogin(@Body('kakaoUser') kakaoUser) {
 		const user: UserResponseDto = await this.authService.createKakaoUser(kakaoUser as KakaoUserDto);
-		return user;
+		return this.authService.login(user);
+	}
+
+	@UseGuards(JwtRefreshGuard)
+	@Post('token-refresh')
+	@ApiDocs.refreshToken('access token 재발급')
+	async refreshToken(@AuthUser() user) {
+		return await this.authService.refresh(user);
 	}
 }
