@@ -16,7 +16,6 @@ jobs:
                 node-version: [16.5]
 
         steps:
-            - name: Checkout source code
             - uses: actions/checkout@v3
             - name: Set up Node.js
               uses: actions/setup-node@v3
