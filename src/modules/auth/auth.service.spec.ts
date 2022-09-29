@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { AuthCode } from 'src/entities/auth-code.entity';
 
 import { User } from 'src/entities/users.entity';
 import { MockUsersRepository } from '../../../test/mock/users.mock';
@@ -32,6 +33,10 @@ describe('AuthService', () => {
 				},
 				{
 					provide: getRepositoryToken(User),
+					useClass: MockUsersRepository,
+				},
+				{
+					provide: getRepositoryToken(AuthCode),
 					useClass: MockUsersRepository,
 				},
 				{
