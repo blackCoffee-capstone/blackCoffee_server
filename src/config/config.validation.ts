@@ -15,4 +15,6 @@ export const configValidationSchema = Joi.object({
 	JWT_ACCESS_TOKEN_EXPIRATION_TIME_ADMIN: Joi.string().required(),
 	JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
 	JWT_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+	EMAIL: Joi.string().required(),
+	EMAIL_PASSWORD: Joi.string().required(),
 });

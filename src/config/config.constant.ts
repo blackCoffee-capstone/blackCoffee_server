@@ -35,6 +35,11 @@ export type JwtConfig = {
 	jwtRefreshTokenExpire: string;
 };
 
+export type EmailConfig = {
+	email: string;
+	emailPassword: string;
+};
+
 export const appConfig = (): { appConfig: AppConfig } => ({
 	appConfig: {
 		env: process.env.NODE_ENV as NodeEnv,
@@ -71,5 +76,12 @@ export const jwtConfig = (): { jwtConfig: JwtConfig } => ({
 		jwtAccessTokenExpireAdmin: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME_ADMIN,
 		jwtRefreshTokenSecret: process.env.JWT_REFRESH_TOKEN_SECRET,
 		jwtRefreshTokenExpire: process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
+	},
+});
+
+export const emailConfig = (): { emailConfig: EmailConfig } => ({
+	emailConfig: {
+		email: process.env.EMAIL,
+		emailPassword: process.env.EMAIL_PASSWORD,
 	},
 });

@@ -1,5 +1,12 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { HttpService } from '@nestjs/axios';
-import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {
+	BadRequestException,
+	ForbiddenException,
+	Injectable,
+	InternalServerErrorException,
+	UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +16,7 @@ import { Repository } from 'typeorm';
 import { JwtConfig, OauthConfig } from 'src/config/config.constant';
 import { AuthCode } from 'src/entities/auth-code.entity';
 import { User } from 'src/entities/users.entity';
+import { AuthCodeType } from 'src/types/auth-code.types';
 import { UserType } from 'src/types/users.types';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { KakaoLoginResponseDto } from './dto/kakao-login-response.dto';
@@ -26,6 +34,7 @@ export class AuthService {
 		private readonly configService: ConfigService,
 		private readonly jwtService: JwtService,
 		private readonly httpService: HttpService,
+		private readonly mailerService: MailerService,
 	) {}
 	#oauthConfig = this.configService.get<OauthConfig>('oauthConfig').kakao;
 	#jwtConfig = this.configService.get<JwtConfig>('jwtConfig');
@@ -102,18 +111,22 @@ export class AuthService {
 				.where('user.email = :email', { email: signUpRequestDto.email })
 				.getOne();
 
-			// 이메일 중복 (일반)
 			if (foundUser && foundUser.type === UserType.Normal) {
-				throw new BadRequestException('EMAIL IS ALREADY EXIST');
+				// 이메일 중복 (일반)
+				if (!foundUser.authCode) throw new BadRequestException('Email is already exist');
+				// 이메일 인증 안한 경우
+				else if (foundUser.authCode.type === AuthCodeType.SighUp) {
+					throw new ForbiddenException('Email confirmation is required.');
+				}
 			}
 
 			// 이메일 중복 (카카오)
 			else if (foundUser && foundUser.type === UserType.Kakao) {
-				throw new BadRequestException('USER IS KAKAO USER');
+				throw new BadRequestException('User is kakao user');
 			}
-			// 이메일 인증 안한 경우
 
 			// 인증메일 전송
+
 			// authcode tbl 생성
 
 			//TODO: Remove code after test
@@ -163,5 +176,10 @@ export class AuthService {
 		return userType === UserType.Admin
 			? this.#jwtConfig.jwtAccessTokenExpireAdmin
 			: this.#jwtConfig.jwtAccessTokenExpire;
+	}
+
+	private async generateAuthCode(email: string) {
+		// authcode tbl 추가
+		// 메일 전송
 	}
 }

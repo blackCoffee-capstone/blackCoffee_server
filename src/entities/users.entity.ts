@@ -1,5 +1,5 @@
 import { IsDateString, IsEmail, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
 
 import { UserType } from 'src/types/users.types';
 import { AuthCode } from './auth-code.entity';
@@ -40,13 +40,8 @@ export class User extends CommonEntity {
 	@Column({ type: 'date', nullable: true })
 	birthdate: Date;
 
-	@IsNumber()
-	@Column({ type: 'int', name: 'authcode_id', nullable: true })
-	authcodeId: number;
-
 	@OneToOne(() => AuthCode, (authCode: AuthCode) => authCode.User, {
-		onDelete: 'SET NULL',
+		cascade: true,
 	})
-	@JoinColumn([{ name: 'authcode_id', referencedColumnName: 'id' }])
 	authCode: AuthCode;
 }

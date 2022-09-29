@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsString } from 'class-validator';
-import { Column, Entity, OneToOne } from 'typeorm';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 import { AuthCodeType } from 'src/types/auth-code.types';
 import { CommonEntity } from './common.entity';
@@ -17,12 +17,17 @@ export class AuthCode extends CommonEntity {
 	type: AuthCodeType;
 
 	@IsString()
-	@IsNotEmpty()
-	@Column({ type: 'varchar', nullable: false })
+	@Column({ type: 'varchar', nullable: true })
 	code: string;
 
+	@IsNumber()
+	@IsNotEmpty()
+	@Column({ type: 'int', name: 'user_id', nullable: false })
+	userId: number;
+
 	@OneToOne(() => User, (user: User) => user.authCode, {
-		cascade: true,
+		onDelete: 'CASCADE',
 	})
+	@JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
 	User: User;
 }
