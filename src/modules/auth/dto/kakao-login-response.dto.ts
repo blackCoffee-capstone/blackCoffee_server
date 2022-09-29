@@ -1,10 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
+
 import { UserResponseDto } from 'src/modules/users/dto/user-response.dto';
 
 export class KakaoLoginResponseDto {
+	@IsString()
 	@ApiProperty({ description: 'access token' })
 	readonly accessToken: string;
 
+	@IsString()
 	@ApiProperty({ description: 'refresh token' })
 	readonly refreshToken: string;
 

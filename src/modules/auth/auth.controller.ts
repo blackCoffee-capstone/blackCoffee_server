@@ -6,6 +6,7 @@ import { UserResponseDto } from '../users/dto/user-response.dto';
 import { ApiDocs } from './auth.docs';
 import { AuthService } from './auth.service';
 import { KakaoUserDto } from './dto/kakao-user.dto';
+import { SignUpRequestDto } from './dto/signup-request.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 
@@ -41,6 +42,12 @@ export class AuthController {
 	async kakaoLogin(@Body('kakaoUser') kakaoUser) {
 		const user: UserResponseDto = await this.authService.createKakaoUser(kakaoUser as KakaoUserDto);
 		return this.authService.login(user);
+	}
+
+	@Post('/signup')
+	@ApiDocs.createUser('일반 회원가입')
+	async createUser(@Body() signUpRequestDto: SignUpRequestDto) {
+		return await this.authService.signup(signUpRequestDto);
 	}
 
 	@UseGuards(JwtRefreshGuard)

@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,11 +7,13 @@ import { firstValueFrom } from 'rxjs';
 import { Repository } from 'typeorm';
 
 import { JwtConfig, OauthConfig } from 'src/config/config.constant';
+import { AuthCode } from 'src/entities/auth-code.entity';
 import { User } from 'src/entities/users.entity';
 import { UserType } from 'src/types/users.types';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { KakaoLoginResponseDto } from './dto/kakao-login-response.dto';
 import { KakaoUserDto } from './dto/kakao-user.dto';
+import { SignUpRequestDto } from './dto/signup-request.dto';
 import { TokenRefreshResponseDto } from './dto/token-refresh-response.dto';
 
 @Injectable()
@@ -19,6 +21,8 @@ export class AuthService {
 	constructor(
 		@InjectRepository(User)
 		private readonly usersRepository: Repository<User>,
+		@InjectRepository(AuthCode)
+		private readonly authCodesRepository: Repository<AuthCode>,
 		private readonly configService: ConfigService,
 		private readonly jwtService: JwtService,
 		private readonly httpService: HttpService,
@@ -68,7 +72,6 @@ export class AuthService {
 
 	async login(user: UserResponseDto): Promise<KakaoLoginResponseDto> {
 		try {
-			console.log(user);
 			const payload = { id: user.id };
 			const jwtAccessTokenExpire: string = this.jwtAccessTokenExpireByType(user.type);
 
@@ -86,6 +89,43 @@ export class AuthService {
 				refreshToken,
 				user,
 			});
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
+	async signup(signUpRequestDto: SignUpRequestDto) {
+		try {
+			const foundUser = await this.usersRepository
+				.createQueryBuilder('user')
+				.leftJoinAndSelect('user.authCode', 'authCode')
+				.where('user.email = :email', { email: signUpRequestDto.email })
+				.getOne();
+
+			// 이메일 중복 (일반)
+			if (foundUser && foundUser.type === UserType.Normal) {
+				throw new BadRequestException('EMAIL IS ALREADY EXIST');
+			}
+
+			// 이메일 중복 (카카오)
+			else if (foundUser && foundUser.type === UserType.Kakao) {
+				throw new BadRequestException('USER IS KAKAO USER');
+			}
+			// 이메일 인증 안한 경우
+
+			// 인증메일 전송
+			// authcode tbl 생성
+
+			//TODO: Remove code after test
+			else {
+				const user = this.usersRepository.create({
+					...signUpRequestDto,
+					type: UserType.Normal,
+				});
+
+				const result = await this.usersRepository.save(user);
+				return result;
+			}
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
