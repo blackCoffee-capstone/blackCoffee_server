@@ -1,4 +1,4 @@
 export enum AuthCodeType {
-	SighUp = 'Kakao',
+	SighUp = 'SignUp',
 	FindPw = 'FindPw',
 }

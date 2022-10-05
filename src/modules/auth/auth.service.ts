@@ -137,6 +137,7 @@ export class AuthService {
 				});
 
 				const result = await this.usersRepository.save(user);
+				await this.generateAuthCodeIfSignUp(result.id, result.email);
 				return result;
 			}
 		} catch (error) {
@@ -178,8 +179,16 @@ export class AuthService {
 			: this.#jwtConfig.jwtAccessTokenExpire;
 	}
 
-	private async generateAuthCode(email: string) {
+	// 회원가입 경우
+	private async generateAuthCodeIfSignUp(userId: number, email: string) {
+		// random code
+		const code: string = Math.random().toString(36).slice(2, 10).toString();
 		// authcode tbl 추가
+		const authCode = await this.authCodesRepository.save({
+			type: AuthCodeType.SighUp,
+			code: code,
+			userId: userId,
+		});
 		// 메일 전송
 	}
 }
