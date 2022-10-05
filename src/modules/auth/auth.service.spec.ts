@@ -1,10 +1,11 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { AuthCode } from 'src/entities/auth-code.entity';
 
+import { AuthCode } from 'src/entities/auth-code.entity';
 import { User } from 'src/entities/users.entity';
 import { MockUsersRepository } from '../../../test/mock/users.mock';
 import { AuthService } from './auth.service';
@@ -17,6 +18,13 @@ describe('AuthService', () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				AuthService,
+				{
+					provide: MailerService,
+					useValue: {
+						// eslint-disable-next-line @typescript-eslint/no-empty-function
+						post: jest.fn(() => {}),
+					},
+				},
 				{
 					provide: HttpService,
 					useValue: {
