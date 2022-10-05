@@ -17,11 +17,13 @@ import { JwtConfig, OauthConfig } from 'src/config/config.constant';
 import { AuthCode } from 'src/entities/auth-code.entity';
 import { User } from 'src/entities/users.entity';
 import { AuthCodeType } from 'src/types/auth-code.types';
+import { MailAuthType } from 'src/types/mail-auth.types';
 import { UserType } from 'src/types/users.types';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { KakaoLoginResponseDto } from './dto/kakao-login-response.dto';
 import { KakaoUserDto } from './dto/kakao-user.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
+import { SignUpResponseDto } from './dto/signup-response.dto';
 import { TokenRefreshResponseDto } from './dto/token-refresh-response.dto';
 
 @Injectable()
@@ -103,7 +105,7 @@ export class AuthService {
 		}
 	}
 
-	async signup(signUpRequestDto: SignUpRequestDto) {
+	async signup(signUpRequestDto: SignUpRequestDto): Promise<UserResponseDto> {
 		try {
 			const foundUser = await this.usersRepository
 				.createQueryBuilder('user')
@@ -113,7 +115,8 @@ export class AuthService {
 
 			if (foundUser && foundUser.type === UserType.Normal) {
 				// 이메일 중복 (일반)
-				if (!foundUser.authCode) throw new BadRequestException('Email is already exist');
+				if (!foundUser.authCode || foundUser.authCode.type === AuthCodeType.FindPw)
+					throw new BadRequestException('Email is already exist');
 				// 이메일 인증 안한 경우
 				else if (foundUser.authCode.type === AuthCodeType.SighUp) {
 					throw new ForbiddenException('Email confirmation is required.');
@@ -130,16 +133,41 @@ export class AuthService {
 			// authcode tbl 생성
 
 			//TODO: Remove code after test
-			else {
-				const user = this.usersRepository.create({
-					...signUpRequestDto,
-					type: UserType.Normal,
-				});
+			const user = this.usersRepository.create({
+				...signUpRequestDto,
+				type: UserType.Normal,
+			});
 
-				const result = await this.usersRepository.save(user);
-				await this.generateAuthCodeIfSignUp(result.id, result.email);
-				return result;
-			}
+			const result = await this.usersRepository.save(user);
+			return new UserResponseDto(result);
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
+	async generateAuthCodeIfSignUp(user: UserResponseDto): Promise<SignUpResponseDto> {
+		const expiredAt: string = MailAuthType.ExpiredAt;
+		const code: string = Math.random().toString(36).slice(2, 10).toString();
+
+		try {
+			await this.authCodesRepository.save({
+				type: AuthCodeType.SighUp,
+				code: code,
+				userId: user.id,
+			});
+
+			this.mailerService.sendMail({
+				to: user.email,
+				subject: '[지금,여기] 이메일 인증 메일입니다 :)',
+				// TODO: Template
+				html: `
+			<p>지금,여기에 오신 것을 환영해요! 아래 인증 코드를 지금,여기 앱에서 입력해주세요.</p>
+			<p>인증 코드: <span>${code}</span></p>
+			<p>인증코드는 이메일 발송 시점으로부터 ${expiredAt} 동안 유효합니다.</p>
+			`,
+			});
+
+			return new SignUpResponseDto({ ...user, expiredAt });
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
@@ -177,18 +205,5 @@ export class AuthService {
 		return userType === UserType.Admin
 			? this.#jwtConfig.jwtAccessTokenExpireAdmin
 			: this.#jwtConfig.jwtAccessTokenExpire;
-	}
-
-	// 회원가입 경우
-	private async generateAuthCodeIfSignUp(userId: number, email: string) {
-		// random code
-		const code: string = Math.random().toString(36).slice(2, 10).toString();
-		// authcode tbl 추가
-		const authCode = await this.authCodesRepository.save({
-			type: AuthCodeType.SighUp,
-			code: code,
-			userId: userId,
-		});
-		// 메일 전송
 	}
 }

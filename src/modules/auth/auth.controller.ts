@@ -47,7 +47,8 @@ export class AuthController {
 	@Post('/signup')
 	@ApiDocs.createUser('일반 회원가입')
 	async createUser(@Body() signUpRequestDto: SignUpRequestDto) {
-		return await this.authService.signup(signUpRequestDto);
+		const user = await this.authService.signup(signUpRequestDto);
+		return await this.authService.generateAuthCodeIfSignUp(user);
 	}
 
 	@UseGuards(JwtRefreshGuard)
