@@ -17,7 +17,8 @@ export class AuthCode extends CommonEntity {
 	type: AuthCodeType;
 
 	@IsString()
-	@Column({ type: 'varchar', nullable: true })
+	@IsNotEmpty()
+	@Column({ type: 'varchar', nullable: false })
 	code: string;
 
 	@IsNumber()
