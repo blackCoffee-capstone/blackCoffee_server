@@ -9,6 +9,7 @@ import { AuthCode } from 'src/entities/auth-code.entity';
 import { User } from 'src/entities/users.entity';
 import { MockUsersRepository } from '../../../test/mock/users.mock';
 import { AuthService } from './auth.service';
+import { HashPassword } from './hash-password';
 
 describe('AuthService', () => {
 	let authService: AuthService;
@@ -18,6 +19,7 @@ describe('AuthService', () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				AuthService,
+				HashPassword,
 				{
 					provide: MailerService,
 					useValue: {

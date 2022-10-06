@@ -10,6 +10,7 @@ import { MailerModule } from 'src/mailer/mailer.module';
 import { MockUsersRepository } from '../../../test/mock/users.mock';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { HashPassword } from './hash-password';
 import { KakaoAuthStrategy } from './strategies/kakao-auth.strategy';
 
 describe('AuthController', () => {
@@ -23,6 +24,7 @@ describe('AuthController', () => {
 			controllers: [AuthController],
 			providers: [
 				AuthService,
+				HashPassword,
 				{
 					provide: JwtService,
 					useValue: {

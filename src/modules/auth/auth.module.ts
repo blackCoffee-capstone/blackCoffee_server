@@ -7,6 +7,7 @@ import { AuthCode } from 'src/entities/auth-code.entity';
 import { User } from 'src/entities/users.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { HashPassword } from './hash-password';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { KakaoAuthStrategy } from './strategies/kakao-auth.strategy';
@@ -21,6 +22,6 @@ import { KakaoAuthStrategy } from './strategies/kakao-auth.strategy';
 		}),
 	],
 	controllers: [AuthController],
-	providers: [AuthService, KakaoAuthStrategy, JwtStrategy, JwtRefreshStrategy],
+	providers: [AuthService, KakaoAuthStrategy, JwtStrategy, JwtRefreshStrategy, HashPassword],
 })
 export class AuthModule {}

@@ -27,6 +27,7 @@ import { KakaoUserDto } from './dto/kakao-user.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { SignUpResponseDto } from './dto/signup-response.dto';
 import { TokenRefreshResponseDto } from './dto/token-refresh-response.dto';
+import { HashPassword } from './hash-password';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +36,7 @@ export class AuthService {
 		private readonly usersRepository: Repository<User>,
 		@InjectRepository(AuthCode)
 		private readonly authCodesRepository: Repository<AuthCode>,
+		private hashPassword: HashPassword,
 		private readonly configService: ConfigService,
 		private readonly jwtService: JwtService,
 		private readonly httpService: HttpService,
@@ -106,6 +108,7 @@ export class AuthService {
 				throw new BadRequestException('User is kakao user');
 			}
 
+			signUpRequestDto.password = await this.hashPassword.hash(signUpRequestDto.password);
 			const user = this.usersRepository.create({
 				...signUpRequestDto,
 				type: UserType.Normal,
