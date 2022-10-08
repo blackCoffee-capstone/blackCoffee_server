@@ -70,7 +70,7 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 			}),
 		);
 	},
-	confirmAuthCode(summary: string) {
+	verifyAuthCode(summary: string) {
 		return applyDecorators(
 			ApiOperation({
 				summary,

@@ -52,10 +52,10 @@ export class AuthController {
 		return await this.authService.generateAuthCodeIfSignUp(signUpUser);
 	}
 
-	@Post('/code/confirm')
-	@ApiDocs.confirmAuthCode('인증 코드 확인')
-	async confirmAuthCode(@Body() authCode: AuthCodeDto) {
-		return await this.authService.confirmAuthCode(authCode);
+	@Post('/code/verify')
+	@ApiDocs.verifyAuthCode('인증 코드 확인')
+	async verifyAuthCode(@Body() authCode: AuthCodeDto) {
+		return await this.authService.verifyAuthCode(authCode);
 	}
 
 	@UseGuards(JwtRefreshGuard)

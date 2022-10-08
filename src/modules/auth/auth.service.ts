@@ -99,7 +99,7 @@ export class AuthService {
 					throw new BadRequestException('Email is already exist');
 				// 이메일 인증 안한 경우
 				else if (foundUser.authCode.type === AuthCodeType.SighUp) {
-					throw new ForbiddenException('Email confirmation is required');
+					throw new ForbiddenException('Email verification is required');
 				}
 			}
 
@@ -173,7 +173,7 @@ export class AuthService {
 		}
 	}
 
-	async confirmAuthCode(authCode: AuthCodeDto) {
+	async verifyAuthCode(authCode: AuthCodeDto) {
 		const foundUser = await this.usersRepository
 			.createQueryBuilder('user')
 			.leftJoinAndSelect('user.authCode', 'authCode')
