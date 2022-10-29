@@ -98,7 +98,7 @@ export class AuthService {
 				if (!foundUser.authCode || foundUser.authCode.type === AuthCodeType.FindPw)
 					throw new BadRequestException('Email is already exist');
 				// 이메일 인증 안한 경우
-				else if (foundUser.authCode.type === AuthCodeType.SighUp) {
+				else if (foundUser.authCode.type === AuthCodeType.SignUp) {
 					throw new ForbiddenException('Email verification is required');
 				}
 			}
@@ -151,7 +151,7 @@ export class AuthService {
 
 		try {
 			await this.authCodesRepository.save({
-				type: AuthCodeType.SighUp,
+				type: AuthCodeType.SignUp,
 				code: code,
 				userId: user.id,
 			});
