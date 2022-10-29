@@ -1,7 +1,8 @@
-import { IsDateString, IsEmail, IsNotEmpty, IsNumber, IsString, MaxLength, MinLength } from 'class-validator';
-import { Column, Entity } from 'typeorm';
+import { IsDateString, IsEmail, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
+import { Column, Entity, OneToOne } from 'typeorm';
 
 import { UserType } from 'src/types/users.types';
+import { AuthCode } from './auth-code.entity';
 import { CommonEntity } from './common.entity';
 
 @Entity()
@@ -18,7 +19,7 @@ export class User extends CommonEntity {
 
 	@IsEmail()
 	@Column({ type: 'varchar', nullable: true })
-	email: string;
+	email: string | null;
 
 	@IsNumber()
 	@IsNotEmpty()
@@ -31,12 +32,16 @@ export class User extends CommonEntity {
 	type: UserType;
 
 	@IsString()
-	@MinLength(4)
-	@MaxLength(20)
+	@Length(2, 10)
 	@Column({ type: 'varchar', nullable: true }) //TODO: strong pw
 	password: string;
 
 	@IsDateString()
 	@Column({ type: 'date', nullable: true })
 	birthdate: Date;
+
+	@OneToOne(() => AuthCode, (authCode: AuthCode) => authCode.User, {
+		cascade: true,
+	})
+	authCode: AuthCode;
 }

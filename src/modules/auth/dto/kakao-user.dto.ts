@@ -9,7 +9,6 @@ export class KakaoUserDto {
 	@IsNumber()
 	readonly kakaoId: number;
 
-	@IsNotEmpty()
 	@IsString()
 	readonly email: string;
 

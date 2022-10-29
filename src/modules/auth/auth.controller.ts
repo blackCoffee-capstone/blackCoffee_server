@@ -5,7 +5,9 @@ import { AuthUser } from 'src/decorators/auth.decorator';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { ApiDocs } from './auth.docs';
 import { AuthService } from './auth.service';
+import { AuthCodeDto } from './dto/auth-code.dto';
 import { KakaoUserDto } from './dto/kakao-user.dto';
+import { SignUpRequestDto } from './dto/signup-request.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 
@@ -41,6 +43,19 @@ export class AuthController {
 	async kakaoLogin(@Body('kakaoUser') kakaoUser) {
 		const user: UserResponseDto = await this.authService.createKakaoUser(kakaoUser as KakaoUserDto);
 		return this.authService.login(user);
+	}
+
+	@Post('/signup')
+	@ApiDocs.signUp('일반 회원가입 및 인증 메일 발송')
+	async signUp(@Body() user: SignUpRequestDto) {
+		const signUpUser = await this.authService.signUp(user);
+		return await this.authService.generateAuthCodeIfSignUp(signUpUser);
+	}
+
+	@Post('/code/verify')
+	@ApiDocs.verifyAuthCode('인증 코드 확인')
+	async verifyAuthCode(@Body() authCode: AuthCodeDto) {
+		return await this.authService.verifyAuthCode(authCode);
 	}
 
 	@UseGuards(JwtRefreshGuard)

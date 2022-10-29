@@ -43,6 +43,8 @@ jobs:
                   echo JWT_ACCESS_TOKEN_EXPIRATION_TIME_ADMIN=${{secrets.JWT_ACCESS_TOKEN_EXPIRATION_TIME_ADMIN}} >> .env.test
                   echo JWT_REFRESH_TOKEN_SECRET=${{secrets.JWT_REFRESH_TOKEN_SECRET}} >> .env.test
                   echo JWT_REFRESH_TOKEN_EXPIRATION_TIME=${{secrets.JWT_REFRESH_TOKEN_EXPIRATION_TIME}} >> .env.test
+                  echo EMAIL=${{secrets.EMAIL}} >> .env.test
+                  echo EMAIL_PASSWORD=${{secrets.EMAIL_PASSWORD}} >> .env.test
             - name: Install packages
               run: npm install
             - name: Run unit test
