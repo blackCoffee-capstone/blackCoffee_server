@@ -126,11 +126,10 @@ export class AuthService {
 				else if (foundUser.authCode.type === AuthCodeType.SignUp) {
 					throw new ForbiddenException('Email verification is required');
 				}
-			}
-
-			// 이메일 중복 (카카오)
-			else if (foundUser && foundUser.type === UserType.Kakao) {
+			} else if (foundUser && foundUser.type === UserType.Kakao) {
 				throw new BadRequestException('User is kakao user');
+			} else if (foundUser && foundUser.type === UserType.Facebook) {
+				throw new BadRequestException('User is facebook user');
 			}
 
 			signUpRequestDto.password = await this.hashPassword.hash(signUpRequestDto.password);
