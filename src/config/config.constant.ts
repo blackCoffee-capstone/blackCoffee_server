@@ -25,6 +25,11 @@ export type OauthConfig = {
 		clientId: string;
 		callbackUrl: string;
 	};
+	facebook: {
+		clientId: string;
+		secretKey: string;
+		callbackUrl: string;
+	};
 };
 
 export type JwtConfig = {
@@ -65,6 +70,11 @@ export const oauthConfig = (): { oauthConfig: OauthConfig } => ({
 		kakao: {
 			clientId: process.env.KAKAO_CLIENT_ID,
 			callbackUrl: process.env.KAKAO_CALLBACK_URL,
+		},
+		facebook: {
+			clientId: process.env.FACEBOOK_CLIENT_ID,
+			secretKey: process.env.FACEBOOK_SECRET_KEY,
+			callbackUrl: process.env.FACEBOOK_CALLBACK_URL,
 		},
 	},
 });

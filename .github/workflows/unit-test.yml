@@ -38,6 +38,9 @@ jobs:
                   echo POSTGRES_DB=${{secrets.POSTGRES_DB}} >> .env.test
                   echo KAKAO_CLIENT_ID=${{secrets.KAKAO_CLIENT_ID}} >> .env.test
                   echo KAKAO_CALLBACK_URL=${{secrets.KAKAO_CALLBACK_URL}} >> .env.test
+                  echo FACEBOOK_CLIENT_ID=${{secrets.FACEBOOK_CLIENT_ID}} >> .env.test
+                  echo FACEBOOK_SECRET_KEY=${{secrets.FACEBOOK_SECRET_KEY}} >> .env.test
+                  echo FACEBOOK_CALLBACK_URL=${{secrets.FACEBOOK_CALLBACK_URL}} >> .env.test
                   echo JWT_ACCESS_TOKEN_SECRET=${{secrets.JWT_ACCESS_TOKEN_SECRET}} >> .env.test
                   echo JWT_ACCESS_TOKEN_EXPIRATION_TIME=${{secrets.JWT_ACCESS_TOKEN_EXPIRATION_TIME}} >> .env.test
                   echo JWT_ACCESS_TOKEN_EXPIRATION_TIME_ADMIN=${{secrets.JWT_ACCESS_TOKEN_EXPIRATION_TIME_ADMIN}} >> .env.test
