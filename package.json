@@ -8,7 +8,7 @@
 	"scripts": {
 		"prebuild": "rimraf dist",
 		"build": "nest build",
-		"format": "prettier --write \"server/src/**/*.ts\" \"server/test/**/*.ts\"",
+		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 		"start": "cross-env STAGE=dev nest start",
 		"start:dev": "cross-env STAGE=dev nest build --webpack --webpackPath webpack-hmr.config.js --watch",
 		"start:integ": "cross-env STAGE=integ nest build --webpack --webpackPath webpack-hmr.config.js --watch",
@@ -19,7 +19,7 @@
 		"test:watch": "jest --watch",
 		"test:cov": "jest --coverage",
 		"test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-		"test:e2e": "jest --config ./server/test/jest-e2e.json"
+		"test:e2e": "jest --config ./test/jest-e2e.json"
 	},
 	"dependencies": {
 		"@nestjs-modules/mailer": "^1.8.1",
@@ -84,20 +84,16 @@
 		"webpack-node-externals": "^3.0.0"
 	},
 	"jest": {
+		"moduleNameMapper": {
+			"^src/(.*)$": "<rootDir>/src/$1",
+			"^test/(.*)$": "<rootDir>/test/$1"
+		},
 		"moduleFileExtensions": [
 			"js",
 			"json",
 			"ts"
 		],
 		"rootDir": ".",
-		"roots": [
-			"<rootDir>/server/"
-		],
-		"moduleNameMapper": {
-			"src/(.*)$": "<rootDir>/server/src/$1",
-			"@src/(.*)$": "<rootDir>/server/src/$1",
-			"test/(.*)$": "<rootDir>/server/test/$1"
-		},
 		"testRegex": ".*\\.spec\\.ts$",
 		"transform": {
 			"^.+\\.(t|j)s$": "ts-jest"
@@ -105,7 +101,7 @@
 		"collectCoverageFrom": [
 			"**/*.(t|j)s"
 		],
-		"coverageDirectory": "./coverage",
+		"coverageDirectory": "../coverage",
 		"testEnvironment": "node"
 	}
 }
