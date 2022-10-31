@@ -63,7 +63,7 @@ export class AuthController {
 	}
 
 	@Post('/signup')
-	@ApiDocs.signUp('일반 회원가입 및 인증 메일 발송')
+	@ApiDocs.signUp('일반 회원가입')
 	async signUp(@Body() user: SignUpRequestDto) {
 		const signUpUser = await this.authService.signUp(user);
 		return await this.authService.generateAuthCodeIfSignUp(signUpUser);

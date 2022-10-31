@@ -1,13 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { HttpService } from '@nestjs/axios';
-import {
-	BadRequestException,
-	ForbiddenException,
-	Injectable,
-	InternalServerErrorException,
-	NotFoundException,
-	UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -109,27 +102,12 @@ export class AuthService {
 	}
 
 	async signUp(signUpRequestDto: SignUpRequestDto): Promise<UserResponseDto> {
-		try {
-			const foundUser = await this.usersRepository
-				.createQueryBuilder('user')
-				.leftJoinAndSelect('user.authCode', 'authCode')
-				.where('user.email = :email', { email: signUpRequestDto.email })
-				.getOne();
+		const foundUser = await this.usersRepository
+			.createQueryBuilder('user')
+			.where('user.email = :email', { email: signUpRequestDto.email })
+			.getOne();
 
-			if (foundUser && foundUser.type === UserType.Normal) {
-				// 이메일 중복 (일반)
-				if (!foundUser.authCode || foundUser.authCode.type === AuthCodeType.FindPw)
-					throw new BadRequestException('Email is already exist');
-				// 이메일 인증 안한 경우
-				else if (foundUser.authCode.type === AuthCodeType.SignUp) {
-					throw new ForbiddenException('Email verification is required');
-				}
-			} else if (foundUser && foundUser.type === UserType.Kakao) {
-				throw new BadRequestException('User is kakao user');
-			} else if (foundUser && foundUser.type === UserType.Facebook) {
-				throw new BadRequestException('User is facebook user');
-			}
-
+		if (await this.errIfDuplicateEmail(foundUser)) {
 			signUpRequestDto.password = await this.hashPassword.hash(signUpRequestDto.password);
 			const user = this.usersRepository.create({
 				...signUpRequestDto,
@@ -138,8 +116,6 @@ export class AuthService {
 
 			const result = await this.usersRepository.save(user);
 			return new UserResponseDto(result);
-		} catch (error) {
-			throw new InternalServerErrorException(error.message, error);
 		}
 	}
 
@@ -196,30 +172,31 @@ export class AuthService {
 	}
 
 	async verifyAuthCode(authCode: AuthCodeDto) {
-		const foundUser = await this.usersRepository
-			.createQueryBuilder('user')
-			.leftJoinAndSelect('user.authCode', 'authCode')
-			.where('user.email = :email', { email: authCode.email })
-			.getOne();
+		//TODO: 수정 예정
+		// const foundUser = await this.usersRepository
+		// 	.createQueryBuilder('user')
+		// 	.leftJoinAndSelect('user.authCode', 'authCode')
+		// 	.where('user.email = :email', { email: authCode.email })
+		// 	.getOne();
 
-		if (!foundUser) {
-			throw new NotFoundException('Email not found');
-		} else if (!foundUser.authCode) {
-			throw new NotFoundException('Auth code not found');
-		} else if (foundUser.authCode.type !== authCode.type) {
-			throw new BadRequestException('Type is incorrect');
-		}
+		// if (!foundUser) {
+		// 	throw new NotFoundException('Email not found');
+		// } else if (!foundUser.authCode) {
+		// 	throw new NotFoundException('Auth code not found');
+		// } else if (foundUser.authCode.type !== authCode.type) {
+		// 	throw new BadRequestException('Type is incorrect');
+		// }
 
-		const now = new Date();
-		const expiredAt = foundUser.authCode.createdAt;
-		const diffMinute = (now.getTime() - expiredAt.getTime()) / 1000 / 60;
+		// const now = new Date();
+		// const expiredAt = foundUser.authCode.createdAt;
+		// const diffMinute = (now.getTime() - expiredAt.getTime()) / 1000 / 60;
 
-		if (diffMinute > 10) {
-			throw new ForbiddenException('Auth code expired');
-		} else if (foundUser.authCode.code !== authCode.code) {
-			throw new ForbiddenException('Auth code is incorrect');
-		}
-		await this.authCodesRepository.delete(foundUser.authCode.id);
+		// if (diffMinute > 10) {
+		// 	throw new ForbiddenException('Auth code expired');
+		// } else if (foundUser.authCode.code !== authCode.code) {
+		// 	throw new ForbiddenException('Auth code is incorrect');
+		// }
+		// await this.authCodesRepository.delete(foundUser.authCode.id);
 		return true;
 	}
 
@@ -249,6 +226,16 @@ export class AuthService {
 		} catch (error) {
 			throw new UnauthorizedException();
 		}
+	}
+
+	private async errIfDuplicateEmail(user) {
+		if (user && user.type === UserType.Normal) {
+			throw new BadRequestException('Email is already exist');
+		} else if (user && user.type === UserType.Kakao) {
+			throw new BadRequestException('User is kakao user');
+		} else if (user && user.type === UserType.Facebook) {
+			throw new BadRequestException('User is facebook user');
+		} else return true;
 	}
 
 	private jwtAccessTokenExpireByType(userType: UserType): string {
