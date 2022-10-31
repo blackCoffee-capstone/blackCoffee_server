@@ -88,11 +88,9 @@ export class AuthService {
 
 	async createFacebookUser(facebookUserData: FacebookUserDto): Promise<UserResponseDto> {
 		try {
-			console.log(facebookUserData);
 			let facebookUser = await this.usersRepository.findOne({
 				where: { socialId: facebookUserData.facebookId },
 			});
-			console.log(facebookUser);
 			if (facebookUser) return new UserResponseDto(facebookUser);
 			else {
 				facebookUser = await this.usersRepository.save({
