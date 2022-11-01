@@ -7,7 +7,6 @@ import { UserType } from 'src/types/users.types';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { ApiDocs } from './auth.docs';
 import { AuthService } from './auth.service';
-import { AuthCodeDto } from './dto/auth-code.dto';
 import { OauthUserDto } from './dto/oauth-user.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
@@ -68,14 +67,7 @@ export class AuthController {
 	@Post('/signup')
 	@ApiDocs.signUp('일반 회원가입')
 	async signUp(@Body() user: SignUpRequestDto) {
-		const signUpUser = await this.authService.signUp(user);
-		return await this.authService.generateAuthCodeIfSignUp(signUpUser);
-	}
-
-	@Post('/code/verify')
-	@ApiDocs.verifyAuthCode('인증 코드 확인')
-	async verifyAuthCode(@Body() authCode: AuthCodeDto) {
-		return await this.authService.verifyAuthCode(authCode);
+		return await this.authService.signUp(user);
 	}
 
 	@UseGuards(JwtRefreshGuard)

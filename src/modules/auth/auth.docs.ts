@@ -1,10 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { boolean } from 'joi';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { AuthController } from './auth.controller';
-import { AuthCodeDto } from './dto/auth-code.dto';
 import { KakaoLoginRequestDto } from './dto/kakao-login-request.dto';
 import { OauthLoginResponseDto } from './dto/oauth-login-response.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
@@ -92,22 +90,6 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 				status: 200,
 				description: '',
 				type: SignUpResponseDto,
-			}),
-		);
-	},
-	verifyAuthCode(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '인증 코드 확인',
-			}),
-			ApiBody({
-				type: AuthCodeDto,
-			}),
-			ApiResponse({
-				status: 200,
-				description: '',
-				type: boolean,
 			}),
 		);
 	},

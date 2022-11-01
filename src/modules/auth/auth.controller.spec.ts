@@ -3,10 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { AuthCode } from 'src/entities/auth-code.entity';
 
 import { User } from 'src/entities/users.entity';
-import { MailerModule } from 'src/mailer/mailer.module';
 import { MockUsersRepository } from '../../../test/mock/users.mock';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -20,7 +18,7 @@ describe('AuthController', () => {
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
-			imports: [HttpModule, MailerModule],
+			imports: [HttpModule],
 			controllers: [AuthController],
 			providers: [
 				AuthService,
@@ -34,10 +32,6 @@ describe('AuthController', () => {
 				KakaoAuthStrategy,
 				{
 					provide: getRepositoryToken(User),
-					useClass: MockUsersRepository,
-				},
-				{
-					provide: getRepositoryToken(AuthCode),
 					useClass: MockUsersRepository,
 				},
 				{
