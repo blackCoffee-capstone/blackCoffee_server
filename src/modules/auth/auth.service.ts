@@ -57,25 +57,45 @@ export class AuthService {
 	}
 
 	async createKakaoUser(kakaoUserData: KakaoUserDto): Promise<UserResponseDto> {
-		try {
-			let kakaoUser = await this.usersRepository.findOne({
-				where: { socialId: kakaoUserData.kakaoId },
+		if (kakaoUserData.email) {
+			let compareUser = await this.usersRepository.findOne({
+				where: { email: kakaoUserData.email },
 			});
 
+			if (compareUser) {
+				if (this.kakaoUserIsCompareUser(compareUser, kakaoUserData)) return new UserResponseDto(compareUser);
+				else await this.errIfDuplicateEmail(compareUser);
+			} else {
+				if ((compareUser = await this.getkakaoUserIfExist(kakaoUserData)))
+					return new UserResponseDto(compareUser);
+				else {
+					const newKakaoUser = await this.usersRepository.save({
+						name: kakaoUserData.name,
+						nickname: kakaoUserData.name,
+						email: kakaoUserData.email,
+						socialId: kakaoUserData.kakaoId,
+						type: UserType.Kakao,
+					});
+
+					return new UserResponseDto(newKakaoUser);
+				}
+			}
+		} else {
+			const kakaoUser = await this.getkakaoUserIfExist(kakaoUserData);
 			if (kakaoUser) return new UserResponseDto(kakaoUser);
 			else {
-				kakaoUser = await this.usersRepository.save({
-					name: kakaoUserData.name,
-					nickname: kakaoUserData.name,
-					email: kakaoUserData.email,
-					socialId: kakaoUserData.kakaoId,
-					type: UserType.Kakao,
-				});
-
-				return new UserResponseDto(kakaoUser);
+				try {
+					const newKakaoUser = await this.usersRepository.save({
+						name: kakaoUserData.name,
+						nickname: kakaoUserData.name,
+						socialId: kakaoUserData.kakaoId,
+						type: UserType.Kakao,
+					});
+					return new UserResponseDto(newKakaoUser);
+				} catch (error) {
+					throw new InternalServerErrorException(error.message, error);
+				}
 			}
-		} catch (error) {
-			throw new InternalServerErrorException(error.message, error);
 		}
 	}
 
@@ -225,6 +245,25 @@ export class AuthService {
 			} else throw new UnauthorizedException();
 		} catch (error) {
 			throw new UnauthorizedException();
+		}
+	}
+
+	private kakaoUserIsCompareUser(compareUser, kakaoUser): boolean {
+		if (compareUser.type === UserType.Kakao && compareUser.socialId == kakaoUser.kakaoId) return true;
+		return false;
+	}
+
+	private async getkakaoUserIfExist(kakaoUser) {
+		try {
+			const user = await this.usersRepository
+				.createQueryBuilder('user')
+				.where('user.type = :type', { type: UserType.Kakao })
+				.andWhere('user.social_id = :socialId', { socialId: kakaoUser.kakaoId }) //TODO: test
+				.getOne();
+
+			return user;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
 		}
 	}
 
