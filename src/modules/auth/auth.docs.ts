@@ -46,7 +46,7 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 				type: KakaoLoginRequestDto,
 			}),
 			ApiResponse({
-				status: 200,
+				status: 201,
 				description: '',
 				type: OauthLoginResponseDto,
 			}),
@@ -87,7 +87,7 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 				type: SignUpRequestDto,
 			}),
 			ApiResponse({
-				status: 200,
+				status: 201,
 				description: '',
 				type: SignUpResponseDto,
 			}),

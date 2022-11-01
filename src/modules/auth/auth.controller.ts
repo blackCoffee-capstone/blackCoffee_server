@@ -38,7 +38,6 @@ export class AuthController {
 
 	@UseGuards(KakaoAuthGuard)
 	@Post('/kakao-login')
-	@HttpCode(200)
 	@ApiDocs.kakaoLogin('카카오 로그인 회원가입&로그인 후 유저 정보, 토큰 반환')
 	async kakaoLogin(@Body('kakaoUser') kakaoUser) {
 		const user: UserResponseDto = await this.authService.createOauthUser(kakaoUser as OauthUserDto, UserType.Kakao);

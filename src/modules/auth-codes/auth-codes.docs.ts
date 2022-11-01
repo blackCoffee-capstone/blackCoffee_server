@@ -19,7 +19,7 @@ export const ApiDocs: SwaggerMethodDoc<AuthCodesController> = {
 				type: AuthCodeRequestDto,
 			}),
 			ApiResponse({
-				status: 200,
+				status: 201,
 				description: '',
 				type: AuthCodeResponseDto,
 			}),
@@ -35,7 +35,7 @@ export const ApiDocs: SwaggerMethodDoc<AuthCodesController> = {
 				type: VerifyAuthCodeRequestDto,
 			}),
 			ApiResponse({
-				status: 200,
+				status: 201,
 				description: '',
 				type: boolean,
 			}),
