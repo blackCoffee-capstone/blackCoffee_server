@@ -22,8 +22,9 @@ import { MailAuthType } from 'src/types/mail-auth.types';
 import { UserType } from 'src/types/users.types';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { AuthCodeDto } from './dto/auth-code.dto';
-import { KakaoLoginResponseDto } from './dto/kakao-login-response.dto';
+import { FacebookUserDto } from './dto/facebook-user.dto';
 import { KakaoUserDto } from './dto/kakao-user.dto';
+import { OauthLoginResponseDto } from './dto/oauth-login-response.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { SignUpResponseDto } from './dto/signup-response.dto';
 import { TokenRefreshResponseDto } from './dto/token-refresh-response.dto';
@@ -85,6 +86,28 @@ export class AuthService {
 		}
 	}
 
+	async createFacebookUser(facebookUserData: FacebookUserDto): Promise<UserResponseDto> {
+		try {
+			let facebookUser = await this.usersRepository.findOne({
+				where: { socialId: facebookUserData.facebookId },
+			});
+			if (facebookUser) return new UserResponseDto(facebookUser);
+			else {
+				facebookUser = await this.usersRepository.save({
+					name: facebookUserData.name,
+					nickname: facebookUserData.name,
+					email: facebookUserData.email,
+					socialId: facebookUserData.facebookId,
+					type: UserType.Facebook,
+				});
+
+				return new UserResponseDto(facebookUser);
+			}
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
 	async signUp(signUpRequestDto: SignUpRequestDto): Promise<UserResponseDto> {
 		try {
 			const foundUser = await this.usersRepository
@@ -98,14 +121,13 @@ export class AuthService {
 				if (!foundUser.authCode || foundUser.authCode.type === AuthCodeType.FindPw)
 					throw new BadRequestException('Email is already exist');
 				// 이메일 인증 안한 경우
-				else if (foundUser.authCode.type === AuthCodeType.SighUp) {
+				else if (foundUser.authCode.type === AuthCodeType.SignUp) {
 					throw new ForbiddenException('Email verification is required');
 				}
-			}
-
-			// 이메일 중복 (카카오)
-			else if (foundUser && foundUser.type === UserType.Kakao) {
+			} else if (foundUser && foundUser.type === UserType.Kakao) {
 				throw new BadRequestException('User is kakao user');
+			} else if (foundUser && foundUser.type === UserType.Facebook) {
+				throw new BadRequestException('User is facebook user');
 			}
 
 			signUpRequestDto.password = await this.hashPassword.hash(signUpRequestDto.password);
@@ -121,7 +143,7 @@ export class AuthService {
 		}
 	}
 
-	async login(user: UserResponseDto): Promise<KakaoLoginResponseDto> {
+	async login(user: UserResponseDto): Promise<OauthLoginResponseDto> {
 		try {
 			const payload = { id: user.id };
 			const jwtAccessTokenExpire: string = this.jwtAccessTokenExpireByType(user.type);
@@ -135,7 +157,7 @@ export class AuthService {
 				expiresIn: this.#jwtConfig.jwtRefreshTokenExpire,
 			});
 
-			return new KakaoLoginResponseDto({
+			return new OauthLoginResponseDto({
 				accessToken,
 				refreshToken,
 				user,
@@ -151,7 +173,7 @@ export class AuthService {
 
 		try {
 			await this.authCodesRepository.save({
-				type: AuthCodeType.SighUp,
+				type: AuthCodeType.SignUp,
 				code: code,
 				userId: user.id,
 			});

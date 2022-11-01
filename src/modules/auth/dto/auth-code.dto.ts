@@ -10,7 +10,7 @@ export class AuthCodeDto {
 
 	@IsString()
 	@ApiProperty({
-		example: AuthCodeType.SighUp,
+		example: AuthCodeType.SignUp,
 		description: '인증 타입 (회원가입중: SignUp, 비밀번호변경중: FindPw)',
 	})
 	readonly type: AuthCodeType;
