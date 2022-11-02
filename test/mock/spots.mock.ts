@@ -1,5 +1,5 @@
 export const mockSpot = {
-	locationId: 1,
+	id: 1,
 	name: '을왕리',
 	latitude: 37.253452,
 	longitude: 126.234523,

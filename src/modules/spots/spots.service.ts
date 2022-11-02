@@ -4,9 +4,7 @@ import { Repository } from 'typeorm';
 import { Spot } from 'src/entities/spots.entity';
 import { Location } from 'src/entities/locations.entity';
 import { SpotRequestDto } from './dto/spot-request.dto';
-import { SearchSpotDto } from './dto/search-spot.dto';
 import { LocationResponseDto } from './dto/location-response.dto';
-import { type } from 'os';
 
 @Injectable()
 export class SpotsService {
