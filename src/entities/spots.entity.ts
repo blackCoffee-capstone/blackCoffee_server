@@ -15,6 +15,7 @@ export class Spot extends CommonEntity {
 	@IsString()
 	@Column({ type: 'varchar', nullable: false, unique: true })
 	name: string;
+
 	@IsLatitude()
 	@Column({ type: 'double precision', nullable: false })
 	latitude: number;
@@ -42,6 +43,6 @@ export class Spot extends CommonEntity {
 	snsPostCount: number;
 
 	@IsNumber()
-	@Column({ name: 'sns_post_like_number', type: 'int', nullable: true })
-	snsPostLikeNumber: number | null;
+	@Column({ name: 'sns_post_like_number', type: 'int', nullable: false })
+	snsPostLikeNumber: number;
 }
