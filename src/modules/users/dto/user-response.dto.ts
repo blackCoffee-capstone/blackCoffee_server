@@ -15,7 +15,7 @@ export class UserResponseDto {
 	@ApiProperty({ example: 'test@naver.com', description: '사용자 이메일' })
 	readonly email: string;
 
-	@ApiProperty({ example: 'Kakao', description: '사용자 타입 (카카오유저, 관리자)' })
+	@ApiProperty({ example: 'Kakao', description: '사용자 타입 (카카오유저, 페이스북유저, 관리자)' })
 	readonly type: UserType;
 
 	@ApiProperty({ example: '2000-01-01', description: '사용자 생년월일' })

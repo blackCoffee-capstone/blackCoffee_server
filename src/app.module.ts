@@ -5,13 +5,14 @@ import { AppService } from './app.service';
 import { ConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
 import { MailerModule } from './mailer/mailer.module';
+import { AuthCodesModule } from './modules/auth-codes/auth-codes.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ViewController } from './views/view.controller';
 import { SpotsModule } from './modules/spots/spots.module';
 
 @Module({
-	imports: [ConfigModule, UsersModule, DatabaseModule, AuthModule, MailerModule, SpotsModule],
+	imports: [ConfigModule, UsersModule, DatabaseModule, AuthModule, MailerModule, AuthCodesModule, SpotsModule],
 	controllers: [AppController, ViewController],
 	providers: [AppService],
 })
