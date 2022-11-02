@@ -1,17 +1,16 @@
-import { IsArray, isEmpty, IsLatitude, IsLongitude, IsNumber, IsString } from 'class-validator';
-import { Column, Entity, IsNull } from 'typeorm';
+import { IsLatitude, IsLongitude, IsNumber, IsString } from 'class-validator';
+import { Column, Entity } from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { Geometry } from 'geojson';
-import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Spot extends CommonEntity {
 	@IsNumber()
-	@Column({ type: 'int', nullable: false })
+	@Column({ name: 'location_id', type: 'int', nullable: false })
 	locationId: number;
 
 	@IsString()
-	@Column({ type: 'varchar', nullable: false })
+	@Column({ type: 'varchar', nullable: false, unique: true })
 	name: string;
 
 	@IsLatitude()
@@ -37,10 +36,10 @@ export class Spot extends CommonEntity {
 	rank: number | null;
 
 	@IsNumber()
-	@Column({ type: 'int', nullable: false })
+	@Column({ name: 'sns_post_count', type: 'int', nullable: false })
 	snsPostCount: number;
 
 	@IsNumber()
-	@Column({ type: 'int', nullable: true })
+	@Column({ name: 'sns_post_like_number', type: 'int', nullable: true })
 	snsPostLikeNumber: number | null;
 }
