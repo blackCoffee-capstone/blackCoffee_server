@@ -6,19 +6,6 @@ import { UserResponseDto } from './dto/user-response.dto';
 import { UsersController } from './users.controller';
 
 export const ApiDocs: SwaggerMethodDoc<UsersController> = {
-	create(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '사용자 생성',
-			}),
-			ApiResponse({
-				status: 201,
-				description: '',
-				type: String,
-			}),
-		);
-	},
 	getUser(summary: string) {
 		return applyDecorators(
 			ApiOperation({

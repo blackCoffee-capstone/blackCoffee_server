@@ -1,20 +1,20 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export class KakaoUserDto {
+export class OauthUserDto {
 	@IsNotEmpty()
 	@IsString()
 	readonly name: string;
 
 	@IsNotEmpty()
 	@IsNumber()
-	readonly kakaoId: number;
+	readonly socialId: number;
 
 	@IsString()
 	readonly email: string;
 
-	constructor({ name, kakaoId, email }) {
+	constructor({ name, socialId, email }) {
 		this.name = name;
-		this.kakaoId = kakaoId;
+		this.socialId = socialId;
 		this.email = email;
 	}
 }

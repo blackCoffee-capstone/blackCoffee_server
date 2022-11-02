@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-facebook';
 import { OauthConfig } from 'src/config/config.constant';
+import { OauthUserDto } from '../dto/oauth-user.dto';
 
 @Injectable()
 export class FacebookAuthStrategy extends PassportStrategy(Strategy, 'facebook') {
@@ -19,11 +20,11 @@ export class FacebookAuthStrategy extends PassportStrategy(Strategy, 'facebook')
 
 	async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<any> {
 		const user = {
-			facebookId: parseInt(profile.id),
+			socialId: parseInt(profile.id),
 			email: profile.emails ? profile.emails[0].value : null,
 			name: profile.name.familyName + profile.name.givenName,
 		};
 
-		return user;
+		return new OauthUserDto(user);
 	}
 }
