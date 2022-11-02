@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { Geometry } from 'geojson';
 
-export class ResponseSpotDto {
+export class SpotRequestDto {
 	@IsNumber()
 	@ApiProperty({ example: 1, description: '여행지 id' })
 	readonly locationId: number;
 
 	@IsString()
-	@ApiProperty({ example: '을왕리', description: '여행지 이름' })
+	@ApiProperty({ example: '을왕리해수욕장', description: '여행지 이름' })
 	readonly name: string;
 
 	@IsNumber()
@@ -19,7 +19,6 @@ export class ResponseSpotDto {
 	@ApiProperty({ example: 126.234523, description: '경도' })
 	readonly longitude: number;
 
-	@IsNotEmpty()
 	@ApiProperty({ example: '(37.253452, 126.234523)', description: '[위도, 경도]' })
 	readonly geom: Geometry;
 
@@ -34,6 +33,6 @@ export class ResponseSpotDto {
 
 	@IsOptional()
 	@IsNumber()
-	@ApiProperty({ example: 100, description: '좋아요 수' })
+	@ApiProperty({ example: 100, description: 'sns 게시글 좋아요 수' })
 	readonly snsPostLikeNumber: number | null;
 }
