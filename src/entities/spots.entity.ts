@@ -1,18 +1,20 @@
 import { IsLatitude, IsLongitude, IsNumber, IsString } from 'class-validator';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { Geometry } from 'geojson';
-
+import { Location } from './locations.entity';
 @Entity()
 export class Spot extends CommonEntity {
-	@IsNumber()
-	@Column({ name: 'location_id', type: 'int', nullable: false })
-	locationId: number;
+	@ManyToOne(() => Location, (location: Location) => location.spots, {
+		cascade: true,
+		eager: true,
+	})
+	@JoinColumn([{ name: 'location_id', referencedColumnName: 'id' }])
+	location: Location;
 
 	@IsString()
 	@Column({ type: 'varchar', nullable: false, unique: true })
 	name: string;
-
 	@IsLatitude()
 	@Column({ type: 'double precision', nullable: false })
 	latitude: number;
