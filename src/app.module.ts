@@ -9,9 +9,10 @@ import { AuthCodesModule } from './modules/auth-codes/auth-codes.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ViewController } from './views/view.controller';
+import { SpotsModule } from './modules/spots/spots.module';
 
 @Module({
-	imports: [ConfigModule, UsersModule, DatabaseModule, AuthModule, MailerModule, AuthCodesModule],
+	imports: [ConfigModule, UsersModule, DatabaseModule, AuthModule, MailerModule, AuthCodesModule, SpotsModule],
 	controllers: [AppController, ViewController],
 	providers: [AppService],
 })
