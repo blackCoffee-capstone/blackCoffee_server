@@ -110,7 +110,7 @@ export class AuthService {
 
 	async login(user: UserResponseDto): Promise<OauthLoginResponseDto> {
 		try {
-			const payload = { id: user.id };
+			const payload = { id: user.id, role: user.type };
 			const jwtAccessTokenExpire: string = this.jwtAccessTokenExpireByType(user.type);
 
 			const accessToken = this.jwtService.sign(payload, {
@@ -134,7 +134,7 @@ export class AuthService {
 
 	async refresh(user: any) {
 		try {
-			const payload = { id: user.id };
+			const payload = { id: user.id, role: user.type };
 			const jwtAccessTokenExpire: string = this.jwtAccessTokenExpireByType(user.type);
 
 			const newAccessToken = this.jwtService.sign(payload, {
@@ -147,10 +147,10 @@ export class AuthService {
 		}
 	}
 
-	async getUserIdIfExist(id: number) {
+	async getUserIdIfExist(id: number, role: UserType) {
 		try {
 			const user = await this.usersRepository.findOne({
-				where: { id },
+				where: { id, type: role },
 			});
 			if (user) {
 				return { id: user.id, type: user.type };
