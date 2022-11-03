@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Spot } from 'src/entities/spots.entity';
 import { Location } from 'src/entities/locations.entity';
-import { SpotRequestDto } from './dto/spot-request.dto';
+import { Spot } from 'src/entities/spots.entity';
+import { Repository } from 'typeorm';
 import { LocationRequestDto } from './dto/location-request.dto';
-import { SpotResponseDto } from './dto/spot-response.dto';
 import { LocationResponseDto } from './dto/location-response.dto';
+import { SpotRequestDto } from './dto/spot-request.dto';
+import { SpotResponseDto } from './dto/spot-response.dto';
 
 @Injectable()
 export class SpotsService {
@@ -18,7 +18,7 @@ export class SpotsService {
 	) {}
 
 	async createSpot(requestSpot: SpotRequestDto) {
-		let location = await this.locationsRepository.findOne({
+		const location = await this.locationsRepository.findOne({
 			where: { id: requestSpot.locationId },
 		});
 		const saveSpot = await this.spotsRepository.save({
