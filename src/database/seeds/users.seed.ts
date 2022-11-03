@@ -13,6 +13,16 @@ const seedAdminUserData = {
 
 export default class UsersSeed implements Seeder {
 	public async run(Factory: Factory, connection: Connection): Promise<void> {
-		await connection.createQueryBuilder().insert().into(User).values([seedAdminUserData]).execute();
+		const currentAdminuser = await connection
+			.getRepository(User)
+			.createQueryBuilder()
+			.select('user')
+			.from(User, 'user')
+			.where('user.email = :email', {
+				email: seedAdminUserData.email,
+			})
+			.getOne();
+
+		if (!currentAdminuser) await connection.getRepository(User).save(seedAdminUserData);
 	}
 }
