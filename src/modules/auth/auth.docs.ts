@@ -4,7 +4,8 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagg
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { AuthController } from './auth.controller';
 import { KakaoLoginRequestDto } from './dto/kakao-login-request.dto';
-import { OauthLoginResponseDto } from './dto/oauth-login-response.dto';
+import { LoginRequestDto } from './dto/login-request.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { SignUpResponseDto } from './dto/signup-response.dto';
 import { TokenRefreshRequestDto } from './dto/token-refresh-request.dto';
@@ -48,7 +49,7 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 			ApiResponse({
 				status: 201,
 				description: '',
-				type: OauthLoginResponseDto,
+				type: LoginResponseDto,
 			}),
 		);
 	},
@@ -73,7 +74,7 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 			ApiResponse({
 				status: 200,
 				description: '',
-				type: OauthLoginResponseDto,
+				type: LoginResponseDto,
 			}),
 		);
 	},
@@ -90,6 +91,22 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 				status: 201,
 				description: '',
 				type: SignUpResponseDto,
+			}),
+		);
+	},
+	login(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '일반 로그인',
+			}),
+			ApiBody({
+				type: LoginRequestDto,
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+				type: LoginResponseDto,
 			}),
 		);
 	},

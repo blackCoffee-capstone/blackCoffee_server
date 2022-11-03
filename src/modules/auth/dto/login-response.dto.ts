@@ -3,7 +3,7 @@ import { IsString } from 'class-validator';
 
 import { UserResponseDto } from 'src/modules/users/dto/user-response.dto';
 
-export class OauthLoginResponseDto {
+export class LoginResponseDto {
 	@IsString()
 	@ApiProperty({ description: 'access token' })
 	readonly accessToken: string;

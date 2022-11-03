@@ -1,5 +1,11 @@
 import { HttpService } from '@nestjs/axios';
-import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	InternalServerErrorException,
+	NotFoundException,
+	UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,7 +16,7 @@ import { JwtConfig, OauthConfig } from 'src/config/config.constant';
 import { User } from 'src/entities/users.entity';
 import { UserType } from 'src/types/users.types';
 import { UserResponseDto } from '../users/dto/user-response.dto';
-import { OauthLoginResponseDto } from './dto/oauth-login-response.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 import { OauthUserDto } from './dto/oauth-user.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { TokenRefreshResponseDto } from './dto/token-refresh-response.dto';
@@ -108,7 +114,7 @@ export class AuthService {
 		}
 	}
 
-	async login(user: UserResponseDto): Promise<OauthLoginResponseDto> {
+	async login(user: UserResponseDto): Promise<LoginResponseDto> {
 		try {
 			const payload = { id: user.id, role: user.type };
 			const jwtAccessTokenExpire: string = this.jwtAccessTokenExpireByType(user.type);
@@ -122,7 +128,7 @@ export class AuthService {
 				expiresIn: this.#jwtConfig.jwtRefreshTokenExpire,
 			});
 
-			return new OauthLoginResponseDto({
+			return new LoginResponseDto({
 				accessToken,
 				refreshToken,
 				user,
@@ -130,6 +136,22 @@ export class AuthService {
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
+	}
+
+	async validateEmailPassword(email: string, password: string): Promise<UserResponseDto> {
+		const types = [UserType.Admin, UserType.Normal];
+		const foundUser = await this.usersRepository
+			.createQueryBuilder('user')
+			.where('user.email = :email', { email })
+			.andWhere('user.type IN (:...types)', { types })
+			.getOne();
+
+		if (!foundUser || !foundUser.password) {
+			throw new NotFoundException('User is not found');
+		} else if (!(await this.isValidPassword(foundUser.password, password))) {
+			throw new UnauthorizedException('Password is incorrect');
+		}
+		return new UserResponseDto(foundUser);
 	}
 
 	async refresh(user: any) {
@@ -170,7 +192,7 @@ export class AuthService {
 			const user = await this.usersRepository
 				.createQueryBuilder('user')
 				.where('user.type = :type', { type: userType })
-				.andWhere('user.social_id = :socialId', { socialId: oauthUser.socialId }) //TODO: test
+				.andWhere('user.social_id = :socialId', { socialId: oauthUser.socialId })
 				.getOne();
 
 			return user;
@@ -187,6 +209,10 @@ export class AuthService {
 		} else if (user && user.type === UserType.Facebook) {
 			throw new BadRequestException('User is facebook user');
 		} else return true;
+	}
+
+	private async isValidPassword(original: string, target: string) {
+		return await this.hashPassword.equal({ password: target, hashPassword: original });
 	}
 
 	private jwtAccessTokenExpireByType(userType: UserType): string {
