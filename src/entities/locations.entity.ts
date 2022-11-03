@@ -10,7 +10,8 @@ export class Location extends CommonEntity {
 	name: string;
 
 	@OneToMany(() => Spot, (spot: Spot) => spot.location, {
-		onDelete: 'CASCADE',
+		cascade: false,
+		eager: true,
 	})
 	spots: Spot[];
 }
