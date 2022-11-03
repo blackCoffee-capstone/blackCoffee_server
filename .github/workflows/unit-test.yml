@@ -49,6 +49,6 @@ jobs:
                   echo EMAIL=${{secrets.EMAIL}} >> .env.test
                   echo EMAIL_PASSWORD=${{secrets.EMAIL_PASSWORD}} >> .env.test
             - name: Install packages
-              run: npm install
+              run: npm install --force
             - name: Run unit test
               run: npm test
