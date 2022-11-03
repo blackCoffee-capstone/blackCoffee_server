@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Spot } from 'src/entities/spots.entity';
 import { Location } from 'src/entities/locations.entity';
 import { SpotRequestDto } from './dto/spot-request.dto';
+import { LocationRequestDto } from './dto/location-request.dto';
+import { SpotResponseDto } from './dto/spot-response.dto';
 import { LocationResponseDto } from './dto/location-response.dto';
 
 @Injectable()
@@ -12,28 +14,38 @@ export class SpotsService {
 		@InjectRepository(Spot)
 		private readonly spotsRepository: Repository<Spot>,
 		@InjectRepository(Location)
-		private readonly locationRepository: Repository<Location>,
+		private readonly locationsRepository: Repository<Location>,
 	) {}
 
-	async createSpot(responseSpot: SpotRequestDto) {
-		let location = await this.locationRepository.findOne({
-			where: { id: responseSpot.locationId },
+	async createSpot(requestSpot: SpotRequestDto) {
+		let location = await this.locationsRepository.findOne({
+			where: { id: requestSpot.locationId },
 		});
-		const spot = this.spotsRepository.create({
-			...responseSpot,
+		const saveSpot = await this.spotsRepository.save({
+			...requestSpot,
 			location: location,
 		});
+		const spotLocation = new LocationResponseDto({
+			id: location.id,
+			name: location.name,
+		});
 
-		const saveSpot = await this.spotsRepository.save(spot);
-		return saveSpot;
+		return new SpotResponseDto({
+			...saveSpot,
+			location: spotLocation,
+		});
 	}
 
-	async createLocation(responseLocaiton: LocationResponseDto) {
-		const location = await this.locationRepository.save(responseLocaiton);
-		return location;
+	async createLocation(requestLocaiton: LocationRequestDto) {
+		const location = await this.locationsRepository.save(requestLocaiton);
+		return new LocationResponseDto(location);
 	}
 
-	async getAll() {
+	async getAllSpot() {
 		return await this.spotsRepository.find();
+	}
+
+	async getAllLocation() {
+		return await this.locationsRepository.find();
 	}
 }
