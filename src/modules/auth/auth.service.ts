@@ -139,9 +139,12 @@ export class AuthService {
 	}
 
 	async validateEmailPassword(email: string, password: string): Promise<UserResponseDto> {
-		const foundUser = await this.usersRepository.findOne({
-			where: { email, type: UserType.Normal },
-		});
+		const types = [UserType.Admin, UserType.Normal];
+		const foundUser = await this.usersRepository
+			.createQueryBuilder('user')
+			.where('user.email = :email', { email })
+			.andWhere('user.type IN (:...types)', { types })
+			.getOne();
 
 		if (!foundUser || !foundUser.password) {
 			throw new NotFoundException('User is not found');
