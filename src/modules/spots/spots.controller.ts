@@ -9,22 +9,22 @@ export class SpotsController {
 
 	// Test
 	@Post()
-	createSpot(@Body() spot: SpotRequestDto) {
-		return this.spotsService.createSpot(spot);
+	async createSpot(@Body() spot: SpotRequestDto) {
+		return await this.spotsService.createSpot(spot);
 	}
 
 	@Post('/location')
-	createLocation(@Body() location: LocationRequestDto) {
-		return this.spotsService.createLocation(location);
+	async createLocation(@Body() location: LocationRequestDto) {
+		return await this.spotsService.createLocation(location);
 	}
 
 	@Get()
-	getAllSpot() {
-		return this.spotsService.getAllSpot();
+	async getAllSpot() {
+		return await this.spotsService.getAllSpot();
 	}
 
 	@Get('/location')
-	getAllLocation() {
-		return this.spotsService.getAllLocation();
+	async getAllLocation() {
+		return await this.spotsService.getAllLocation();
 	}
 }
