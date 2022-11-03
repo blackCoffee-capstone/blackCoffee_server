@@ -1,5 +1,11 @@
 import { HttpService } from '@nestjs/axios';
-import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	InternalServerErrorException,
+	NotFoundException,
+	UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -132,6 +138,19 @@ export class AuthService {
 		}
 	}
 
+	async validateEmailPassword(email: string, password: string): Promise<UserResponseDto> {
+		const foundUser = await this.usersRepository.findOne({
+			where: { email, type: UserType.Normal },
+		});
+
+		if (!foundUser || !foundUser.password) {
+			throw new NotFoundException('User is not found');
+		} else if (!(await this.isValidPassword(foundUser.password, password))) {
+			throw new UnauthorizedException('Password is incorrect');
+		}
+		return new UserResponseDto(foundUser);
+	}
+
 	async refresh(user: any) {
 		try {
 			const payload = { id: user.id, role: user.type };
@@ -170,7 +189,7 @@ export class AuthService {
 			const user = await this.usersRepository
 				.createQueryBuilder('user')
 				.where('user.type = :type', { type: userType })
-				.andWhere('user.social_id = :socialId', { socialId: oauthUser.socialId }) //TODO: test
+				.andWhere('user.social_id = :socialId', { socialId: oauthUser.socialId })
 				.getOne();
 
 			return user;
@@ -187,6 +206,10 @@ export class AuthService {
 		} else if (user && user.type === UserType.Facebook) {
 			throw new BadRequestException('User is facebook user');
 		} else return true;
+	}
+
+	private async isValidPassword(original: string, target: string) {
+		return await this.hashPassword.equal({ password: target, hashPassword: original });
 	}
 
 	private jwtAccessTokenExpireByType(userType: UserType): string {

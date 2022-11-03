@@ -1,16 +1,18 @@
 import { Body, Controller, Get, Header, HttpCode, Post, Query, Redirect, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+
 import { AuthUser, FacebookUser } from 'src/decorators/auth.decorator';
 import { UserType } from 'src/types/users.types';
-
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { ApiDocs } from './auth.docs';
 import { AuthService } from './auth.service';
+import { LoginRequestDto } from './dto/login-request.dto';
 import { OauthUserDto } from './dto/oauth-user.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -67,6 +69,14 @@ export class AuthController {
 	@ApiDocs.signUp('일반 회원가입')
 	async signUp(@Body() user: SignUpRequestDto) {
 		return await this.authService.signUp(user);
+	}
+
+	@Post('/login')
+	@ApiDocs.login('일반 로그인')
+	@UseGuards(LocalAuthGuard)
+	@ApiBody({ type: LoginRequestDto })
+	async login(@AuthUser() user: UserResponseDto) {
+		return await this.authService.login(user);
 	}
 
 	@UseGuards(JwtRefreshGuard)
