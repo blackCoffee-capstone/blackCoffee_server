@@ -6,7 +6,7 @@ import { Location } from './locations.entity';
 @Entity()
 export class Spot extends CommonEntity {
 	@ManyToOne(() => Location, (location: Location) => location.spots, {
-		cascade: true,
+		cascade: false,
 		eager: true,
 	})
 	@JoinColumn([{ name: 'location_id', referencedColumnName: 'id' }])
