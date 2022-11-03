@@ -16,7 +16,7 @@ import { JwtConfig, OauthConfig } from 'src/config/config.constant';
 import { User } from 'src/entities/users.entity';
 import { UserType } from 'src/types/users.types';
 import { UserResponseDto } from '../users/dto/user-response.dto';
-import { OauthLoginResponseDto } from './dto/oauth-login-response.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 import { OauthUserDto } from './dto/oauth-user.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { TokenRefreshResponseDto } from './dto/token-refresh-response.dto';
@@ -114,7 +114,7 @@ export class AuthService {
 		}
 	}
 
-	async login(user: UserResponseDto): Promise<OauthLoginResponseDto> {
+	async login(user: UserResponseDto): Promise<LoginResponseDto> {
 		try {
 			const payload = { id: user.id, role: user.type };
 			const jwtAccessTokenExpire: string = this.jwtAccessTokenExpireByType(user.type);
@@ -128,7 +128,7 @@ export class AuthService {
 				expiresIn: this.#jwtConfig.jwtRefreshTokenExpire,
 			});
 
-			return new OauthLoginResponseDto({
+			return new LoginResponseDto({
 				accessToken,
 				refreshToken,
 				user,
