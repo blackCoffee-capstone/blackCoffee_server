@@ -9,7 +9,7 @@ import { CommonEntity } from './common.entity';
 export class AdForm extends CommonEntity {
 	@IsString()
 	@IsNotEmpty()
-	@Column({ name: 'business_name', type: 'varchar', nullable: false })
+	@Column({ name: 'business_name', type: 'varchar', length: 40, nullable: false })
 	businessName: string;
 
 	@IsLatitude()
