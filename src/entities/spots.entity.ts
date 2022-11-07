@@ -1,8 +1,9 @@
 import { IsLatitude, IsLongitude, IsNumber, IsString } from 'class-validator';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { Geometry } from 'geojson';
 import { Location } from './locations.entity';
+import { SnsPost } from './sns-posts.entity';
 @Entity()
 export class Spot extends CommonEntity {
 	@ManyToOne(() => Location, (location: Location) => location.spots, {
@@ -12,8 +13,8 @@ export class Spot extends CommonEntity {
 	location: Location;
 
 	@IsString()
-	@Column({ type: 'varchar', nullable: false, unique: true })
-	name: string;
+	@Column({ name: 'spot_name', length: 30, type: 'varchar', nullable: true, unique: true })
+	spotName: string;
 
 	@IsLatitude()
 	@Column({ type: 'double precision', nullable: false })
@@ -34,8 +35,8 @@ export class Spot extends CommonEntity {
 	geom: Geometry;
 
 	@IsNumber()
-	@Column({ type: 'smallint', nullable: true })
-	rank: number | null;
+	@Column({ type: 'smallint', nullable: false })
+	rank: number;
 
 	@IsNumber()
 	@Column({ name: 'sns_post_count', type: 'int', nullable: false })
@@ -44,4 +45,10 @@ export class Spot extends CommonEntity {
 	@IsNumber()
 	@Column({ name: 'sns_post_like_number', type: 'int', nullable: false })
 	snsPostLikeNumber: number;
+
+	@OneToMany(() => SnsPost, (snsPost: SnsPost) => snsPost.spot, {
+		cascade: true,
+		eager: true,
+	})
+	snsPosts: SnsPost[];
 }

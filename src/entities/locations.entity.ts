@@ -6,7 +6,7 @@ import { Spot } from './spots.entity';
 @Entity()
 export class Location extends CommonEntity {
 	@IsString()
-	@Column({ type: 'varchar', nullable: false, unique: true })
+	@Column({ type: 'varchar', length: 20, nullable: true, unique: true })
 	name: string;
 
 	@OneToMany(() => Spot, (spot: Spot) => spot.location, {
