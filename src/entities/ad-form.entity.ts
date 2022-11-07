@@ -1,8 +1,8 @@
 import { IsEmail, IsLatitude, IsLongitude, IsNotEmpty, IsString } from 'class-validator';
 import { Geometry } from 'geojson';
-import { AdFormType } from 'src/types/ad-form.types';
 import { Column, Entity } from 'typeorm';
 
+import { AdFormType } from 'src/types/ad-form.types';
 import { CommonEntity } from './common.entity';
 
 @Entity()
