@@ -14,12 +14,13 @@ export class AdFormsService {
 	) {}
 
 	async registerAdForm(licenseFile: Express.Multer.File, adFormData: AdFormsRequestDto): Promise<AdFormsResponseDto> {
-		if (!licenseFile) {
-			throw new BadRequestException('File is not exist');
-		}
+		if (!licenseFile) throw new BadRequestException('File is not exist');
+
+		const geom = `(${adFormData.latitude.toString()},${adFormData.longitude.toString()})`;
 		const adForm = await this.adFormsRepository.save({
 			...adFormData,
 			licenseUrl: 'test', //TODO: ncloud object storage에 file 넣기로 수정
+			geom: geom,
 		});
 		return new AdFormsResponseDto(adForm);
 	}

@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsLatitude, IsLongitude, IsOptional, IsString } from 'class-validator';
-import { Geometry } from 'geojson';
 
 export class AdFormsRequestDto {
 	@IsString()
@@ -14,10 +13,6 @@ export class AdFormsRequestDto {
 	@IsLongitude()
 	@ApiProperty({ example: 126.234523, description: '경도' })
 	readonly longitude: number;
-
-	@IsString()
-	@ApiProperty({ example: '(37.253452, 126.234523)', description: '[위도, 경도]' })
-	readonly geom: Geometry;
 
 	@IsEmail()
 	@ApiProperty({ example: 'test@gmail.com', description: '이메일' })
@@ -36,7 +31,6 @@ export class AdFormsRequestDto {
 		this.businessName = adForm.businessName;
 		this.latitude = adForm.latitude;
 		this.longitude = adForm.longitude;
-		this.geom = adForm.geom;
 		this.email = adForm.email;
 		this.phoneNumber = adForm.phoneNumber;
 		this.requirement = adForm.requirement;
