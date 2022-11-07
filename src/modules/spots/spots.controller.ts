@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { LocationRequestDto } from './dto/location-request.dto';
+import { SearchRequestDto } from './dto/search-request.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
 import { ThemeRequestDto } from './dto/theme-request.dto';
@@ -49,5 +50,15 @@ export class SpotsController {
 	@Get('/snsPost')
 	async getAllSnsPost() {
 		return await this.spotsService.getAllSnsPost();
+	}
+
+	@Get()
+	async searchSpot(@Query() searchSpot: SearchRequestDto) {
+		return await this.spotsService.getSearchSpot(searchSpot);
+	}
+
+	@Get(':spotId')
+	async getDetailSpot(@Query() searchSpot: SearchRequestDto, @Param('spotId') spotId: number) {
+		return await this.spotsService.requestDetailSpot(searchSpot, spotId);
 	}
 }

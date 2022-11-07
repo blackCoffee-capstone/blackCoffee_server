@@ -4,12 +4,12 @@ import { Geometry } from 'geojson';
 
 export class SpotRequestDto {
 	@IsNumber()
-	@ApiProperty({ example: 1, description: '여행지 id' })
+	@ApiProperty({ example: 1, description: '위치 id' })
 	readonly locationId: number;
 
 	@IsString()
 	@ApiProperty({ example: '을왕리해수욕장', description: '여행지 이름' })
-	readonly name: string;
+	readonly spotName: string;
 
 	@IsNumber()
 	@ApiProperty({ example: 37.253452, description: '위도' })
@@ -23,10 +23,9 @@ export class SpotRequestDto {
 	@ApiProperty({ example: '(37.253452, 126.234523)', description: '[위도, 경도]' })
 	readonly geom: Geometry;
 
-	@IsOptional()
 	@IsNumber()
 	@ApiProperty({ example: 1, description: '순위' })
-	readonly rank: number | null;
+	readonly rank: number;
 
 	@IsNumber()
 	@ApiProperty({ example: 50, description: 'SNS 게시물 수' })

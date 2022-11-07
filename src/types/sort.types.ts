@@ -1,4 +1,4 @@
 export enum SortType {
-	Newest = 'Newest',
-	Popularity = 'Popularity',
+	SpotName = 'spot_name',
+	Rank = 'rank',
 }

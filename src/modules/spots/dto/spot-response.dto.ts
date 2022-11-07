@@ -10,24 +10,15 @@ export class SpotResponseDto {
 
 	@IsString()
 	@ApiProperty({ example: '을왕리해수욕장', description: '여행지 이름' })
-	readonly name: string;
-
-	@IsNumber()
-	@ApiProperty({ example: 37.253452, description: '위도' })
-	readonly latitude: number;
-
-	@IsNumber()
-	@ApiProperty({ example: 126.234523, description: '경도' })
-	readonly longitude: number;
+	readonly spotName: string;
 
 	@IsNotEmpty()
 	@ApiProperty({ example: '(37.253452, 126.234523)', description: '[위도, 경도]' })
 	readonly geom: Geometry;
 
-	@IsOptional()
 	@IsNumber()
 	@ApiProperty({ example: 1, description: '순위' })
-	readonly rank: number | null;
+	readonly rank: number;
 
 	@IsNumber()
 	@ApiProperty({ example: 50, description: 'SNS 게시물 수' })
@@ -37,14 +28,12 @@ export class SpotResponseDto {
 	@ApiProperty({ example: 100, description: 'sns 게시글 좋아요 수' })
 	readonly snsPostLikeNumber: number;
 
-	@ApiProperty({ example: '울릉도' })
+	@ApiProperty({ description: '여행지 위치 정보' })
 	readonly location: LocationResponseDto;
 
-	constructor({ id, name, latitude, longitude, geom, rank, snsPostCount, snsPostLikeNumber, location }) {
+	constructor({ id, spotName, geom, rank, snsPostCount, snsPostLikeNumber, location }) {
 		this.id = id;
-		this.name = name;
-		this.latitude = latitude;
-		this.longitude = longitude;
+		this.spotName = spotName;
 		this.geom = geom;
 		this.rank = rank;
 		this.snsPostCount = snsPostCount;
