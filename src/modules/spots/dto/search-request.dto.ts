@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { MetroOnlyFirstType } from 'src/types/metroLocation.types';
 import { SortType } from 'src/types/sort.types';
 
 export class SearchRequestDto {
@@ -31,18 +30,13 @@ export class SearchRequestDto {
 	@ApiPropertyOptional({ default: 20, description: '페이지 별 여행지 개수' })
 	readonly take?: number = 20;
 
-	@IsString()
+	@IsNumber()
 	@IsOptional()
-	@ApiPropertyOptional({ default: '', example: MetroOnlyFirstType.부산, description: '광역자치단체' })
-	readonly metroLocation?: string = '';
+	@ApiPropertyOptional({ description: '지역자치단체 id' })
+	readonly localLocationId?: number;
 
-	@IsString()
+	@IsNumber()
 	@IsOptional()
-	@ApiProperty({ example: '수원시', description: '지역자치단체' })
-	readonly localLocation: string;
-
-	@IsString()
-	@IsOptional()
-	@ApiPropertyOptional({ default: '', example: '산', description: '테마 필터링' })
-	readonly theme?: string = '';
+	@ApiPropertyOptional({ example: 1, description: '테마 필터링' })
+	readonly theme?: number;
 }

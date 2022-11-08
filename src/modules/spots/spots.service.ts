@@ -2,11 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Spot } from 'src/entities/spots.entity';
-import { Location } from 'src/entities/locations.entity';
+import { LocalLocation } from 'src/entities/local-locations.entity';
 import { SpotRequestDto } from './dto/spot-request.dto';
-import { LocationRequestDto } from './dto/location-request.dto';
 import { SpotResponseDto } from './dto/spot-response.dto';
-import { LocationResponseDto } from './dto/location-response.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { Theme } from 'src/entities/theme.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
@@ -14,18 +12,24 @@ import { ThemeRequestDto } from './dto/theme-request.dto';
 import { ThemeResponseDto } from './dto/theme-response.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SnsPostResponseDto } from './dto/sns-post-response.dto';
-import { MetroOnlyFirstType } from 'src/types/metroLocation.types';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
+import { LocalLocationResponseDto } from './dto/local-location-response.dto';
+import { LocalLocationRequestDto } from './dto/local-location-request.dto';
+import { MetroLocation } from 'src/entities/metro-locations.entity';
+import { MetroLocationRequestDto } from './dto/metro-location-request.dto';
+import { MetroLocationResponseDto } from './dto/metro-location-response.dto';
 
 @Injectable()
 export class SpotsService {
 	constructor(
 		@InjectRepository(Spot)
 		private readonly spotsRepository: Repository<Spot>,
-		@InjectRepository(Location)
-		private readonly locationsRepository: Repository<Location>,
+		@InjectRepository(MetroLocation)
+		private readonly MetroLocationsRepository: Repository<MetroLocation>,
+		@InjectRepository(LocalLocation)
+		private readonly localLocationsRepository: Repository<LocalLocation>,
 		@InjectRepository(Theme)
 		private readonly themeRepository: Repository<Theme>,
 		@InjectRepository(SnsPost)
@@ -33,40 +37,59 @@ export class SpotsService {
 	) {}
 
 	async createSpot(requestSpot: SpotRequestDto) {
-		let location = await this.locationsRepository.findOne({ where: { id: requestSpot.locationId } });
+		let localLocation = await this.localLocationsRepository.findOne({ where: { id: requestSpot.localLocationId } });
 		const saveSpot = await this.spotsRepository.save({
 			...requestSpot,
-			location: location,
+			location: localLocation,
 		});
-		const spotLocation = new LocationResponseDto({
-			id: location.id,
-			name: location.name,
+		const spotLocalLocation = new LocalLocationResponseDto({
+			id: localLocation.id,
+			metroLocation: localLocation,
+			depth: localLocation.depth,
+			name: localLocation.name,
 		});
 
 		return new SpotResponseDto({
 			...saveSpot,
-			location: spotLocation,
+			localLocation: spotLocalLocation,
 		});
 	}
 
-	async createLocation(requestLocaiton: LocationRequestDto) {
-		const location = await this.locationsRepository.save(requestLocaiton);
-		return new LocationResponseDto(location);
+	async createMetroLocation(requestMetroLocation: MetroLocationRequestDto) {
+		const MetroLocation = await this.MetroLocationsRepository.save(requestMetroLocation);
+		return new MetroLocationResponseDto(MetroLocation);
 	}
 
-	async getAllLocation() {
-		return await this.locationsRepository.find();
+	async getAllMetroLocation() {
+		return await this.MetroLocationsRepository.find();
+	}
+
+	async createLocalLocation(requestLocalLocation: LocalLocationRequestDto) {
+		const localLocation = await this.localLocationsRepository.save({
+			...requestLocalLocation,
+			metroLocationId: requestLocalLocation.metroLocationId,
+		});
+		return localLocation.metroLocationId;
+		const d = new LocalLocationResponseDto(localLocation);
+
+		return d;
+
+		// return await this.localLocationsRepository.find();
+	}
+
+	async getAllLocalLocation() {
+		return await this.localLocationsRepository.find();
 	}
 
 	async createSnsPost(requestSnsPost: SnsPostRequestDto) {
 		let theme = await this.themeRepository.findOne({ where: { id: requestSnsPost.themeId } });
 		let spot = await this.spotsRepository.findOne({ where: { id: requestSnsPost.spotId } });
-		let location = await this.locationsRepository.findOne({ where: { id: spot.id } });
+		let localLocation = await this.localLocationsRepository.findOne({ where: { id: spot.id } });
 
 		const saveSnsSpot = await this.snsPostRepository.save({ ...requestSnsPost, theme, spot });
 
 		const snsPostTheme = new ThemeResponseDto({ ...theme });
-		const snsPostSpot = new SpotResponseDto({ ...spot, location });
+		const snsPostSpot = new SpotResponseDto({ ...spot, localLocation });
 		return new SnsPostResponseDto({ ...saveSnsSpot, theme: snsPostTheme, spot: snsPostSpot });
 	}
 
@@ -86,28 +109,17 @@ export class SpotsService {
 	async returnResponseSpotDto(responseSpot) {
 		let responseSpotDto = [];
 		for (let i = 0; i < responseSpot.length; i++) {
-			let spotDto = new SearchResponseDto({ spotName: responseSpot.at(i).spotName });
+			let spotDto = new SearchResponseDto({ id: responseSpot.at(i).id, spotName: responseSpot.at(i).spotName });
 			responseSpotDto.push(spotDto);
 		}
 		return responseSpotDto;
 	}
 
-	async getFilterSpot(searchRequest: SearchRequestDto, fullLocation: string) {
-		const responseSpot = await this.spotsRepository
-			.createQueryBuilder('spot')
-			.leftJoinAndSelect('spot.location', 'location')
-			.orderBy(`spot.${searchRequest.sorter}`, 'ASC')
-			.select(['spot.id', 'spot.spotName', 'location.id', 'location.name'])
-			.where('spot.spotName Like :spotName', { spotName: `%${searchRequest.word}%` })
-			.andWhere('location.name Like :name', { name: `%${fullLocation}%` })
-			.limit(searchRequest.take)
-			.offset((searchRequest.page - 1) * searchRequest.take)
-			.getMany();
-
+	async getSearchThemeSpot(searchRequest: SearchRequestDto, responseSpot) {
 		let addThemeSpot = [];
 		if (searchRequest.theme) {
 			for (let i = 1; i < responseSpot.length + 1; i++) {
-				let themeSpot = await this.requestDetailSpot(searchRequest, i);
+				let themeSpot = await this.getDetailSpot(searchRequest, i);
 				if (themeSpot.detailSnsPost.length) addThemeSpot.push(themeSpot);
 			}
 			return await this.returnResponseSpotDto(addThemeSpot);
@@ -116,15 +128,21 @@ export class SpotsService {
 	}
 
 	async getSearchSpot(searchRequest: SearchRequestDto) {
-		if (searchRequest.metroLocation in MetroOnlyFirstType || !searchRequest.metroLocation) {
-			return this.getFilterSpot(searchRequest, searchRequest.metroLocation);
-		} else {
-			const fullLocation = searchRequest.metroLocation.concat(' ', searchRequest.localLocation);
-			return this.getFilterSpot(searchRequest, fullLocation);
-		}
+		const responseSpot = await this.spotsRepository
+			.createQueryBuilder('spot')
+			.leftJoinAndSelect('spot.localLocation', 'localLocation')
+			.orderBy(`spot.${searchRequest.sorter}`, 'ASC')
+			.select(['spot.id', 'spot.spotName', 'localLocation.id', 'localLocation.name'])
+			.where('spot.spotName Like :spotName', { spotName: `%${searchRequest.word}%` })
+			.andWhere('localLocation.id = :name', { id: searchRequest.localLocationId })
+			.limit(searchRequest.take)
+			.offset((searchRequest.page - 1) * searchRequest.take)
+			.getMany();
+
+		return this.getSearchThemeSpot(searchRequest, responseSpot);
 	}
 
-	async getDetailSnsPost(theme: string, detailSpot: Spot) {
+	async getDetailSnsPost(theme: number, detailSpot: Spot) {
 		const detailSnsPost = detailSpot.snsPosts;
 
 		let finalDetailSns = [];
@@ -132,9 +150,9 @@ export class SpotsService {
 			let snsPostForTheme = await this.snsPostRepository
 				.createQueryBuilder('snsPost')
 				.leftJoinAndSelect('snsPost.theme', 'theme')
-				.select(['theme.name', 'snsPost.id'])
+				.select(['theme.id', 'theme.name', 'snsPost.id'])
 				.where('snsPost.id = :id', { id: detailSnsPost.at(+i).id })
-				.andWhere('theme.name Like :name', { name: `%${theme}%` })
+				.andWhere('theme.name = :id', { id: theme })
 				.getOne();
 			if (snsPostForTheme) {
 				let detailSnsDto = new DetailSnsPostResponseDto({
@@ -147,14 +165,14 @@ export class SpotsService {
 		return finalDetailSns;
 	}
 
-	async requestDetailSpot(searchRequest: SearchRequestDto, spotId: number) {
+	async getDetailSpot(searchRequest: SearchRequestDto, spotId: number) {
 		const detailSpot = await this.spotsRepository.findOne({ where: { id: spotId } });
 		const detailSnsPost = await this.getDetailSnsPost(searchRequest.theme, detailSpot);
 
 		const returnDetailSpot = new DetailSpotResponseDto({
 			...detailSpot,
 			detailSnsPost: detailSnsPost,
-			favorability: detailSpot.snsPostLikeNumber * detailSpot.snsPostCount,
+			favorability: detailSpot.snsPostLikeNumber * detailSpot.snsPostCount, // 수정 예정
 		});
 
 		return returnDetailSpot;

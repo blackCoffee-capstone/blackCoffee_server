@@ -3,6 +3,10 @@ import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Geometry } from 'geojson';
 
 export class DetailSpotResponseDto<T> {
+	@IsNumber()
+	@ApiProperty({ example: 1, description: '여행지 id' })
+	readonly id: number;
+
 	@IsString()
 	@ApiProperty({ example: '을왕리해수욕장', description: '여행지 이름' })
 	readonly spotName: string;
@@ -19,7 +23,8 @@ export class DetailSpotResponseDto<T> {
 	@ApiProperty({ example: 1, description: '호감도' })
 	readonly favorability: number;
 
-	constructor({ spotName, geom, favorability, detailSnsPost }) {
+	constructor({ id, spotName, geom, favorability, detailSnsPost }) {
+		this.id = id;
 		this.spotName = spotName;
 		this.geom = geom;
 		this.favorability = favorability;
