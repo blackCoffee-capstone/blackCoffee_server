@@ -37,14 +37,19 @@ export class SpotsService {
 	) {}
 
 	async createSpot(requestSpot: SpotRequestDto) {
-		let localLocation = await this.localLocationsRepository.findOne({ where: { id: requestSpot.localLocationId } });
+		const localLocation = await this.localLocationsRepository.findOne({
+			where: { id: requestSpot.localLocationId },
+		});
 		const saveSpot = await this.spotsRepository.save({
 			...requestSpot,
-			location: localLocation,
+			localLocation: localLocation,
+		});
+		const metroLocaton = await this.MetroLocationsRepository.findOne({
+			where: { id: localLocation.metroLocation.id },
 		});
 		const spotLocalLocation = new LocalLocationResponseDto({
 			id: localLocation.id,
-			metroLocation: localLocation,
+			metroLocation: metroLocaton,
 			depth: localLocation.depth,
 			name: localLocation.name,
 		});
