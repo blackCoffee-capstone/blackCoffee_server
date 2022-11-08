@@ -69,12 +69,7 @@ export class SpotsService {
 			...requestLocalLocation,
 			metroLocationId: requestLocalLocation.metroLocationId,
 		});
-		return localLocation.metroLocationId;
-		const d = new LocalLocationResponseDto(localLocation);
-
-		return d;
-
-		// return await this.localLocationsRepository.find();
+		return new LocalLocationResponseDto(localLocation);
 	}
 
 	async getAllLocalLocation() {
