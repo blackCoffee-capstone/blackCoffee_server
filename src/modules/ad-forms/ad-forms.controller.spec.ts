@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
@@ -19,6 +20,17 @@ describe('AdFormsController', () => {
 				{
 					provide: getRepositoryToken(AdForm),
 					useClass: MockAdFormsRepository,
+				},
+				{
+					provide: ConfigService,
+					useValue: {
+						get: jest.fn((key: string) => {
+							if (key === 'ncloudConfig') {
+								return 1;
+							}
+							return null;
+						}),
+					},
 				},
 			],
 		}).compile();
