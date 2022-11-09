@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Geometry } from 'geojson';
-import { LocalLocationResponseDto } from './local-location-response.dto';
+import { LocationResponseDto } from './location-response.dto';
 
 export class SpotResponseDto {
 	@IsNumber()
@@ -28,16 +28,16 @@ export class SpotResponseDto {
 	@ApiProperty({ example: 100, description: 'sns 게시글 좋아요 수' })
 	readonly snsPostLikeNumber: number;
 
-	@ApiProperty({ description: '지역자치단체 정보' })
-	readonly localLocation: LocalLocationResponseDto;
+	@ApiProperty({ description: '위치 정보' })
+	readonly location: LocationResponseDto;
 
-	constructor({ id, spotName, geom, rank, snsPostCount, snsPostLikeNumber, localLocation }) {
+	constructor({ id, spotName, geom, rank, snsPostCount, snsPostLikeNumber, location }) {
 		this.id = id;
 		this.spotName = spotName;
 		this.geom = geom;
 		this.rank = rank;
 		this.snsPostCount = snsPostCount;
 		this.snsPostLikeNumber = snsPostLikeNumber;
-		this.localLocation = new LocalLocationResponseDto(localLocation);
+		this.location = new LocationResponseDto(location);
 	}
 }

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { SortType } from 'src/types/sort.types';
@@ -32,11 +32,13 @@ export class SearchRequestDto {
 
 	@IsNumber()
 	@IsOptional()
-	@ApiPropertyOptional({ description: '지역자치단체 id' })
-	readonly localLocationId?: number;
+	@Type(() => Number)
+	@ApiPropertyOptional({ example: 1, description: '위치 id' })
+	readonly locationId?: number;
 
 	@IsNumber()
 	@IsOptional()
-	@ApiPropertyOptional({ example: 1, description: '테마 필터링' })
-	readonly theme?: number;
+	@Type(() => Number)
+	@ApiPropertyOptional({ example: 1, description: '테마 id' })
+	readonly themeId?: number;
 }

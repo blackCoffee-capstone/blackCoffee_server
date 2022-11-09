@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { LocalLocationRequestDto } from './dto/local-location-request.dto';
-import { MetroLocationRequestDto } from './dto/metro-location-request.dto';
+import { LocationRequestDto } from './dto/location-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
@@ -22,31 +21,17 @@ export class SpotsController {
 	}
 
 	// Test
-	@Post('/local-location')
-	@ApiDocs.createLocalLocation('지역자치단체 위치 정보 생성')
-	async createLocalLocation(@Body() localLocation: LocalLocationRequestDto) {
-		return await this.spotsService.createLocalLocation(localLocation);
+	@Post('/location')
+	@ApiDocs.createLocation('위치 정보 생성')
+	async createLocation(@Body() location: LocationRequestDto) {
+		return await this.spotsService.createLocation(location);
 	}
 
 	// Test
-	@Get('/local-location')
-	@ApiDocs.getAllLocalLocation('모든 지역자치단체 위치 정보 생성')
-	async getAllLocalLocation() {
-		return await this.spotsService.getAllLocalLocation();
-	}
-
-	// Test
-	@Post('/metro-location')
-	@ApiDocs.createMetroLocation('광역자치단체 위치 정보 생성')
-	async createMetroLocation(@Body() metroLocation: MetroLocationRequestDto) {
-		return await this.spotsService.createMetroLocation(metroLocation);
-	}
-
-	// Test
-	@Get('/metro-location')
-	@ApiDocs.getAllMetroLocation('모든 광역자치단체 위치 정보 생성')
-	async getAllMetroLocation() {
-		return await this.spotsService.getAllMetroLocation();
+	@Get('/location')
+	@ApiDocs.getAllLocation('모든 위치 정보 생성')
+	async getAllLocation() {
+		return await this.spotsService.getAllLocation();
 	}
 
 	// Test
@@ -64,14 +49,14 @@ export class SpotsController {
 	}
 
 	// Test
-	@Post('/snsPost')
+	@Post('/sns-post')
 	@ApiDocs.createSnsPost('sns post 생성')
 	async createSnsPost(@Body() snsPost: SnsPostRequestDto) {
 		return await this.spotsService.createSnsPost(snsPost);
 	}
 
 	// Test
-	@Get('/snsPost')
+	@Get('/sns-post')
 	@ApiDocs.getAllSnsPost('모든 sns spot 정보 반환')
 	async getAllSnsPost() {
 		return await this.spotsService.getAllSnsPost();

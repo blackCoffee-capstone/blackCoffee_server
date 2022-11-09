@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsNumber, IsString } from 'class-validator';
-import { Theme } from 'src/entities/theme.entity';
+import { ThemeResponseDto } from './theme-response.dto';
 
 export class DetailSnsPostResponseDto {
 	@IsNumber()
@@ -24,7 +24,7 @@ export class DetailSnsPostResponseDto {
 	readonly content: string;
 
 	@ApiProperty({ description: '테마' })
-	readonly theme: Theme;
+	readonly theme: ThemeResponseDto;
 
 	constructor({ id, date, likeNumber, photoUrl, content, theme }) {
 		this.id = id;
@@ -32,6 +32,6 @@ export class DetailSnsPostResponseDto {
 		this.likeNumber = likeNumber;
 		this.photoUrl = photoUrl;
 		this.content = content;
-		this.theme = theme;
+		this.theme = new ThemeResponseDto(theme);
 	}
 }

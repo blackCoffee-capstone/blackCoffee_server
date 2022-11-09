@@ -2,8 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
-import { LocalLocationResponseDto } from './dto/local-location-response.dto';
-import { MetroLocationResponseDto } from './dto/metro-location-response.dto';
+import { LocationResponseDto } from './dto/location-response.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { SnsPostResponseDto } from './dto/sns-post-response.dto';
 import { SpotResponseDto } from './dto/spot-response.dto';
@@ -25,52 +24,25 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
-	createMetroLocation(summary: string) {
+	createLocation(summary: string) {
 		return applyDecorators(
 			ApiOperation({
 				summary,
-				description: '광역자치단체 위치 정보 생성',
+				description: '위치 정보 생성',
 			}),
 			ApiResponse({
 				status: 201,
 				description: '',
-				type: MetroLocationResponseDto,
+				type: LocationResponseDto,
 			}),
 			ApiBearerAuth('Authorization'),
 		);
 	},
-	getAllMetroLocation(summary: string) {
+	getAllLocation(summary: string) {
 		return applyDecorators(
 			ApiOperation({
 				summary,
-				description: '모든 광역자치단체 위치 정보 반환',
-			}),
-			ApiResponse({
-				status: 200,
-				description: '',
-			}),
-			ApiBearerAuth('Authorization'),
-		);
-	},
-	createLocalLocation(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '지역자치단체 위치 정보 생성',
-			}),
-			ApiResponse({
-				status: 201,
-				description: '',
-				type: LocalLocationResponseDto,
-			}),
-			ApiBearerAuth('Authorization'),
-		);
-	},
-	getAllLocalLocation(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '모든 지역자치단체 위치 정보 반환',
+				description: '모든 위치 정보 반환',
 			}),
 			ApiResponse({
 				status: 200,

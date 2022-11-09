@@ -1,12 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { LocalLocation } from 'src/entities/local-locations.entity';
-import { MetroLocation } from 'src/entities/metro-locations.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
-import { MockLocalLocationsRepository } from 'test/mock/local-locations.mock';
-import { MockMetroLocationsRepository } from 'test/mock/metro-locations.mock';
+import { Location } from 'src/entities/locations.entity';
+import { MockLocationsRepository } from 'test/mock/locations.mock';
 import { MockSnsPostsRepository } from 'test/mock/snsPosts.mock';
 import { MockSpotsRepository } from 'test/mock/spots.mock';
 import { MockThemeRepository } from 'test/mock/theme.mock';
@@ -17,8 +15,7 @@ describe('SpotsService', () => {
 	let spotsRepository: MockSpotsRepository;
 	let themeRepository: MockThemeRepository;
 	let snsPostRepository: MockSnsPostsRepository;
-	let localLocationsRepository: MockLocalLocationsRepository;
-	let MetroLocationsRepository: MockMetroLocationsRepository;
+	let locationsRepository: MockLocationsRepository;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -37,12 +34,8 @@ describe('SpotsService', () => {
 					useClass: MockSnsPostsRepository,
 				},
 				{
-					provide: getRepositoryToken(LocalLocation),
-					useClass: MockLocalLocationsRepository,
-				},
-				{
-					provide: getRepositoryToken(MetroLocation),
-					useClass: MockMetroLocationsRepository,
+					provide: getRepositoryToken(Location),
+					useClass: MockLocationsRepository,
 				},
 			],
 		}).compile();
@@ -51,8 +44,7 @@ describe('SpotsService', () => {
 		spotsRepository = module.get(getRepositoryToken(Spot));
 		themeRepository = module.get(getRepositoryToken(Theme));
 		snsPostRepository = module.get(getRepositoryToken(SnsPost));
-		localLocationsRepository = module.get(getRepositoryToken(LocalLocation));
-		MetroLocationsRepository = module.get(getRepositoryToken(MetroLocation));
+		locationsRepository = module.get(getRepositoryToken(Location));
 	});
 
 	it('should be defined', () => {

@@ -4,8 +4,8 @@ import { Geometry } from 'geojson';
 
 export class SpotRequestDto {
 	@IsNumber()
-	@ApiProperty({ example: 1, description: '지방자치단체 id' })
-	readonly localLocationId: number;
+	@ApiProperty({ example: 1, description: '위치 id' })
+	readonly locationId: number;
 
 	@IsString()
 	@ApiProperty({ example: '을왕리해수욕장', description: '여행지 이름' })

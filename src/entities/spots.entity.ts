@@ -2,15 +2,15 @@ import { IsLatitude, IsLongitude, IsNumber, IsString } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { Geometry } from 'geojson';
-import { LocalLocation } from './local-locations.entity';
+import { Location } from './locations.entity';
 import { SnsPost } from './sns-posts.entity';
 @Entity()
 export class Spot extends CommonEntity {
-	@ManyToOne(() => LocalLocation, (localLocation: LocalLocation) => localLocation.spots, {
+	@ManyToOne(() => Location, (location: Location) => location.spots, {
 		onDelete: 'SET NULL',
 	})
-	@JoinColumn([{ name: 'local_location_id', referencedColumnName: 'id' }])
-	localLocation: LocalLocation;
+	@JoinColumn([{ name: 'location_id', referencedColumnName: 'id' }])
+	location: Location;
 
 	@IsString()
 	@Column({ name: 'spot_name', length: 30, type: 'varchar', nullable: false, unique: true })
