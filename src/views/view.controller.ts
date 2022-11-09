@@ -2,9 +2,15 @@ import { Controller, Get, Render } from '@nestjs/common';
 
 @Controller('view')
 export class ViewController {
-	@Get('/admin')
+	@Get('/admin/login')
 	@Render('admin-login')
-	root() {
+	adminLogin() {
+		return {};
+	}
+
+	@Get('/admin')
+	@Render('admin-main')
+	adminMain() {
 		return {};
 	}
 }
