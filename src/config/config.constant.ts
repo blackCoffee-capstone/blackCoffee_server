@@ -45,6 +45,13 @@ export type EmailConfig = {
 	emailPassword: string;
 };
 
+export type NcloudConfig = {
+	accessKeyId: string;
+	secretAccessKey: string;
+	storageEndPoint: string;
+	storageBucket: string;
+};
+
 export const appConfig = (): { appConfig: AppConfig } => ({
 	appConfig: {
 		env: process.env.NODE_ENV as NodeEnv,
@@ -93,5 +100,14 @@ export const emailConfig = (): { emailConfig: EmailConfig } => ({
 	emailConfig: {
 		email: process.env.EMAIL,
 		emailPassword: process.env.EMAIL_PASSWORD,
+	},
+});
+
+export const ncloudConfig = (): { ncloudConfig: NcloudConfig } => ({
+	ncloudConfig: {
+		accessKeyId: process.env.NCLOUD_ACCESS_KEY_ID,
+		secretAccessKey: process.env.NCLOUD_SECRET_ACCESS_KEY,
+		storageEndPoint: process.env.NCLOUD_STORAGE_ENDPOINT,
+		storageBucket: process.env.NCLOUD_STORAGE_BUCKET,
 	},
 });
