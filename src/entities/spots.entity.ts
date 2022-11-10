@@ -35,8 +35,8 @@ export class Spot extends CommonEntity {
 	geom: Geometry;
 
 	@IsNumber()
-	@Column({ type: 'smallint', nullable: false })
-	rank: number;
+	@Column({ type: 'smallint', nullable: true })
+	rank: number | null;
 
 	@IsNumber()
 	@Column({ name: 'sns_post_count', type: 'int', nullable: false })
