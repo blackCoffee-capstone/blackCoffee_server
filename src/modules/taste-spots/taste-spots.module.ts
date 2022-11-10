@@ -3,12 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Location } from 'src/entities/locations.entity';
 import { Spot } from 'src/entities/spots.entity';
-import { SpotsController } from './spots.controller';
-import { SpotsService } from './spots.service';
+import { TasteSpotsController } from './taste-spots.controller';
+import { TasteSpotsService } from './taste-spots.service';
 
 @Module({
 	imports: [TypeOrmModule.forFeature([Spot, Location])],
-	controllers: [SpotsController],
-	providers: [SpotsService],
+	controllers: [TasteSpotsController],
+	providers: [TasteSpotsService],
 })
-export class SpotsModule {}
+export class TasteSpotsModule {}
