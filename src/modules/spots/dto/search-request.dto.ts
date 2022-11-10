@@ -34,11 +34,11 @@ export class SearchRequestDto {
 	@IsOptional()
 	@Type(() => Number)
 	@ApiPropertyOptional({ example: 1, description: '위치 id' })
-	readonly locationId?: number;
+	locationId?: number;
 
 	@IsNumber()
 	@IsOptional()
 	@Type(() => Number)
 	@ApiPropertyOptional({ example: 1, description: '테마 id' })
-	readonly themeId?: number;
+	themeId?: number;
 }

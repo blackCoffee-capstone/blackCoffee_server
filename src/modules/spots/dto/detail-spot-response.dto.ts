@@ -15,19 +15,19 @@ export class DetailSpotResponseDto<T> {
 	@ApiProperty({ example: '(37.253452, 126.234523)', description: '[위도, 경도]' })
 	readonly geom: Geometry;
 
+	@IsNumber()
+	@ApiProperty({ example: 1, description: '호감도' })
+	readonly snsPostLikeNumber: number;
+
 	@IsArray()
 	@ApiProperty({ isArray: true, example: '관련 sns 게시글 정보' })
 	readonly detailSnsPost: T[];
 
-	@IsNumber()
-	@ApiProperty({ example: 1, description: '호감도' })
-	readonly favorability: number;
-
-	constructor({ id, spotName, geom, favorability, detailSnsPost }) {
+	constructor({ id, spotName, geom, snsPostLikeNumber, detailSnsPost }) {
 		this.id = id;
 		this.spotName = spotName;
 		this.geom = geom;
-		this.favorability = favorability;
+		this.snsPostLikeNumber = snsPostLikeNumber;
 		this.detailSnsPost = detailSnsPost;
 	}
 }
