@@ -20,4 +20,8 @@ export const configValidationSchema = Joi.object({
 	JWT_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
 	EMAIL: Joi.string().required(),
 	EMAIL_PASSWORD: Joi.string().required(),
+	NCLOUD_ACCESS_KEY_ID: Joi.string().required(),
+	NCLOUD_SECRET_ACCESS_KEY: Joi.string().required(),
+	NCLOUD_STORAGE_ENDPOINT: Joi.string().required(),
+	NCLOUD_STORAGE_BUCKET: Joi.string().required(),
 });

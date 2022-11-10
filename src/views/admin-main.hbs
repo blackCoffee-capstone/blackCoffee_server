@@ -13,6 +13,17 @@
 		/>
 	</head>
 	<body>
+
+		<div class='header'>
+			<div id='admin_page'>
+				<a>ADMIN PAGE</a>
+				<div class='material-symbols-outlined'>
+					logout
+				</div>
+			</div>
+
+		</div>
+
 		<div class='container'>
 			<div class='home'>
 				지금, 여기
@@ -22,8 +33,7 @@
 					<a href='#'>광고 관리</a>
 					<ul class='sub_menu'>
 						<li><a href='#'>요청 광고 확인</a></li>
-						<li><a href='#'>광고 등록</a></li>
-						<li><a href='#'>광고 수정</a></li>
+						<li><a href='#'>광고 등록 및 수정</a></li>
 					</ul>
 				</li>
 				<li class='main_menu'>
@@ -35,26 +45,10 @@
 			</ul>
 		</div>
 
-		<div class='header'>
-			<a>ADMIN PAGE</a>
-			<span class='material-symbols-outlined'>
-				logout
-			</span>
-			<span class='material-symbols-outlined'>
-				notifications
-			</span>
-			<span class='material-symbols-outlined'>
-				mail
-			</span>
-			<span class='material-symbols-outlined' id='person'>
-				account_circle
-			</span>
-		</div>
-
 		<div class='wrap'>
-			<div class='ad_box'>
+			<div class='ad_box box'>
 				<div class='manage_top'>
-					광고 요청
+					광고 요청 목록
 				</div>
 				<table>
 					<thead>
@@ -88,17 +82,12 @@
 									상세 정보
 								</button></td>
 						</tr>
-						<tr>
-							<td>F</td><td>061-755-1234</td><td>NOT APPROVE</td><td><button class='btn' type='button'>
-									상세 정보
-								</button></td>
-						</tr>
 					</tbody>
 				</table>
 			</div>
-			<div class='community_box'>
+			<div class='community_box box'>
 				<div class='manage_top'>
-					신고 내역
+					신고 내역 목록
 				</div>
 				<table>
 					<thead>
@@ -138,95 +127,94 @@
 		</div>
 
 		<div class='wrap'>
-			<div class='ad_reg_box'>
+			<div class='ad_reg_box box'>
 				<div class='manage_top'>
-					광고 등록
+					광고 및 수정 목록
 				</div>
 				<table>
 					<thead>
 						<tr>
-							<th>NUM</th><th>STATUS</th><th>REGISTER</th>
+							<th>NAME</th><th>TELL</th><th>STATUS</th><th>REGISTER</th><th>MANAGEMENT</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr>
-							<td>1</td><td>NOT REGISTER</td><td><button class='btn' type='button'>
-									상세 정보
+							<td>A</td><td>02-123-4567</td><td>APPROVE</td><td>REGISTER</td><td><button
+									class='btn'
+									type='button'
+								>
+									광고 관리
 								</button></td>
 						</tr>
 						<tr>
-							<td>2</td><td>NOT REGISTER</td><td><button class='btn' type='button'>
-									상세 정보
+							<td>B</td><td>031-452-9512</td><td>APPROVE</td><td>NOT REGISTER</td><td><button
+									class='btn'
+									type='button'
+								>
+									광고 관리
 								</button></td>
 						</tr>
 						<tr>
-							<td>3</td><td>NOT REGISTER</td><td><button class='btn' type='button'>
-									상세 정보
+							<td>C</td><td>032-564-1231</td><td>APPROVE</td><td>NOT REGISTER</td><td><button
+									class='btn'
+									type='button'
+								>
+									광고 관리
 								</button></td>
 						</tr>
 						<tr>
-							<td>4</td><td>NOT REGISTER</td><td><button class='btn' type='button'>
-									상세 정보
+							<td>D</td><td>02-461-8456</td><td>APPROVE</td><td>DELETE</td><td><button
+									class='btn'
+									type='button'
+								>
+									광고 관리
 								</button></td>
 						</tr>
 						<tr>
-							<td>5</td><td>NOT REGISTER</td><td><button class='btn' type='button'>
-									상세 정보
+							<td>E</td><td>031-156-7865</td><td>APPROVE</td><td>REGISTER</td><td><button
+									class='btn'
+									type='button'
+								>
+									광고 관리
 								</button></td>
 						</tr>
 						<tr>
-							<td>6</td><td>NOT REGISTER</td><td><button class='btn' type='button'>
-									상세 정보
+							<td>F</td><td>032-654-1234</td><td>APPROVE</td><td>REGISTER</td><td><button
+									class='btn'
+									type='button'
+								>
+									광고 관리
 								</button></td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
 
-			<div class='ad_edit_box'>
-				<div class='manage_top'>
-					광고 수정
+			<div class='box_wrap'>
+				<div class='numbers'>
+					{{! <span class='material-symbols-outlined'>
+						person_filled
+					</span> }}
+					<p>TOTAL USERS</p>
+					<a>13,256</a>
+					<span id='ascent'>
+						<p>(+14.2%)</p>
+					</span>
+
 				</div>
-				<table>
-					<thead>
-						<tr>
-							<th>NAME</th><th>TELL</th><th>REGISTER</th><th>EDIT</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>A</td><td>02-123-4567</td><td>REGISTER</td><td><button class='btn' type='button'>
-									광고 수정
-								</button></td>
-						</tr>
-						<tr>
-							<td>2</td><td>031-452-9512</td><td>REGISTER</td><td><button class='btn' type='button'>
-									광고 수정
-								</button></td>
-						</tr>
-						<tr>
-							<td>3</td><td>032-564-1231</td><td>REGISTER</td><td><button class='btn' type='button'>
-									광고 수정
-								</button></td>
-						</tr>
-						<tr>
-							<td>4</td><td>02-461-8456</td><td>DELETE</td><td><button class='btn' type='button'>
-									광고 수정
-								</button></td>
-						</tr>
-						<tr>
-							<td>5</td><td>031-156-7865</td><td>REGISTER</td><td><button class='btn' type='button'>
-									광고 수정
-								</button></td>
-						</tr>
-						<tr>
-							<td>6</td><td>032-654-1234</td><td>REGISTER</td><td><button class='btn' type='button'>
-									광고 수정
-								</button></td>
-						</tr>
-					</tbody>
-				</table>
+				<div class='numbers'>
+					{{! <span class='material-symbols-outlined'>
+						list_alt
+					</span> }}
+					<p>TOTAL ADVERTISEMENT</p>
+					<a>256</a>
+					<span id='ascent'>
+						<p>(+27.2%)</p>
+					</span>
+
+				</div>
 			</div>
+
 		</div>
 	</body>
 </html>
