@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Spot } from 'src/entities/spots.entity';
 import { Location } from 'src/entities/locations.entity';
 import { SpotRequestDto } from './dto/spot-request.dto';
 import { SpotResponseDto } from './dto/spot-response.dto';
@@ -17,6 +15,8 @@ import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { LocationResponseDto } from './dto/location-response.dto';
 import { LocationRequestDto } from './dto/location-request.dto';
+import { Spot } from 'src/entities/spots.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class SpotsService {
@@ -98,8 +98,8 @@ export class SpotsService {
 			.orderBy(`spot.${searchRequest.sorter}`, 'ASC')
 			.where('spot.spotName Like :spotName', { spotName: `%${searchRequest.word}%` });
 
-		const locationId = searchRequest.locationId;
 		if (searchRequest.locationId) {
+			const locationId = searchRequest.locationId;
 			searchSpot = searchSpot.andWhere('location.id = :locationId', { locationId });
 		}
 		if (searchRequest.themeId) {
@@ -119,7 +119,10 @@ export class SpotsService {
 		const responseSnsPostDto = [];
 
 		for (let i = 0; i < filterSnsPost.length; i++) {
-			const spotDto = new DetailSnsPostResponseDto({ ...filterSnsPost.at(i) });
+			const spotDto = new DetailSnsPostResponseDto({
+				...filterSnsPost.at(i),
+				theme: new ThemeResponseDto({ ...filterSnsPost.at(i).theme }),
+			});
 			responseSnsPostDto.push(spotDto);
 		}
 		return responseSnsPostDto;
@@ -143,7 +146,7 @@ export class SpotsService {
 		return new DetailSpotResponseDto({
 			...detailSpot,
 			detailSnsPost: detailSnsPostDto,
-			favorability: detailSpot.snsPostLikeNumber * detailSpot.snsPostCount, // 수정 예정
+			snsPostLikeNumber: detailSpot.snsPostLikeNumber * detailSpot.snsPostCount, // 수정 예정
 		});
 	}
 }

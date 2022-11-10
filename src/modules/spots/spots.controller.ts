@@ -29,7 +29,7 @@ export class SpotsController {
 
 	// Test
 	@Get('/location')
-	@ApiDocs.getAllLocation('모든 위치 정보 생성')
+	@ApiDocs.getAllLocation('모든 위치 정보 반환')
 	async getAllLocation() {
 		return await this.spotsService.getAllLocation();
 	}
