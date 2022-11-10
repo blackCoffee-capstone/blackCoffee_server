@@ -1,7 +1,7 @@
 export const mockLocation = {
 	id: 1,
-	metroLocationName: '전라도',
-	localLocationName: '고창군',
+	metroLocationName: '경기도',
+	localLocationName: '수원시',
 };
 
 export class MockLocationsRepository {
