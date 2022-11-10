@@ -128,6 +128,8 @@ export class AuthService {
 				expiresIn: this.#jwtConfig.jwtRefreshTokenExpire,
 			});
 
+			await this.updateUserIfNewUser(user);
+
 			return new LoginResponseDto({
 				accessToken,
 				refreshToken,
@@ -213,6 +215,15 @@ export class AuthService {
 
 	private async isValidPassword(original: string, target: string) {
 		return await this.hashPassword.equal({ password: target, hashPassword: original });
+	}
+
+	private async updateUserIfNewUser(user: UserResponseDto) {
+		if (user.isNewUser) {
+			await this.usersRepository.update(user.id, {
+				isNewUser: false,
+			});
+		}
+		return true;
 	}
 
 	private jwtAccessTokenExpireByType(userType: UserType): string {

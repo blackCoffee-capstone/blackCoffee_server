@@ -1,4 +1,4 @@
-import { IsDateString, IsEmail, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
+import { IsBoolean, IsDateString, IsEmail, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
 import { Column, Entity } from 'typeorm';
 
 import { UserType } from 'src/types/users.types';
@@ -38,4 +38,8 @@ export class User extends CommonEntity {
 	@IsDateString()
 	@Column({ type: 'date', nullable: true })
 	birthdate: Date;
+
+	@IsBoolean()
+	@Column({ name: 'is_new_user', type: 'boolean', nullable: false, default: true })
+	isNewUser: boolean;
 }
