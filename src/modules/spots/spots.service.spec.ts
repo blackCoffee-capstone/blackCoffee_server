@@ -70,16 +70,6 @@ describe('SpotsService', () => {
 			await spotsService.getDetailSpot(searchRequest, spotId);
 			if (searchRequest.themeId) expect(snsPostRepository.createQueryBuilder().andWhere).toHaveBeenCalledTimes(1);
 		});
-		it('detailSnsPost가 null값이 아니면 정상이라고 판단한다.', async () => {
-			const snsSpy = jest
-				.spyOn(snsPostRepository.createQueryBuilder(), 'getMany')
-				.mockResolvedValue([await snsPostRepository.find()]);
-
-			const result = await spotsService.getDetailSpot(searchRequest, spotId);
-
-			expect(snsSpy).toHaveBeenCalledWith();
-			expect(result.detailSnsPost !== null);
-		});
 	});
 	describe('getSearchSpot function', () => {
 		const searchRequestTwo = new SearchRequestDto();
@@ -98,21 +88,12 @@ describe('SpotsService', () => {
 			expect(spotsRepository.createQueryBuilder().andWhere).toHaveBeenCalledTimes(1);
 
 			searchRequestTwo.locationId = 1;
-
 			await spotsService.getSearchSpot(searchRequestTwo);
 			expect(spotsRepository.createQueryBuilder().andWhere).toHaveBeenCalledTimes(2);
 
 			searchRequestTwo.themeId = 1;
 			await spotsService.getSearchSpot(searchRequestTwo);
 			expect(spotsRepository.createQueryBuilder().andWhere).toHaveBeenCalledTimes(4);
-		});
-		it('getSearchSpot이 null값이 아니면 정상이라고 판단한다.', async () => {
-			const spotSpy = jest
-				.spyOn(spotsRepository.createQueryBuilder(), 'getMany')
-				.mockResolvedValue([await snsPostRepository.find()]);
-
-			await spotsService.getSearchSpot(searchRequestTwo);
-			expect(spotSpy).toHaveBeenCalledWith();
 		});
 	});
 });

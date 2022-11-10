@@ -28,13 +28,6 @@ export class SpotsController {
 	}
 
 	// Test
-	@Get('/location')
-	@ApiDocs.getAllLocation('모든 위치 정보 반환')
-	async getAllLocation() {
-		return await this.spotsService.getAllLocation();
-	}
-
-	// Test
 	@Post('/theme')
 	@ApiDocs.createTheme('테마 정보 생성')
 	async createTheme(@Body() theme: ThemeRequestDto) {
@@ -42,24 +35,10 @@ export class SpotsController {
 	}
 
 	// Test
-	@Get('/theme')
-	@ApiDocs.getAllTheme('모든 테마 정보 반환')
-	async getAllTheme() {
-		return await this.spotsService.getAllTheme();
-	}
-
-	// Test
 	@Post('/sns-post')
 	@ApiDocs.createSnsPost('sns post 생성')
 	async createSnsPost(@Body() snsPost: SnsPostRequestDto) {
 		return await this.spotsService.createSnsPost(snsPost);
-	}
-
-	// Test
-	@Get('/sns-post')
-	@ApiDocs.getAllSnsPost('모든 sns spot 정보 반환')
-	async getAllSnsPost() {
-		return await this.spotsService.getAllSnsPost();
 	}
 
 	@Get()
