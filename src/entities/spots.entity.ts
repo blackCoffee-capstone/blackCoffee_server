@@ -14,8 +14,8 @@ export class Spot extends CommonEntity {
 	location: Location;
 
 	@IsString()
-	@Column({ name: 'spot_name', length: 30, type: 'varchar', nullable: false, unique: true })
-	spotName: string;
+	@Column({ length: 30, type: 'varchar', nullable: false, unique: true })
+	name: string;
 
 	@IsLatitude()
 	@Column({ type: 'double precision', nullable: false })

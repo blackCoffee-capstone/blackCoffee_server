@@ -20,7 +20,7 @@ export class SnsPost extends CommonEntity {
 
 	@IsDateString()
 	@Column({ type: 'timestamptz', nullable: false })
-	date: string;
+	date: Date;
 
 	@IsNumber()
 	@Column({ name: 'like_number', type: 'smallint', nullable: false })

@@ -1,7 +1,7 @@
 export const mockSpot = {
 	locationId: 1,
 	id: 1,
-	spotName: '수원 여행지',
+	name: '수원 여행지',
 	latitude: 37.253452,
 	longitude: 126.234523,
 	geom: '(37.253452, 126.234523)',

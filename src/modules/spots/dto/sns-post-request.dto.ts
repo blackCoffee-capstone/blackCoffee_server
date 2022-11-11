@@ -12,7 +12,7 @@ export class SnsPostRequestDto {
 
 	@IsDateString()
 	@ApiProperty({ example: '2022-02-01', description: 'sns 게시글 등록일' })
-	readonly date: string;
+	readonly date: Date;
 
 	@IsNumber()
 	@ApiProperty({ example: 100, description: 'sns 게시글 좋아요 수' })

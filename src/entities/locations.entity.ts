@@ -7,12 +7,12 @@ import { Spot } from './spots.entity';
 @Entity()
 export class Location extends CommonEntity {
 	@IsString()
-	@Column({ name: 'metro_location_name', type: 'varchar', length: 10, nullable: false, unique: false })
-	metroLocationName: string;
+	@Column({ name: 'metro_name', type: 'varchar', length: 10, nullable: false, unique: false })
+	metroName: string;
 
 	@IsString()
-	@Column({ name: 'local_location_name', type: 'varchar', length: 10, nullable: true, unique: true })
-	localLocationName: string;
+	@Column({ name: 'local_name', type: 'varchar', length: 10, nullable: true, unique: true })
+	localName: string;
 
 	@OneToMany(() => Spot, (spot: Spot) => spot.location, {
 		cascade: true,

@@ -9,7 +9,7 @@ export class DetailSpotResponseDto<T> {
 
 	@IsString()
 	@ApiProperty({ example: '을왕리해수욕장', description: '여행지 이름' })
-	readonly spotName: string;
+	readonly name: string;
 
 	@IsNotEmpty()
 	@ApiProperty({ example: '(37.253452, 126.234523)', description: '[위도, 경도]' })
@@ -23,9 +23,9 @@ export class DetailSpotResponseDto<T> {
 	@ApiProperty({ isArray: true, example: '관련 sns 게시글 정보' })
 	readonly detailSnsPost: T[];
 
-	constructor({ id, spotName, geom, snsPostLikeNumber, detailSnsPost }) {
+	constructor({ id, name, geom, snsPostLikeNumber, detailSnsPost }) {
 		this.id = id;
-		this.spotName = spotName;
+		this.name = name;
 		this.geom = geom;
 		this.snsPostLikeNumber = snsPostLikeNumber;
 		this.detailSnsPost = detailSnsPost;

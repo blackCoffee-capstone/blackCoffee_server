@@ -8,10 +8,10 @@ export class SearchResponseDto {
 
 	@IsString()
 	@ApiProperty({ example: '을왕리해수욕장', description: '여행지 이름' })
-	readonly spotName: string;
+	readonly name: string;
 
-	constructor({ id, spotName }) {
+	constructor({ id, name }) {
 		this.id = id;
-		this.spotName = spotName;
+		this.name = name;
 	}
 }

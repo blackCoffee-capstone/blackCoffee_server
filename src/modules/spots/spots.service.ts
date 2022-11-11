@@ -58,7 +58,7 @@ export class SpotsService {
 			.createQueryBuilder('spot')
 			.leftJoinAndSelect('spot.location', 'location')
 			.orderBy(`spot.${searchRequest.sorter}`, 'ASC')
-			.where('spot.spotName Like :spotName', { spotName: `%${searchRequest.word}%` });
+			.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
 
 		if (searchRequest.locationId) {
 			const locationId = searchRequest.locationId;
@@ -96,7 +96,6 @@ export class SpotsService {
 		return new DetailSpotResponseDto({
 			...detailSpot,
 			detailSnsPost: detailSnsPostsDto,
-			snsPostLikeNumber: detailSpot.snsPostLikeNumber * detailSpot.snsPostCount, // 수정 예정
 		});
 	}
 }

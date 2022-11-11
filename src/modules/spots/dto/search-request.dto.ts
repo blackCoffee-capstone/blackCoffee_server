@@ -14,21 +14,21 @@ export class SearchRequestDto {
 	@IsOptional()
 	@ApiPropertyOptional({
 		enum: SortType,
-		default: SortType.SpotName,
-		description: '정렬 기준 (이름순: spot_name, 인기순: rank)',
+		default: SortType.Name,
+		description: '정렬 기준 (이름순: Name, 인기순: Rank)',
 	})
-	readonly sorter?: SortType = SortType.SpotName;
+	readonly sorter?: SortType = SortType.Name;
 
 	@IsNumber()
 	@IsOptional()
 	@Type(() => Number)
-	@ApiPropertyOptional({ default: 20, description: '페이지 번호' })
+	@ApiPropertyOptional({ default: 1, description: '페이지 번호' })
 	readonly page?: number = 1;
 
 	@IsNumber()
 	@IsOptional()
 	@Type(() => Number)
-	@ApiPropertyOptional({ default: 20, description: '페이지 별 여행지 개수' })
+	@ApiPropertyOptional({ default: 20, description: '페이지 별 데이터 개수' })
 	readonly take?: number = 20;
 
 	@IsNumber()
