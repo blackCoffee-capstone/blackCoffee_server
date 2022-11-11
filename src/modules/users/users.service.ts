@@ -60,7 +60,7 @@ export class UsersService {
 		}
 	}
 
-	private async IsDuplicateArr(arr: any): Promise<boolean> {
+	private IsDuplicateArr(arr: any): boolean {
 		const set = new Set(arr);
 
 		if (arr.length !== set.size) return true;
