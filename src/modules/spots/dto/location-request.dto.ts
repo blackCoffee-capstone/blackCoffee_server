@@ -1,8 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class LocationRequestDto {
 	@IsString()
-	@ApiProperty({ example: '을왕리', description: '위치 이름' })
-	readonly name: string;
+	@ApiProperty({ example: '경기도', description: '광역자치단체 이름' })
+	readonly metroName: string;
+
+	@IsOptional()
+	@IsString()
+	@ApiProperty({ example: '수원시', description: '지역자치단체 이름' })
+	readonly localName: string;
 }

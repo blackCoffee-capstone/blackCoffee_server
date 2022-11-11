@@ -1,12 +1,13 @@
-export const mocklocation = {
+export const mockLocation = {
 	id: 1,
-	name: '을왕리',
+	metroName: '경기도',
+	localName: '수원시',
 };
 
 export class MockLocationsRepository {
-	save = jest.fn().mockResolvedValue(mocklocation);
+	save = jest.fn().mockResolvedValue(mockLocation);
 
 	async find() {
-		return mocklocation;
+		return mockLocation;
 	}
 }
