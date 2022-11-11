@@ -8,6 +8,8 @@ import { SpotRequestDto } from './dto/spot-request.dto';
 import { ThemeRequestDto } from './dto/theme-request.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
+import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
+
 @Controller('spots')
 @ApiTags('spots - 여행지/위치/테마/SNS Post 정보')
 export class SpotsController {
@@ -43,13 +45,13 @@ export class SpotsController {
 
 	@Get()
 	@ApiDocs.searchSpot('여행지 검색(단어 검색, 정렬, 필터링, 페이지네이션)')
-	async searchSpot(@Query() searchSpot: SearchRequestDto) {
-		return await this.spotsService.getSearchSpot(searchSpot);
+	async searchSpot(@Query() searchRequest: SearchRequestDto) {
+		return await this.spotsService.getSearchSpot(searchRequest);
 	}
 
 	@Get(':spotId')
-	@ApiDocs.getDetailSpot('여행지 상세 페이지(여행지 기본 정보, 연관 sns posts')
-	async getDetailSpot(@Query() searchSpot: SearchRequestDto, @Param('spotId') spotId: number) {
-		return await this.spotsService.getDetailSpot(searchSpot, spotId);
+	@ApiDocs.detailSpot('여행지 상세 페이지(여행지 기본 정보, 연관 sns posts')
+	async detailSpot(@Query() datailRequest: DetailSpotRequestDto, @Param('spotId') spotId: number) {
+		return await this.spotsService.getDetailSpot(datailRequest, spotId);
 	}
 }

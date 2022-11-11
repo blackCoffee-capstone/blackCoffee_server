@@ -73,7 +73,7 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
-	getDetailSpot(summary: string) {
+	detailSpot(summary: string) {
 		return applyDecorators(
 			ApiOperation({
 				summary,

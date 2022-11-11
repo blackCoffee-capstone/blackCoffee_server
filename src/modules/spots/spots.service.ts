@@ -8,6 +8,7 @@ import { Theme } from 'src/entities/theme.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
+import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { LocationRequestDto } from './dto/location-request.dto';
@@ -78,18 +79,18 @@ export class SpotsService {
 		return Array.from(responseSpots).map((post) => new SearchResponseDto(post));
 	}
 
-	async getDetailSpot(searchRequest: SearchRequestDto, spotId: number) {
+	async getDetailSpot(detailRequest: DetailSpotRequestDto, spotId: number) {
 		let detailSnsPost = await this.snsPostRepository
 			.createQueryBuilder('snsPost')
 			.leftJoinAndSelect('snsPost.spot', 'spot')
 			.leftJoinAndSelect('snsPost.theme', 'theme')
 			.where('spot.id = :spotId', { spotId });
 
-		if (searchRequest.themeId) {
-			detailSnsPost = detailSnsPost.andWhere('theme.id = :id', { id: searchRequest.themeId });
+		if (detailRequest.themeId) {
+			detailSnsPost = detailSnsPost.andWhere('theme.id = :id', { id: detailRequest.themeId });
 		}
 
-		const filterSnsPosts = await detailSnsPost.getMany();
+		const filterSnsPosts = await detailSnsPost.limit(detailRequest.take).getMany();
 		const detailSpot = await this.spotsRepository.findOne({ where: { id: spotId } });
 		const detailSnsPostsDto = Array.from(filterSnsPosts).map((post) => new DetailSnsPostResponseDto(post));
 
