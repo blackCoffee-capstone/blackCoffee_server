@@ -15,6 +15,7 @@ export class MockSnsPostsRepository {
 		select: jest.fn().mockReturnThis(),
 		where: jest.fn().mockReturnThis(),
 		andWhere: jest.fn().mockReturnThis(),
+		limit: jest.fn().mockReturnThis(),
 		getMany: jest.fn().mockReturnThis(),
 	});
 	findOne = jest.fn().mockReturnThis();
