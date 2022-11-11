@@ -1,8 +1,9 @@
 import { IsBoolean, IsDateString, IsEmail, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 import { UserType } from 'src/types/users.types';
 import { CommonEntity } from './common.entity';
+import { TasteSpot } from './taste-spots.entity';
 
 @Entity()
 export class User extends CommonEntity {
@@ -42,4 +43,9 @@ export class User extends CommonEntity {
 	@IsBoolean()
 	@Column({ name: 'is_new_user', type: 'boolean', nullable: false, default: true })
 	isNewUser: boolean;
+
+	@OneToMany(() => TasteSpot, (tasteSpot: TasteSpot) => tasteSpot.user, {
+		cascade: true,
+	})
+	tasteSpots: TasteSpot[];
 }

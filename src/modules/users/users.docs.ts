@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -29,6 +29,23 @@ export const ApiDocs: SwaggerMethodDoc<UsersController> = {
 			ApiResponse({
 				status: 200,
 				description: '',
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
+	createUsersTasteSpots(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '사용자의 여행지 취향 저장',
+			}),
+			ApiBody({
+				type: Array<number>,
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+				type: Boolean,
 			}),
 			ApiBearerAuth('Authorization'),
 		);

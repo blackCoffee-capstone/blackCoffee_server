@@ -1,8 +1,9 @@
 import { IsLatitude, IsLongitude, IsNumber, IsString } from 'class-validator';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { CommonEntity } from './common.entity';
 import { Geometry } from 'geojson';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { CommonEntity } from './common.entity';
 import { Location } from './locations.entity';
+import { TasteSpot } from './taste-spots.entity';
 @Entity()
 export class Spot extends CommonEntity {
 	@ManyToOne(() => Location, (location: Location) => location.spots, {
@@ -44,4 +45,9 @@ export class Spot extends CommonEntity {
 	@IsNumber()
 	@Column({ name: 'sns_post_like_number', type: 'int', nullable: false })
 	snsPostLikeNumber: number;
+
+	@OneToMany(() => TasteSpot, (tasteSpot: TasteSpot) => tasteSpot.spot, {
+		cascade: true,
+	})
+	tasteSpots: TasteSpot[];
 }
