@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { TasteSpotsResponseDto } from './dto/taste-spots-response.dto';
@@ -16,11 +16,6 @@ export const ApiDocs: SwaggerMethodDoc<TasteSpotsController> = {
 				status: 200,
 				description: '',
 				type: [TasteSpotsResponseDto],
-			}),
-			ApiQuery({
-				name: 'length',
-				required: true,
-				type: Number,
 			}),
 			ApiBearerAuth('Authorization'),
 		);

@@ -1,4 +1,4 @@
-import { IsDateString, IsNumber, IsString } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { CommonEntity } from './common.entity';
@@ -6,11 +6,21 @@ import { Spot } from './spots.entity';
 import { Theme } from './theme.entity';
 @Entity()
 export class SnsPost extends CommonEntity {
+	@IsNumber()
+	@IsNotEmpty()
+	@Column({ name: 'theme_id' })
+	themeId: number;
+
 	@ManyToOne(() => Theme, (theme: Theme) => theme.snsPosts, {
 		onDelete: 'SET NULL',
 	})
 	@JoinColumn([{ name: 'theme_id', referencedColumnName: 'id' }])
 	theme: Theme;
+
+	@IsNumber()
+	@IsNotEmpty()
+	@Column({ name: 'spot_id' })
+	spotId: number;
 
 	@ManyToOne(() => Spot, (spot: Spot) => spot.snsPosts, {
 		onDelete: 'SET NULL',

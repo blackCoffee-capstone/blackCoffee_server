@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { TasteSpotsLocationResponseDto } from './taste-spots-location-response.dto';
 
 export class TasteSpotsResponseDto {
 	@ApiProperty({ example: 1, description: '여행지 id' })
@@ -7,12 +8,12 @@ export class TasteSpotsResponseDto {
 	@ApiProperty({ example: 'test', description: '여행지 이름' })
 	readonly name: string;
 
-	@ApiProperty({ example: '서울시', description: '여행지 위치명' })
-	readonly locationName: string;
+	@ApiProperty({ description: '여행지 위치' })
+	readonly location: TasteSpotsLocationResponseDto;
 
-	constructor({ id, name, locationName }) {
+	constructor({ id, name, location }) {
 		this.id = id;
 		this.name = name;
-		this.locationName = locationName;
+		this.location = location;
 	}
 }

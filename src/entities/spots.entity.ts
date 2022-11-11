@@ -1,4 +1,4 @@
-import { IsLatitude, IsLongitude, IsNumber, IsString } from 'class-validator';
+import { IsLatitude, IsLongitude, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Geometry } from 'geojson';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
@@ -9,6 +9,11 @@ import { TasteSpot } from './taste-spots.entity';
 
 @Entity()
 export class Spot extends CommonEntity {
+	@IsNumber()
+	@IsNotEmpty()
+	@Column({ name: 'location_id' })
+	locationId: number;
+
 	@ManyToOne(() => Location, (location: Location) => location.spots, {
 		onDelete: 'SET NULL',
 	})

@@ -2,7 +2,6 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Spot } from 'src/entities/spots.entity';
 import { TasteSpot } from 'src/entities/taste-spots.entity';
 import { User } from 'src/entities/users.entity';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -14,8 +13,6 @@ export class UsersService {
 		private readonly usersRepository: Repository<User>,
 		@InjectRepository(TasteSpot)
 		private readonly tasteSpotsRepository: Repository<TasteSpot>,
-		@InjectRepository(Spot)
-		private readonly spotsRepository: Repository<Spot>,
 	) {}
 
 	async getUser(userId: number): Promise<UserResponseDto> {

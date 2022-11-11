@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiDocs } from './taste-spots.docs';
@@ -12,7 +12,7 @@ export class TasteSpotsController {
 
 	@Get()
 	@ApiDocs.getTasteSpots('여행지 취향 선택 리스트 반환')
-	async getTasteSpots(@Query('length') length: number) {
-		return await this.tasteSpotsService.getTasteSpots(length);
+	async getTasteSpots() {
+		return await this.tasteSpotsService.getTasteSpots();
 	}
 }
