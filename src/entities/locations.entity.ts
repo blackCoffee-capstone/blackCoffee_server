@@ -1,5 +1,6 @@
 import { IsString } from 'class-validator';
 import { Column, Entity, OneToMany } from 'typeorm';
+
 import { CommonEntity } from './common.entity';
 import { Spot } from './spots.entity';
 

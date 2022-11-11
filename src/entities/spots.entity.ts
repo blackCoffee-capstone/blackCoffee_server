@@ -1,7 +1,8 @@
 import { IsLatitude, IsLongitude, IsNumber, IsString } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { CommonEntity } from './common.entity';
 import { Geometry } from 'geojson';
+
+import { CommonEntity } from './common.entity';
 import { Location } from './locations.entity';
 import { SnsPost } from './sns-posts.entity';
 @Entity()

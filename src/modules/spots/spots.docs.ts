@@ -1,9 +1,10 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
+import { SpotsController } from './spots.controller';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
-import { SpotsController } from './spots.controller';
 
 export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 	createSpot(summary: string) {

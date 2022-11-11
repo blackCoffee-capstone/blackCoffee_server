@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsNumber, IsString } from 'class-validator';
+
 import { ThemeResponseDto } from './theme-response.dto';
 
 export class DetailSnsPostResponseDto {

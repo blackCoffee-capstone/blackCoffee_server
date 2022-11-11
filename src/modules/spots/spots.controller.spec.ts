@@ -1,13 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { SnsPost } from 'src/entities/sns-posts.entity';
+
+import { Location } from 'src/entities/locations.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
-import { Location } from 'src/entities/locations.entity';
+import { SnsPost } from 'src/entities/sns-posts.entity';
 import { MockLocationsRepository } from 'test/mock/locations.mock';
-import { MockSnsPostsRepository } from 'test/mock/snsPosts.mock';
 import { MockSpotsRepository } from 'test/mock/spots.mock';
 import { MockThemeRepository } from 'test/mock/theme.mock';
+import { MockSnsPostsRepository } from 'test/mock/snsPosts.mock';
 import { SpotsController } from './spots.controller';
 import { SpotsService } from './spots.service';
 

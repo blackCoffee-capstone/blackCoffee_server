@@ -1,5 +1,6 @@
 import { IsDateString, IsNumber, IsString } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+
 import { CommonEntity } from './common.entity';
 import { Spot } from './spots.entity';
 import { Theme } from './theme.entity';
