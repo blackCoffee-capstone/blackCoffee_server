@@ -54,6 +54,7 @@ h1 {
 	margin-top: 16px;
 	margin-bottom: 18px;
 	border-radius: 5px;
+	cursor: pointer;
 }
 
 .submit_btn:hover {
