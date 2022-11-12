@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagg
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { UserResponseDto } from './dto/user-response.dto';
+import { UserTasteSpotsRequestDto } from './dto/user-taste-spots-request.dto';
 import { UsersController } from './users.controller';
 
 export const ApiDocs: SwaggerMethodDoc<UsersController> = {
@@ -40,7 +41,7 @@ export const ApiDocs: SwaggerMethodDoc<UsersController> = {
 				description: '사용자의 여행지 취향 저장',
 			}),
 			ApiBody({
-				type: Array<number>,
+				type: UserTasteSpotsRequestDto,
 			}),
 			ApiResponse({
 				status: 201,
