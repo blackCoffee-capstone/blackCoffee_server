@@ -9,6 +9,7 @@ import { AdFormsModule } from './modules/ad-forms/ad-forms.module';
 import { AuthCodesModule } from './modules/auth-codes/auth-codes.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { SpotsModule } from './modules/spots/spots.module';
+import { TasteSpotsModule } from './modules/taste-spots/taste-spots.module';
 import { UsersModule } from './modules/users/users.module';
 import { ViewController } from './views/view.controller';
 
@@ -22,6 +23,7 @@ import { ViewController } from './views/view.controller';
 		AuthCodesModule,
 		SpotsModule,
 		AdFormsModule,
+		TasteSpotsModule,
 	],
 	controllers: [AppController, ViewController],
 	providers: [AppService],
