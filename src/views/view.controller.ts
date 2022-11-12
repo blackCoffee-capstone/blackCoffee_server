@@ -1,11 +1,11 @@
-import { Controller, Get, Render } from '@nestjs/common';
+import { Controller, Get, Render, Res } from '@nestjs/common';
+import { Response } from 'express';
 
 @Controller('view')
 export class ViewController {
 	@Get('/admin/login')
-	@Render('admin-login')
-	adminLogin() {
-		return {};
+	adminLogin(@Res() res: Response) {
+		return res.render('admin-login');
 	}
 
 	@Get('/admin')
