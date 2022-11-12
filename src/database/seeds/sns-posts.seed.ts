@@ -61,7 +61,7 @@ export default class SnsPostsSeed implements Seeder {
 		for (const snsPost of seedSnsPostDatas) {
 			const isSnsPostExist = currentSnsPosts.find(
 				(currentSnsPost) =>
-					currentSnsPost.theme.id === snsPost.themeId && currentSnsPost.spot.id === snsPost.spotId,
+					currentSnsPost.themeId === snsPost.themeId && currentSnsPost.spotId === snsPost.spotId,
 			);
 
 			if (!isSnsPostExist) {
