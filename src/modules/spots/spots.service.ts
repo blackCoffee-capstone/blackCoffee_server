@@ -13,8 +13,10 @@ import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { LocationRequestDto } from './dto/location-request.dto';
+import { LocationResponseDto } from './dto/location-response.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { ThemeRequestDto } from './dto/theme-request.dto';
+import { ThemeResponseDto } from './dto/theme-response.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
 
 @Injectable()
@@ -71,6 +73,16 @@ export class SpotsService {
 
 	async createTheme(requestTheme: ThemeRequestDto) {
 		return await this.themeRepository.save(requestTheme);
+	}
+
+	async getFilterList() {
+		const themeFilterList = await this.themeRepository.find();
+		const themeDto = Array.from(themeFilterList).map((theme) => new ThemeResponseDto(theme));
+
+		const locationFilterList = await this.locationsRepository.find();
+		const locationDto = Array.from(locationFilterList).map((location) => new LocationResponseDto(location));
+
+		return [themeDto, locationDto];
 	}
 
 	async getSearchSpot(searchRequest: SearchRequestDto) {

@@ -72,6 +72,19 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
+	filterList(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '필터링 목록 반환',
+			}),
+			ApiResponse({
+				status: 200,
+				description: '',
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
 	searchSpot(summary: string) {
 		return applyDecorators(
 			ApiOperation({

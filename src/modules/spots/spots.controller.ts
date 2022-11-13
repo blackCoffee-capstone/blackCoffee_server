@@ -50,6 +50,12 @@ export class SpotsController {
 		return await this.spotsService.createSnsPost(snsPost);
 	}
 
+	@Get('/filter')
+	@ApiDocs.filterList('필터링 목록 반환')
+	async filterList() {
+		return await this.spotsService.getFilterList();
+	}
+
 	@Get()
 	@ApiDocs.searchSpot('여행지 검색(단어 검색, 정렬, 필터링, 페이지네이션)')
 	async searchSpot(@Query() searchRequest: SearchRequestDto) {
