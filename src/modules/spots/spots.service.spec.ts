@@ -109,4 +109,13 @@ describe('SpotsService', () => {
 			expect(spotsRepository.createQueryBuilder().andWhere).toHaveBeenCalledTimes(3);
 		});
 	});
+	describe('getFilterList function', () => {
+		beforeEach(async () => {
+			await spotsService.getFilterList();
+		});
+		it('theme, location find가 정상적으로 실행된다.', async () => {
+			expect(themeRepository.find).toHaveBeenCalledTimes(1);
+			expect(locationsRepository.find).toHaveBeenCalledTimes(1);
+		});
+	});
 });
