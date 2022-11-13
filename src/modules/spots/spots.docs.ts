@@ -7,6 +7,19 @@ import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 
 export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
+	saveData(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '데이터 저장 및 업데이트',
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
 	createSpot(summary: string) {
 		return applyDecorators(
 			ApiOperation({

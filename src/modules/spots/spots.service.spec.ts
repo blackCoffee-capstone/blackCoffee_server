@@ -2,13 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
 import { Location } from 'src/entities/locations.entity';
-import { Spot } from 'src/entities/spots.entity';
-import { Theme } from 'src/entities/theme.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
+import { Theme } from 'src/entities/theme.entity';
+import { Spot } from 'src/entities/spots.entity';
+import { Rank } from 'src/entities/rank.entity';
 import { MockLocationsRepository } from 'test/mock/locations.mock';
-import { MockSpotsRepository } from 'test/mock/spots.mock';
-import { MockThemeRepository } from 'test/mock/theme.mock';
 import { MockSnsPostsRepository } from 'test/mock/snsPosts.mock';
+import { MockThemeRepository } from 'test/mock/theme.mock';
+import { MockSpotsRepository } from 'test/mock/spots.mock';
+import { MockRankRepository } from 'test/mock/rank.mock';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 
@@ -20,6 +22,7 @@ describe('SpotsService', () => {
 	let themeRepository: MockThemeRepository;
 	let snsPostRepository: MockSnsPostsRepository;
 	let locationsRepository: MockLocationsRepository;
+	let rankRepository: MockRankRepository;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -42,14 +45,19 @@ describe('SpotsService', () => {
 					provide: getRepositoryToken(Location),
 					useClass: MockLocationsRepository,
 				},
+				{
+					provide: getRepositoryToken(Rank),
+					useClass: MockRankRepository,
+				},
 			],
 		}).compile();
 
 		spotsService = module.get<SpotsService>(SpotsService);
-		spotsRepository = module.get(getRepositoryToken(Spot));
-		themeRepository = module.get(getRepositoryToken(Theme));
-		snsPostRepository = module.get(getRepositoryToken(SnsPost));
 		locationsRepository = module.get(getRepositoryToken(Location));
+		snsPostRepository = module.get(getRepositoryToken(SnsPost));
+		themeRepository = module.get(getRepositoryToken(Theme));
+		spotsRepository = module.get(getRepositoryToken(Spot));
+		rankRepository = module.get(getRepositoryToken(Rank));
 	});
 
 	it('should be defined', () => {

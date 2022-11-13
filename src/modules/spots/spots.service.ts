@@ -3,18 +3,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Location } from 'src/entities/locations.entity';
-import { Spot } from 'src/entities/spots.entity';
-import { Theme } from 'src/entities/theme.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
+import { Theme } from 'src/entities/theme.entity';
+import { Spot } from 'src/entities/spots.entity';
+import { Rank } from 'src/entities/rank.entity';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { LocationRequestDto } from './dto/location-request.dto';
-import { SpotRequestDto } from './dto/spot-request.dto';
-import { ThemeRequestDto } from './dto/theme-request.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
+import { ThemeRequestDto } from './dto/theme-request.dto';
+import { SpotRequestDto } from './dto/spot-request.dto';
 
 @Injectable()
 export class SpotsService {
@@ -27,7 +28,25 @@ export class SpotsService {
 		private readonly themeRepository: Repository<Theme>,
 		@InjectRepository(SnsPost)
 		private readonly snsPostRepository: Repository<SnsPost>,
+		@InjectRepository(Rank)
+		private readonly rankRepository: Repository<Rank>,
 	) {}
+
+	// 임시
+	async saveData() {
+		const saveRanking = await this.saveRankRecord();
+		return saveRanking;
+	}
+
+	async saveRankRecord() {
+		const rankingSpots = await this.spotsRepository
+			.createQueryBuilder('spot')
+			.select('id')
+			.orderBy('rank', 'ASC')
+			.where('rank is not null')
+			.getRawMany();
+		return await this.rankRepository.save({ ranking: rankingSpots.flatMap(({ id }) => [id]) });
+	}
 
 	async createSpot(requestSpot: SpotRequestDto) {
 		const location = await this.locationsRepository.findOne({

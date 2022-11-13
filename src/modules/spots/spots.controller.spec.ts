@@ -11,6 +11,7 @@ import { MockThemeRepository } from 'test/mock/theme.mock';
 import { MockSnsPostsRepository } from 'test/mock/snsPosts.mock';
 import { SpotsController } from './spots.controller';
 import { SpotsService } from './spots.service';
+import { Rank } from 'src/entities/rank.entity';
 
 describe('SpotsController', () => {
 	let spotsController: SpotsController;
@@ -37,6 +38,11 @@ describe('SpotsController', () => {
 				SpotsService,
 				{
 					provide: getRepositoryToken(SnsPost),
+					useClass: MockSnsPostsRepository,
+				},
+				SpotsService,
+				{
+					provide: getRepositoryToken(Rank),
 					useClass: MockSnsPostsRepository,
 				},
 			],
