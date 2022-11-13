@@ -1,0 +1,124 @@
+<html>
+	<head>
+		<meta charset='utf-8' />
+		<link rel='stylesheet' href='/css/ad-request.css' />
+		<script src='/lib/jquery-3.6.1.min.js'></script>
+		<script src='/js/ad-request.js'></script>
+		<link rel='preconnect' href='https://fonts.googleapis.com' />
+		<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
+		<link href='https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap' rel='stylesheet' />
+		<link
+			rel='stylesheet'
+			href='https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0'
+		/>
+	</head>
+	<body>
+
+		<div class='header'>
+			<div id='admin_page'>
+				<a>ADMIN PAGE</a>
+				<div class='material-symbols-outlined'>
+					logout
+				</div>
+			</div>
+
+		</div>
+
+		<div class='container'>
+			<div class='home'>
+				<a href='http://localhost:3000/view/admin'> 지금, 여기 </a>
+			</div>
+			<ul id='menu'>
+				<li class='main_menu'>
+					<a href='#'>광고 관리</a>
+					<ul class='sub_menu'>
+						<li><a href='http://localhost:3000/view/admin/ad-request'>요청 광고 확인</a></li>
+						<li><a href='#'>광고 등록 및 수정</a></li>
+					</ul>
+				</li>
+				<li class='main_menu'>
+					<a href='#'>커뮤니티 관리</a>
+					<ul class='sub_menu'>
+						<li><a href='#'>신고 내역</a></li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+
+		<div class='ad_request'>
+			<a>추가 입력</a>
+			<table id='append_table'>
+				<thead>
+					<tr>
+						<th><label for='add_no'>NO</label></th>
+						<th>ID</th>
+						<th>BUSINESS</th>
+						<th>EMAIL</th>
+						<th>STATUS</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><input type='text' id='add_no' /></td>
+						<td><input type='text' id='add_id' /></td>
+						<td><input type='text' id='add_business' /></td>
+						<td><input type='text' id='add_email' /></td>
+						<td><input type='text' id='add_status' /></td>
+						<td><button type='button' id='append_row'>데이터 추가</button></td>
+					</tr>
+				</tbody>
+			</table>
+
+			<table id='list_table'>
+				<thead>
+					<tr>
+						<th>NO</th>
+						<th>ID</th>
+						<th>BUSINESS</th>
+						<th>EMAIL</th>
+						<th>STATUS</th>
+						<th>DETAIL</th>
+						<th>DELETE</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>1</td>
+						<td>kkk1234</td>
+						<td>A</td>
+						<td>kkk1234@gmail.com</td>
+						<td>NOT APPROVE</td>
+						<td>
+							<a href='#' class='detail-link'>DETAIL</a>
+						</td>
+						<td>
+							<a href='#' class='delete-link'>DELETE</a>
+						</td>
+					</tr>
+					<tr>
+						<td>2</td>
+						<td>abc9999</td>
+						<td>B</td>
+						<td>abc9999@gmail.com</td>
+						<td>NOT APPROVE</td>
+						<td>
+							<a href='#' class='detail-link'>DETAIL</a>
+						</td>
+						<td>
+							<a href='#' class='delete-link'>DELETE</a>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div id='popup'>
+			<div class='close'>close</div>
+			<div style='text-align : center; margin-top:70px;'><img
+					src='https://scontent-ssn1-1.xx.fbcdn.net/v/t39.30808-6/273300062_5512099255560765_7231279751257498891_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=973b4a&_nc_ohc=9LgI2Z7Ags0AX_liZ1Z&_nc_ht=scontent-ssn1-1.xx&oh=00_AfBtTFCGHYlM26OBDv6FEjLKTk9_OeW9YdAayUK4GB2Vlg&oe=63766D1C'
+					style='width:70%; height:70%;'
+				/>
+			</div>
+		</div>
+
+	</body>
+</html>
