@@ -1,7 +1,10 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
+import { LocationRequestDto } from './dto/location-request.dto';
+import { ThemeRequestDto } from './dto/theme-request.dto';
+import { FiltersResponseDto } from './dto/filters-response.dto';
 import { FiltersController } from './filters.controller';
 
 export const ApiDocs: SwaggerMethodDoc<FiltersController> = {
@@ -11,11 +14,13 @@ export const ApiDocs: SwaggerMethodDoc<FiltersController> = {
 				summary,
 				description: '위치 정보 생성',
 			}),
+			ApiBody({
+				type: LocationRequestDto,
+			}),
 			ApiResponse({
 				status: 201,
 				description: '',
 			}),
-			ApiBearerAuth('Authorization'),
 		);
 	},
 	createTheme(summary: string) {
@@ -24,11 +29,13 @@ export const ApiDocs: SwaggerMethodDoc<FiltersController> = {
 				summary,
 				description: '테마 정보 생성',
 			}),
+			ApiBody({
+				type: ThemeRequestDto,
+			}),
 			ApiResponse({
 				status: 201,
 				description: '',
 			}),
-			ApiBearerAuth('Authorization'),
 		);
 	},
 	filterList(summary: string) {
@@ -40,8 +47,8 @@ export const ApiDocs: SwaggerMethodDoc<FiltersController> = {
 			ApiResponse({
 				status: 200,
 				description: '',
+				type: FiltersResponseDto,
 			}),
-			ApiBearerAuth('Authorization'),
 		);
 	},
 };

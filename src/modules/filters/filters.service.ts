@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 
 import { Location } from 'src/entities/locations.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { FiltersResponseDto } from './dto/filters-response.dto';
 import { LocationRequestDto } from './dto/location-request.dto';
 import { LocationResponseDto } from './dto/location-response.dto';
 import { ThemeRequestDto } from './dto/theme-request.dto';
@@ -26,13 +27,13 @@ export class FiltersService {
 		return await this.themeRepository.save(requestTheme);
 	}
 
-	async getFilterList() {
-		const themeFilterList = await this.themeRepository.find();
-		const themeDto = Array.from(themeFilterList).map((theme) => new ThemeResponseDto(theme));
-
+	async getFilterList(): Promise<FiltersResponseDto<LocationResponseDto, ThemeResponseDto>> {
 		const locationFilterList = await this.locationsRepository.find();
-		const locationDto = Array.from(locationFilterList).map((location) => new LocationResponseDto(location));
+		const locationsDto = Array.from(locationFilterList).map((location) => new LocationResponseDto(location));
 
-		return [themeDto, locationDto];
+		const themeFilterList = await this.themeRepository.find();
+		const themesDto = Array.from(themeFilterList).map((theme) => new ThemeResponseDto(theme));
+
+		return new FiltersResponseDto({ locationsDto, themesDto });
 	}
 }
