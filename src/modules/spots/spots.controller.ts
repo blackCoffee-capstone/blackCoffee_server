@@ -2,11 +2,9 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
-import { LocationRequestDto } from './dto/location-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
-import { ThemeRequestDto } from './dto/theme-request.dto';
 import { ApiDocs } from './spots.docs';
 import { SpotsService } from './spots.service';
 
@@ -30,30 +28,10 @@ export class SpotsController {
 	}
 
 	// Test
-	@Post('/location')
-	@ApiDocs.createLocation('위치 정보 생성')
-	async createLocation(@Body() location: LocationRequestDto) {
-		return await this.spotsService.createLocation(location);
-	}
-
-	// Test
-	@Post('/theme')
-	@ApiDocs.createTheme('테마 정보 생성')
-	async createTheme(@Body() theme: ThemeRequestDto) {
-		return await this.spotsService.createTheme(theme);
-	}
-
-	// Test
 	@Post('/sns-post')
 	@ApiDocs.createSnsPost('sns post 생성')
 	async createSnsPost(@Body() snsPost: SnsPostRequestDto) {
 		return await this.spotsService.createSnsPost(snsPost);
-	}
-
-	@Get('/filter')
-	@ApiDocs.filterList('필터링 목록 반환')
-	async filterList() {
-		return await this.spotsService.getFilterList();
 	}
 
 	@Get()

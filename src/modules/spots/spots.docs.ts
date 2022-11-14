@@ -33,32 +33,6 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
-	createLocation(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '위치 정보 생성',
-			}),
-			ApiResponse({
-				status: 201,
-				description: '',
-			}),
-			ApiBearerAuth('Authorization'),
-		);
-	},
-	createTheme(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '테마 정보 생성',
-			}),
-			ApiResponse({
-				status: 201,
-				description: '',
-			}),
-			ApiBearerAuth('Authorization'),
-		);
-	},
 	createSnsPost(summary: string) {
 		return applyDecorators(
 			ApiOperation({
@@ -67,19 +41,6 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 			}),
 			ApiResponse({
 				status: 201,
-				description: '',
-			}),
-			ApiBearerAuth('Authorization'),
-		);
-	},
-	filterList(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '필터링 목록 반환',
-			}),
-			ApiResponse({
-				status: 200,
 				description: '',
 			}),
 			ApiBearerAuth('Authorization'),

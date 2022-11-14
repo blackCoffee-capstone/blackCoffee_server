@@ -10,14 +10,10 @@ import { Rank } from 'src/entities/rank.entity';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
-import { LocationRequestDto } from './dto/location-request.dto';
-import { LocationResponseDto } from './dto/location-response.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
-import { ThemeRequestDto } from './dto/theme-request.dto';
-import { ThemeResponseDto } from './dto/theme-response.dto';
 
 @Injectable()
 export class SpotsService {
@@ -60,29 +56,11 @@ export class SpotsService {
 		});
 	}
 
-	async createLocation(requestLocation: LocationRequestDto) {
-		return await this.locationsRepository.save(requestLocation);
-	}
-
 	async createSnsPost(requestSnsPost: SnsPostRequestDto) {
 		const theme = await this.themeRepository.findOne({ where: { id: requestSnsPost.themeId } });
 		const spot = await this.spotsRepository.findOne({ where: { id: requestSnsPost.spotId } });
 
 		return await this.snsPostRepository.save({ ...requestSnsPost, theme, spot });
-	}
-
-	async createTheme(requestTheme: ThemeRequestDto) {
-		return await this.themeRepository.save(requestTheme);
-	}
-
-	async getFilterList() {
-		const themeFilterList = await this.themeRepository.find();
-		const themeDto = Array.from(themeFilterList).map((theme) => new ThemeResponseDto(theme));
-
-		const locationFilterList = await this.locationsRepository.find();
-		const locationDto = Array.from(locationFilterList).map((location) => new LocationResponseDto(location));
-
-		return [themeDto, locationDto];
 	}
 
 	async getSearchSpot(searchRequest: SearchRequestDto) {
