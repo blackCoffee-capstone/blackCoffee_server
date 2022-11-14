@@ -1,5 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthCodeType } from 'src/types/auth-code.types';
 import { ApiDocs } from './auth-codes.docs';
 import { AuthCodesService } from './auth-codes.service';
 import { AuthCodeRequestDto } from './dto/auth-code-request.dto';
@@ -13,7 +14,7 @@ export class AuthCodesController {
 	@Post('/signup')
 	@ApiDocs.generateSignUpAuthCode('회원가입을 위한 인증 메일 전송')
 	async generateSignUpAuthCode(@Body() authCodeReq: AuthCodeRequestDto) {
-		return await this.authCodesService.generateSignUpAuthCode(authCodeReq.email);
+		return await this.authCodesService.generateAuthCode(authCodeReq.email, AuthCodeType.SignUp);
 	}
 
 	@Post('/signup/verify')
@@ -24,6 +25,6 @@ export class AuthCodesController {
 
 	@Post('/find-pw')
 	async findUsersPw(@Body() authCodeReq: AuthCodeRequestDto) {
-		return await this.authCodesService.generateFindPwAuthCode(authCodeReq.email);
+		return await this.authCodesService.generateAuthCode(authCodeReq.email, AuthCodeType.FindPw);
 	}
 }
