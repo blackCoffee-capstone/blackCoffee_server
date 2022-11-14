@@ -1,55 +1,25 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { boolean } from 'joi';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
-import { SnsPostRequestDto } from './dto/sns-post-request.dto';
-import { SpotRequestDto } from './dto/spot-request.dto';
 import { SpotsController } from './spots.controller';
 
 export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
-	saveData(summary: string) {
+	saveSpot(summary: string) {
 		return applyDecorators(
 			ApiOperation({
 				summary,
-				description: '데이터 저장 및 업데이트',
+				description: 'Spot/Sns Post/Rank 저장 및 업데이트',
 			}),
 			ApiResponse({
 				status: 201,
 				description: '',
-			}),
-		);
-	},
-	createSpot(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '여행지 정보 생성',
-			}),
-			ApiBody({
-				type: SpotRequestDto,
-			}),
-			ApiResponse({
-				status: 201,
-				description: '',
-			}),
-		);
-	},
-	createSnsPost(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: 'sns post 생성',
-			}),
-			ApiBody({
-				type: SnsPostRequestDto,
-			}),
-			ApiResponse({
-				status: 201,
-				description: '',
+				type: boolean,
 			}),
 		);
 	},

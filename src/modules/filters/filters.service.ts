@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -28,12 +28,16 @@ export class FiltersService {
 	}
 
 	async getFilterList(): Promise<FiltersResponseDto<LocationResponseDto, ThemeResponseDto>> {
-		const locationFilterList = await this.locationsRepository.find();
-		const locationsDto = Array.from(locationFilterList).map((location) => new LocationResponseDto(location));
+		try {
+			const locationFilterList = await this.locationsRepository.find();
+			const locationsDto = Array.from(locationFilterList).map((location) => new LocationResponseDto(location));
 
-		const themeFilterList = await this.themeRepository.find();
-		const themesDto = Array.from(themeFilterList).map((theme) => new ThemeResponseDto(theme));
+			const themeFilterList = await this.themeRepository.find();
+			const themesDto = Array.from(themeFilterList).map((theme) => new ThemeResponseDto(theme));
 
-		return new FiltersResponseDto({ locationsDto, themesDto });
+			return new FiltersResponseDto({ locationsDto, themesDto });
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 }

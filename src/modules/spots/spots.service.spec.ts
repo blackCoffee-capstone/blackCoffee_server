@@ -93,7 +93,6 @@ describe('SpotsService', () => {
 			expect(spotsRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
 			expect(spotsRepository.createQueryBuilder().leftJoinAndSelect).toHaveBeenCalledTimes(1);
 			expect(spotsRepository.createQueryBuilder().orderBy).toHaveBeenCalledTimes(1);
-			expect(spotsRepository.createQueryBuilder().where).toHaveBeenCalledTimes(1);
 			expect(spotsRepository.createQueryBuilder().limit).toHaveBeenCalledTimes(1);
 			expect(spotsRepository.createQueryBuilder().offset).toHaveBeenCalledTimes(1);
 		});

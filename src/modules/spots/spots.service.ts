@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -30,8 +30,7 @@ export class SpotsService {
 		private readonly rankRepository: Repository<Rank>,
 	) {}
 
-	// 임시
-	async saveData() {
+	async saveSpot() {
 		const saveRanking = await this.saveRankRecord();
 		return saveRanking;
 	}
@@ -64,48 +63,59 @@ export class SpotsService {
 	}
 
 	async getSearchSpot(searchRequest: SearchRequestDto) {
-		let searchSpot = await this.spotsRepository
-			.createQueryBuilder('spot')
-			.leftJoinAndSelect('spot.location', 'location')
-			.orderBy(`spot.${searchRequest.sorter}`, 'ASC')
-			.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
+		try {
+			let searchSpots = await this.spotsRepository
+				.createQueryBuilder('spot')
+				.leftJoinAndSelect('spot.location', 'location')
+				.orderBy(`spot.${searchRequest.sorter}`, 'ASC');
+			if (searchRequest.word) {
+				searchSpots = searchSpots.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
+			}
+			if (searchRequest.locationId) {
+				const locationId = searchRequest.locationId;
+				searchSpots = searchSpots.andWhere('location.id = :locationId', { locationId });
+			}
+			if (searchRequest.themeId) {
+				searchSpots = searchSpots
+					.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
+					.leftJoinAndSelect('snsPosts.theme', 'theme')
+					.andWhere('theme.id = :id', { id: searchRequest.themeId });
+			}
+			const responseSpots = await searchSpots
+				.limit(searchRequest.take)
+				.offset((searchRequest.page - 1) * searchRequest.take)
+				.getMany();
 
-		if (searchRequest.locationId) {
-			const locationId = searchRequest.locationId;
-			searchSpot = searchSpot.andWhere('location.id = :locationId', { locationId });
+			return Array.from(responseSpots).map((post) => new SearchResponseDto(post));
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
 		}
-		if (searchRequest.themeId) {
-			searchSpot = searchSpot
-				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
-				.leftJoinAndSelect('snsPosts.theme', 'theme')
-				.andWhere('theme.id = :id', { id: searchRequest.themeId });
-		}
-		const responseSpots = await searchSpot
-			.limit(searchRequest.take)
-			.offset((searchRequest.page - 1) * searchRequest.take)
-			.getMany();
-
-		return Array.from(responseSpots).map((post) => new SearchResponseDto(post));
 	}
 
 	async getDetailSpot(detailRequest: DetailSpotRequestDto, spotId: number) {
-		let detailSnsPost = await this.snsPostRepository
-			.createQueryBuilder('snsPost')
-			.leftJoinAndSelect('snsPost.spot', 'spot')
-			.leftJoinAndSelect('snsPost.theme', 'theme')
-			.where('spot.id = :spotId', { spotId });
+		const IsSpot = await this.spotsRepository.findOne({ where: { id: spotId } });
+		if (!IsSpot) throw new NotFoundException('Spot is not found');
+		try {
+			let detailSnsPost = await this.snsPostRepository
+				.createQueryBuilder('snsPost')
+				.leftJoinAndSelect('snsPost.spot', 'spot')
+				.leftJoinAndSelect('snsPost.theme', 'theme')
+				.where('spot.id = :spotId', { spotId });
 
-		if (detailRequest.themeId) {
-			detailSnsPost = detailSnsPost.andWhere('theme.id = :id', { id: detailRequest.themeId });
+			if (detailRequest.themeId) {
+				detailSnsPost = detailSnsPost.andWhere('theme.id = :id', { id: detailRequest.themeId });
+			}
+
+			const filterSnsPosts = await detailSnsPost.limit(detailRequest.take).getMany();
+			const detailSpot = await this.spotsRepository.findOne({ where: { id: spotId } });
+			const detailSnsPostsDto = Array.from(filterSnsPosts).map((post) => new DetailSnsPostResponseDto(post));
+
+			return new DetailSpotResponseDto({
+				...detailSpot,
+				detailSnsPost: detailSnsPostsDto,
+			});
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
 		}
-
-		const filterSnsPosts = await detailSnsPost.limit(detailRequest.take).getMany();
-		const detailSpot = await this.spotsRepository.findOne({ where: { id: spotId } });
-		const detailSnsPostsDto = Array.from(filterSnsPosts).map((post) => new DetailSnsPostResponseDto(post));
-
-		return new DetailSpotResponseDto({
-			...detailSpot,
-			detailSnsPost: detailSnsPostsDto,
-		});
 	}
 }
