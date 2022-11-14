@@ -21,4 +21,9 @@ export class AuthCodesController {
 	async verifyAuthCode(@Body() authCode: VerifyAuthCodeRequestDto) {
 		return await this.authCodesService.verifyAuthCode(authCode);
 	}
+
+	@Post('/find-pw')
+	async findUsersPw(@Body() authCodeReq: AuthCodeRequestDto) {
+		return await this.authCodesService.generateFindPwAuthCode(authCodeReq.email);
+	}
 }
