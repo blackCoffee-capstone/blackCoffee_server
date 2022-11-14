@@ -15,6 +15,7 @@ $(document).ready(function () {
 				$('<td>').append($('#add_id').val()),
 				$('<td>').append($('#add_business').val()),
 				$('<td>').append($('#add_email').val()),
+				$('<td>').append($('#add_date').val()),
 				$('<td>').append($('#add_status').val()),
 				$('<td>').append($('<a>').prop('href', '#').addClass('detail-link').append('DETAIL')),
 				$('<td>').append($('<a>').prop('href', '#').addClass('delete-link').append('DELETE')),
