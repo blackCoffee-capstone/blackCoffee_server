@@ -1,4 +1,5 @@
 export enum AdFormType {
 	Todo = 'Todo',
-	Complete = 'Complete',
+	Approve = 'Approve',
+	Reject = 'Reject',
 }
