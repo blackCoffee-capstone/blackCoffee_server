@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { AuthCode } from 'src/entities/auth-code.entity';
+import { User } from 'src/entities/users.entity';
 import { AuthCodeType } from 'src/types/auth-code.types';
 import { MailAuthType } from 'src/types/mail-auth.types';
 import { VerifyAuthCodeRequestDto } from './dto/verify-auth-code-request.dto';
@@ -19,13 +20,21 @@ export class AuthCodesService {
 	constructor(
 		@InjectRepository(AuthCode)
 		private readonly authCodesRepository: Repository<AuthCode>,
+		@InjectRepository(User)
+		private readonly usersRepository: Repository<User>,
 		private readonly mailerService: MailerService,
 	) {}
 
 	async generateSignUpAuthCode(email: string) {
 		const expiredAt: number = MailAuthType.ExpiredAt;
 		const code: string = Math.random().toString(36).slice(2, 10).toString();
-
+		const foundEmailUser = await this.usersRepository
+			.createQueryBuilder('user')
+			.where('user.email = :email', { email })
+			.getOne();
+		if (foundEmailUser) {
+			throw new BadRequestException('Email is already exist');
+		}
 		try {
 			const foundAuthCode = await this.authCodesRepository
 				.createQueryBuilder('userCode')
