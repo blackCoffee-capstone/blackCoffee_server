@@ -17,6 +17,7 @@ export class TasteSpotsService {
 	) {}
 
 	async getTasteSpots(): Promise<TasteSpotsResponseDto[]> {
+		//TODO: 알고리즘 수정 예정
 		let snsPosts = await this.snsPostsRepository
 			.createQueryBuilder('sns_post')
 			.select('sns_post.theme_id, Max(sns_post.spot_id) as "spot_id"')
