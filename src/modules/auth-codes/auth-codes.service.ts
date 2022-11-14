@@ -15,6 +15,7 @@ import { AuthCodeType } from 'src/types/auth-code.types';
 import { MailAuthType } from 'src/types/mail-auth.types';
 import { AuthCodeResponseDto } from './dto/auth-code-response.dto';
 import { VerifyAuthCodeRequestDto } from './dto/verify-auth-code-request.dto';
+import { VerifyAuthCodeResponseDto } from './dto/verify-auth-code-response.dto';
 
 @Injectable()
 export class AuthCodesService {
@@ -50,17 +51,18 @@ export class AuthCodesService {
 				}
 
 				this.sendAuthMail(type, email, code, expiredAt);
-				return { expiredAt };
+				return new AuthCodeResponseDto({ expiredAt });
 			} catch (error) {
 				throw new InternalServerErrorException(error.message, error);
 			}
 		}
 	}
 
-	async verifyAuthCode(authCode: VerifyAuthCodeRequestDto) {
+	async verifyAuthCode(authCode: VerifyAuthCodeRequestDto, type: AuthCodeType): Promise<VerifyAuthCodeResponseDto> {
 		const foundAuthCode = await this.authCodesRepository
-			.createQueryBuilder('authCode')
-			.where('authCode.email = :email', { email: authCode.email })
+			.createQueryBuilder('auth_code')
+			.where('auth_code.email = :email', { email: authCode.email })
+			.andWhere('auth_code.type = :type', { type })
 			.getOne();
 
 		if (!foundAuthCode) throw new NotFoundException('Auth code not found');
@@ -75,8 +77,8 @@ export class AuthCodesService {
 		} else if (foundAuthCode.code !== authCode.code) {
 			throw new BadRequestException('Auth code is incorrect');
 		}
-		await this.authCodesRepository.delete(foundAuthCode.id);
-		return true;
+		this.authCodesRepository.delete(foundAuthCode.id);
+		return new VerifyAuthCodeResponseDto({ email: authCode.email });
 	}
 
 	private async errIfExistEmailOrNot(email: string, type: AuthCodeType): Promise<boolean> {

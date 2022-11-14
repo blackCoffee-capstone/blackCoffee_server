@@ -25,7 +25,7 @@ export const ApiDocs: SwaggerMethodDoc<AuthCodesController> = {
 			}),
 		);
 	},
-	verifyAuthCode(summary: string) {
+	verifySignUpAuthCode(summary: string) {
 		return applyDecorators(
 			ApiOperation({
 				summary,
