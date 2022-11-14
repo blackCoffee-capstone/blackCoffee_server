@@ -18,17 +18,19 @@ export class AuthCodesController {
 	}
 
 	@Post('/signup/verify')
-	@ApiDocs.verifySignUpAuthCode('회원가입 인증 코드 확인')
+	@ApiDocs.verifySignUpAuthCode('회원가입을 위한 인증 코드 확인')
 	async verifySignUpAuthCode(@Body() authCode: VerifyAuthCodeRequestDto) {
 		return await this.authCodesService.verifyAuthCode(authCode, AuthCodeType.SignUp);
 	}
 
 	@Post('/find-pw')
-	async findUsersPw(@Body() authCodeReq: AuthCodeRequestDto) {
+	@ApiDocs.generateFindPwAuthCode('임시 비밀번호 발급을 위한 인증 메일 전송')
+	async generateFindPwAuthCode(@Body() authCodeReq: AuthCodeRequestDto) {
 		return await this.authCodesService.generateAuthCode(authCodeReq.email, AuthCodeType.FindPw);
 	}
 
 	@Post('/find-pw/verify')
+	@ApiDocs.verifyFindPwAuthCode('임시 비밀번호 발급을 위한 인증 코드 확인')
 	async verifyFindPwAuthCode(@Body() authCode: VerifyAuthCodeRequestDto) {
 		return await this.authCodesService.verifyAuthCode(authCode, AuthCodeType.FindPw);
 	}
