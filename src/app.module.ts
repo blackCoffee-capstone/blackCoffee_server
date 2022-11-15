@@ -9,6 +9,7 @@ import { AdFormsModule } from './modules/ad-forms/ad-forms.module';
 import { AuthCodesModule } from './modules/auth-codes/auth-codes.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FiltersModule } from './modules/filters/filters.module';
+import { FiltersService } from './modules/filters/filters.service';
 import { SpotsModule } from './modules/spots/spots.module';
 import { TasteSpotsModule } from './modules/taste-spots/taste-spots.module';
 import { UsersModule } from './modules/users/users.module';
@@ -28,6 +29,6 @@ import { ViewController } from './views/view.controller';
 		FiltersModule,
 	],
 	controllers: [AppController, ViewController],
-	providers: [AppService],
+	providers: [AppService, FiltersService],
 })
 export class AppModule {}
