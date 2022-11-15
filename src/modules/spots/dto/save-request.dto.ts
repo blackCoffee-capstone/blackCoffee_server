@@ -1,15 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsNumber, IsString } from 'class-validator';
 
 export class SaveRequestDto {
 	@IsString()
 	@ApiProperty({ example: '경기도', description: '광역자치단체 이름' })
 	readonly metroName: string;
 
-	@IsOptional()
 	@IsString()
 	@ApiProperty({ example: '수원시', description: '지역자치단체 이름' })
-	readonly localName: string;
+	readonly localName: string | null;
 
 	@IsString()
 	@ApiProperty({ example: '을왕리해수욕장', description: '여행지 이름' })
@@ -24,7 +23,6 @@ export class SaveRequestDto {
 	readonly longitude: number;
 
 	@IsNumber()
-	@IsOptional()
 	@ApiProperty({ example: 1, description: '순위' })
 	readonly rank: number | null;
 

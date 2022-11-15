@@ -12,7 +12,7 @@ export class Location extends CommonEntity {
 
 	@IsString()
 	@Column({ name: 'local_name', type: 'varchar', length: 10, nullable: true, unique: true })
-	localName: string;
+	localName: string | null;
 
 	@OneToMany(() => Spot, (spot: Spot) => spot.location, {
 		cascade: true,

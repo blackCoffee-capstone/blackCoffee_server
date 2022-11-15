@@ -55,7 +55,7 @@ export class SpotsService {
 		}
 	}
 
-	async updateSpotSns() {
+	private async updateSpotSns() {
 		try {
 			const spots = await this.spotsRepository
 				.createQueryBuilder('spot')
@@ -77,7 +77,7 @@ export class SpotsService {
 	}
 
 	// 임시 계산: 다시 수정 예정
-	async week() {
+	private async week() {
 		const date = new Date();
 		const cudate = date.getDate();
 		const start = new Date(date.setDate(1));
@@ -86,7 +86,7 @@ export class SpotsService {
 		return week;
 	}
 
-	async updateRank(requestRank, spotId: number) {
+	private async updateRank(requestRank, spotId: number) {
 		try {
 			await this.spotsRepository.update(spotId, { rank: requestRank.rank });
 
@@ -106,7 +106,7 @@ export class SpotsService {
 		}
 	}
 
-	async createSpot(requestSpot: SpotRequestDto) {
+	private async createSpot(requestSpot: SpotRequestDto) {
 		const IsSpot = await this.spotsRepository.findOne({ where: { name: requestSpot.name } });
 		if (IsSpot) {
 			if (requestSpot.rank) await this.updateRank(requestSpot, IsSpot.id);
@@ -127,7 +127,7 @@ export class SpotsService {
 		}
 	}
 
-	async createSnsPost(requestSnsPost: SnsPostRequestDto) {
+	private async createSnsPost(requestSnsPost: SnsPostRequestDto) {
 		const IsSnsPost = await this.snsPostRepository.findOne({ where: { photoUrl: requestSnsPost.photoUrl } });
 		if (IsSnsPost) {
 			if (requestSnsPost.likeNumber !== IsSnsPost.likeNumber)
