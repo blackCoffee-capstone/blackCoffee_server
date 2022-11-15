@@ -1,6 +1,6 @@
 import { Factory, Seeder } from 'typeorm-seeding';
 
-import { hash } from 'bcrypt';
+import { hash } from 'bcryptjs';
 import { User } from 'src/entities/users.entity';
 import { UserType } from 'src/types/users.types';
 import { Connection } from 'typeorm';
