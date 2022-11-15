@@ -13,4 +13,9 @@ export class ViewController {
 	adminMain() {
 		return {};
 	}
+
+	@Get('/admin/ad-request')
+	adRequestn(@Res() res: Response) {
+		return res.render('ad-request');
+	}
 }

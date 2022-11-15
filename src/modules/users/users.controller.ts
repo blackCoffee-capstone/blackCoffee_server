@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { AuthUser } from 'src/decorators/auth.decorator';
@@ -6,6 +6,7 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { UserType } from 'src/types/users.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/role.guard';
+import { UserTasteSpotsRequestDto } from './dto/user-taste-spots-request.dto';
 import { ApiDocs } from './users.docs';
 import { UsersService } from './users.service';
 
@@ -27,5 +28,11 @@ export class UsersController {
 	@ApiDocs.adminTest('관리자 전용 api 테스트')
 	async adminTest(@AuthUser() userData) {
 		return 'User is Admin';
+	}
+
+	@Post('/taste-spots')
+	@ApiDocs.createUsersTasteSpots('사용자의 여행지 취향 저장')
+	async createUsersTasteSpots(@AuthUser() userData, @Body() tasteSpotsDto: UserTasteSpotsRequestDto) {
+		return await this.usersService.createUsersTasteSpots(userData.id, tasteSpotsDto.tasteSpots);
 	}
 }
