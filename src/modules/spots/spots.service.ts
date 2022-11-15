@@ -191,11 +191,10 @@ export class SpotsService {
 			}
 
 			const filterSnsPosts = await detailSnsPost.limit(detailRequest.take).getMany();
-			const detailSpot = await this.spotsRepository.findOne({ where: { id: spotId } });
 			const detailSnsPostsDto = Array.from(filterSnsPosts).map((post) => new DetailSnsPostResponseDto(post));
 
 			return new DetailSpotResponseDto({
-				...detailSpot,
+				...IsSpot,
 				detailSnsPost: detailSnsPostsDto,
 			});
 		} catch (error) {

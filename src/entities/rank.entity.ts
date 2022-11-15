@@ -1,4 +1,4 @@
-import { IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
 import { CommonEntity } from './common.entity';
@@ -20,11 +20,12 @@ export class Rank extends CommonEntity {
 	week: number;
 
 	@IsNumber()
-	@Column({ name: 'spot_id', type: 'smallint', nullable: false })
+	@IsNotEmpty()
+	@Column({ name: 'spot_id' })
 	spotId: number;
 
-	@ManyToOne(() => Spot, (spot: Spot) => spot.ranks, {
-		onDelete: 'NO ACTION',
+	@ManyToOne(() => Spot, (spot: Spot) => spot.rankings, {
+		onDelete: 'SET NULL',
 	})
 	@JoinColumn([{ name: 'spot_id', referencedColumnName: 'id' }])
 	spot: Spot;

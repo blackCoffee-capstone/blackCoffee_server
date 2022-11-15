@@ -66,8 +66,8 @@ export class Spot extends CommonEntity {
 	})
 	snsPosts: SnsPost[];
 
-	@OneToMany(() => Rank, (rank: Rank) => rank.spot, {
+	@OneToMany(() => Rank, (ranking: Rank) => ranking.spot, {
 		cascade: true,
 	})
-	ranks: Rank[];
+	rankings: Rank[];
 }
