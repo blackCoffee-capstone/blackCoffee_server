@@ -92,6 +92,7 @@ export class SpotsService {
 					longitude: +spot[2],
 					rank: +spot[3],
 				}),
+				location,
 			);
 		}
 	}
@@ -121,6 +122,8 @@ export class SpotsService {
 					photoUrl: sns[2],
 					content: sns[3],
 				}),
+				spot,
+				theme,
 			);
 		}
 		await this.updateSpotSns(changeSpots);
@@ -180,14 +183,11 @@ export class SpotsService {
 		}
 	}
 
-	private async createSpot(requestSpot: SpotRequestDto) {
+	private async createSpot(requestSpot: SpotRequestDto, location: Location) {
 		const IsSpot = await this.spotsRepository.findOne({ where: { name: requestSpot.name } });
 		try {
 			if (!IsSpot) {
 				if (requestSpot.rank === 0) requestSpot.rank = null;
-				const location = await this.locationsRepository.findOne({
-					where: { id: requestSpot.locationId },
-				});
 				const spot = await this.spotsRepository.save({
 					...requestSpot,
 					location: location,
@@ -201,7 +201,7 @@ export class SpotsService {
 		}
 	}
 
-	private async createSnsPost(requestSnsPost: SnsPostRequestDto) {
+	private async createSnsPost(requestSnsPost: SnsPostRequestDto, spot: Spot, theme: Theme) {
 		const IsSnsPost = await this.snsPostRepository.findOne({ where: { photoUrl: requestSnsPost.photoUrl } });
 		try {
 			if (IsSnsPost) {
@@ -210,9 +210,6 @@ export class SpotsService {
 						likeNumber: requestSnsPost.likeNumber,
 					});
 			} else {
-				const theme = await this.themeRepository.findOne({ where: { id: requestSnsPost.themeId } });
-				const spot = await this.spotsRepository.findOne({ where: { id: requestSnsPost.spotId } });
-
 				await this.snsPostRepository.save({ ...requestSnsPost, theme, spot });
 			}
 		} catch (error) {
