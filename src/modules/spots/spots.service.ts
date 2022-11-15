@@ -38,39 +38,113 @@ export class SpotsService {
 
 	async saveSpot(metaData: SaveRequestDto[]) {
 		try {
-			const spots = await this.spotsRepository.find();
-			spots.forEach(async (spot) => {
-				await this.spotsRepository.update(spot.id, { rank: null });
-			});
-			metaData.forEach(async (meta) => {
-				const locationId = await this.filtersService.createLocation(new LocationRequestDto(meta));
-				const themeId = await this.filtersService.createTheme(new ThemeRequestDto(meta));
-				const spotId = await this.createSpot(new SpotRequestDto({ ...meta, locationId: locationId }));
-				await this.createSnsPost(new SnsPostRequestDto({ ...meta, themeId: themeId, spotId: spotId }));
-			});
-			await this.updateSpotSns();
+			await this.spotsRepository.update({}, { rank: null });
+
+			await this.noDuplicateLocation(metaData);
+			await this.noDuplicateTheme(metaData);
+			await this.noDuplicateSpot(metaData);
+			await this.noDuplicateSnsPost(metaData);
+
 			return true;
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
 	}
 
-	private async updateSpotSns() {
+	private async noDuplicateLocation(metaData: SaveRequestDto[]) {
+		const addLocations = Array.from(metaData).map((meta) => [meta.metroName, meta.localName]);
+		const noDupLocations = [...new Set(addLocations.join('|').split('|'))].map((l) => l.split(','));
+		for (const location of noDupLocations) {
+			await this.filtersService.createLocation(
+				new LocationRequestDto({ metroName: location[0], localName: location[1] }),
+			);
+		}
+	}
+
+	private async noDuplicateTheme(metaData: SaveRequestDto[]) {
+		const addThemes = Array.from(metaData).map((meta) => meta.themeName);
+		const noDupThemes = [...new Set(addThemes)];
+		for (const theme of noDupThemes) {
+			await this.filtersService.createTheme(new ThemeRequestDto({ themeName: theme }));
+		}
+	}
+
+	private async noDuplicateSpot(metaData: SaveRequestDto[]) {
+		const addSpots = Array.from(metaData).map((meta) => [
+			meta.name,
+			meta.latitude,
+			meta.longitude,
+			meta.rank,
+			meta.metroName,
+			meta.localName,
+		]);
+		const noDupSpots = [...new Set(addSpots.join('|').split('|'))].map((s) => s.split(','));
+		for (const spot of noDupSpots) {
+			if (spot[5] === '') spot[5] = null;
+			const location = await this.locationsRepository.findOne({
+				where: { metroName: spot[4], localName: spot[5] },
+			});
+			await this.createSpot(
+				new SpotRequestDto({
+					locationId: location.id,
+					name: spot[0],
+					latitude: +spot[1],
+					longitude: +spot[2],
+					rank: +spot[3],
+				}),
+			);
+		}
+	}
+
+	private async noDuplicateSnsPost(metaData: SaveRequestDto[]) {
+		const addSnsPosts = Array.from(metaData).map((meta) => [
+			meta.date,
+			meta.likeNumber,
+			meta.photoUrl,
+			meta.content,
+			meta.themeName,
+			meta.name,
+		]);
+		const noDupSnsPosts = [...new Set(addSnsPosts.join('|').split('|'))].map((s) => s.split(','));
+		const changeSpots = [];
+		for (const sns of noDupSnsPosts) {
+			const spot = await this.spotsRepository.findOne({ where: { name: sns[5] } });
+			const theme = await this.themeRepository.findOne({ where: { name: sns[4] } });
+
+			changeSpots.push(spot.id);
+			await this.createSnsPost(
+				new SnsPostRequestDto({
+					themeId: theme.id,
+					spotId: spot.id,
+					date: sns[0],
+					likeNumber: +sns[1],
+					photoUrl: sns[2],
+					content: sns[3],
+				}),
+			);
+		}
+		await this.updateSpotSns(changeSpots);
+	}
+
+	private async updateSpotSns(changeSpots) {
 		try {
+			const noDupSpots = [...new Set(changeSpots)];
 			const spots = await this.spotsRepository
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
+				.where('spot.id IN (:...ids)', { ids: noDupSpots })
 				.getMany();
-			spots.forEach(async (spot) => {
+
+			for (const spot of spots) {
 				let likeSum = 0;
-				spot.snsPosts.forEach((snsPost) => {
+				for (const snsPost of spot.snsPosts) {
 					likeSum += snsPost.likeNumber;
-				});
+				}
 				await this.spotsRepository.update(spot.id, {
 					snsPostCount: spot.snsPosts.length,
 					snsPostLikeNumber: likeSum,
 				});
-			});
+			}
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
@@ -108,20 +182,20 @@ export class SpotsService {
 
 	private async createSpot(requestSpot: SpotRequestDto) {
 		const IsSpot = await this.spotsRepository.findOne({ where: { name: requestSpot.name } });
-		if (IsSpot) {
-			if (requestSpot.rank) await this.updateRank(requestSpot, IsSpot.id);
-			return IsSpot.id;
-		}
 		try {
-			const location = await this.locationsRepository.findOne({
-				where: { id: requestSpot.locationId },
-			});
-			const spot = await this.spotsRepository.save({
-				...requestSpot,
-				location: location,
-			});
-			if (requestSpot.rank) await this.updateRank(requestSpot, IsSpot.id);
-			return spot.id;
+			if (!IsSpot) {
+				if (requestSpot.rank === 0) requestSpot.rank = null;
+				const location = await this.locationsRepository.findOne({
+					where: { id: requestSpot.locationId },
+				});
+				const spot = await this.spotsRepository.save({
+					...requestSpot,
+					location: location,
+				});
+				if (requestSpot.rank) await this.updateRank(requestSpot, spot.id);
+			} else {
+				if (requestSpot.rank) await this.updateRank(requestSpot, IsSpot.id);
+			}
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
@@ -129,18 +203,18 @@ export class SpotsService {
 
 	private async createSnsPost(requestSnsPost: SnsPostRequestDto) {
 		const IsSnsPost = await this.snsPostRepository.findOne({ where: { photoUrl: requestSnsPost.photoUrl } });
-		if (IsSnsPost) {
-			if (requestSnsPost.likeNumber !== IsSnsPost.likeNumber)
-				await this.snsPostRepository.update(IsSnsPost.id, {
-					likeNumber: requestSnsPost.likeNumber,
-				});
-			return IsSnsPost.id;
-		}
 		try {
-			const theme = await this.themeRepository.findOne({ where: { id: requestSnsPost.themeId } });
-			const spot = await this.spotsRepository.findOne({ where: { id: requestSnsPost.spotId } });
+			if (IsSnsPost) {
+				if (requestSnsPost.likeNumber !== IsSnsPost.likeNumber)
+					await this.snsPostRepository.update(IsSnsPost.id, {
+						likeNumber: requestSnsPost.likeNumber,
+					});
+			} else {
+				const theme = await this.themeRepository.findOne({ where: { id: requestSnsPost.themeId } });
+				const spot = await this.spotsRepository.findOne({ where: { id: requestSnsPost.spotId } });
 
-			await this.snsPostRepository.save({ ...requestSnsPost, theme, spot });
+				await this.snsPostRepository.save({ ...requestSnsPost, theme, spot });
+			}
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}

@@ -20,13 +20,12 @@ export class FiltersService {
 	) {}
 
 	async createLocation(requestLocation: LocationRequestDto) {
+		if (requestLocation.localName === '') requestLocation.localName = null;
 		const IsLocation = await this.locationsRepository.findOne({
 			where: { metroName: requestLocation.metroName, localName: requestLocation.localName },
 		});
-		if (IsLocation) return IsLocation.id;
 		try {
-			const location = await this.locationsRepository.save(requestLocation);
-			return location.id;
+			if (!IsLocation) await this.locationsRepository.save(requestLocation);
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
@@ -34,10 +33,8 @@ export class FiltersService {
 
 	async createTheme(requestTheme: ThemeRequestDto) {
 		const IsTheme = await this.themeRepository.findOne({ where: { name: requestTheme.name } });
-		if (IsTheme) return IsTheme.id;
 		try {
-			const theme = await this.themeRepository.save(requestTheme);
-			return theme.id;
+			if (!IsTheme) await this.themeRepository.save(requestTheme);
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
