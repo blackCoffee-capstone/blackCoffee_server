@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { AuthUser } from 'src/decorators/auth.decorator';
@@ -6,7 +6,6 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { UserType } from 'src/types/users.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/role.guard';
-import { ChangePwRequestDto } from './dto/change-pw-request.dto';
 import { UserTasteSpotsRequestDto } from './dto/user-taste-spots-request.dto';
 import { ApiDocs } from './users.docs';
 import { UsersService } from './users.service';
@@ -35,11 +34,5 @@ export class UsersController {
 	@ApiDocs.createUsersTasteSpots('사용자의 여행지 취향 저장')
 	async createUsersTasteSpots(@AuthUser() userData, @Body() tasteSpotsDto: UserTasteSpotsRequestDto) {
 		return await this.usersService.createUsersTasteSpots(userData.id, tasteSpotsDto.tasteSpots);
-	}
-
-	@Patch('/change-pw')
-	@ApiDocs.updateUsersPw('사용자 비밀번호 변경')
-	async updateUsersPw(@AuthUser() userData, @Body() changePwDto: ChangePwRequestDto) {
-		return await this.usersService.updateUsersPw(userData, changePwDto);
 	}
 }

@@ -4,7 +4,6 @@ import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { AuthUser, FacebookUser } from 'src/decorators/auth.decorator';
 import { UserType } from 'src/types/users.types';
-import { AuthCodeRequestDto } from '../auth-codes/dto/auth-code-request.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { ApiDocs } from './auth.docs';
 import { AuthService } from './auth.service';
@@ -85,11 +84,5 @@ export class AuthController {
 	@ApiDocs.refreshToken('access token 재발급')
 	async refreshToken(@AuthUser() user) {
 		return await this.authService.refresh(user);
-	}
-
-	@Post('find-pw')
-	@ApiDocs.generateTempPw('임시 비밀번호 메일로 발송')
-	async generateTempPw(@Body() authCodeReq: AuthCodeRequestDto) {
-		return await this.authService.generateTempPw(authCodeReq.email);
 	}
 }

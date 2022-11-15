@@ -32,7 +32,7 @@ export class User extends CommonEntity {
 	type: UserType;
 
 	@IsString()
-	@Length(8, 24)
+	@Length(2, 10)
 	@Column({ type: 'varchar', nullable: true }) //TODO: strong pw
 	password: string;
 

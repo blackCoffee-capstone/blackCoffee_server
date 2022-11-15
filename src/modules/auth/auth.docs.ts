@@ -2,7 +2,6 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
-import { AuthCodeRequestDto } from '../auth-codes/dto/auth-code-request.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { AuthController } from './auth.controller';
 import { KakaoLoginRequestDto } from './dto/kakao-login-request.dto';
@@ -126,22 +125,6 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 				type: TokenRefreshResponseDto,
 			}),
 			ApiBearerAuth('Authorization'),
-		);
-	},
-	generateTempPw(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '임시 비밀번호 메일로 발송',
-			}),
-			ApiBody({
-				type: AuthCodeRequestDto,
-			}),
-			ApiResponse({
-				status: 201,
-				description: '',
-				type: Boolean,
-			}),
 		);
 	},
 };

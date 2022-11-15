@@ -13,9 +13,7 @@ import { AuthCode } from 'src/entities/auth-code.entity';
 import { User } from 'src/entities/users.entity';
 import { AuthCodeType } from 'src/types/auth-code.types';
 import { MailAuthType } from 'src/types/mail-auth.types';
-import { AuthCodeResponseDto } from './dto/auth-code-response.dto';
 import { VerifyAuthCodeRequestDto } from './dto/verify-auth-code-request.dto';
-import { VerifyAuthCodeResponseDto } from './dto/verify-auth-code-response.dto';
 
 @Injectable()
 export class AuthCodesService {
@@ -27,42 +25,54 @@ export class AuthCodesService {
 		private readonly mailerService: MailerService,
 	) {}
 
-	async generateAuthCode(email: string, type: AuthCodeType): Promise<AuthCodeResponseDto> {
+	async generateSignUpAuthCode(email: string) {
 		const expiredAt: number = MailAuthType.ExpiredAt;
 		const code: string = Math.random().toString(36).slice(2, 10).toString();
+		const foundEmailUser = await this.usersRepository
+			.createQueryBuilder('user')
+			.where('user.email = :email', { email })
+			.getOne();
+		if (foundEmailUser) {
+			throw new BadRequestException('Email is already exist');
+		}
+		try {
+			const foundAuthCode = await this.authCodesRepository
+				.createQueryBuilder('userCode')
+				.where('userCode.email = :email', { email })
+				.getOne();
 
-		if (await this.errIfExistEmailOrNot(email, type)) {
-			try {
-				const foundAuthCode = await this.authCodesRepository
-					.createQueryBuilder('auth_code')
-					.where('auth_code.email = :email', { email })
-					.andWhere('auth_code.type = :type', { type })
-					.getOne();
-
-				if (foundAuthCode) {
-					foundAuthCode.code = code;
-					await this.authCodesRepository.save(foundAuthCode);
-				} else {
-					await this.authCodesRepository.save({
-						email,
-						type,
-						code,
-					});
-				}
-
-				this.sendAuthMail(type, email, code, expiredAt);
-				return new AuthCodeResponseDto({ expiredAt });
-			} catch (error) {
-				throw new InternalServerErrorException(error.message, error);
+			if (foundAuthCode) {
+				foundAuthCode.code = code;
+				await this.authCodesRepository.save(foundAuthCode);
+			} else {
+				await this.authCodesRepository.save({
+					email: email,
+					type: AuthCodeType.SignUp,
+					code: code,
+				});
 			}
+
+			this.mailerService.sendMail({
+				to: email,
+				subject: '[지금,여기] 이메일 인증 메일입니다 :)',
+				// TODO: Template
+				html: `
+			<p>지금,여기에 오신 것을 환영해요! 아래 인증 코드를 지금,여기 앱에서 입력해주세요.</p>
+			<p>인증 코드: <span>${code}</span></p>
+			<p>인증코드는 이메일 발송 시점으로부터 ${expiredAt.toString()}분 동안 유효합니다.</p>
+			`,
+			});
+
+			return { expiredAt };
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
 		}
 	}
 
-	async verifyAuthCode(authCode: VerifyAuthCodeRequestDto, type: AuthCodeType): Promise<VerifyAuthCodeResponseDto> {
+	async verifyAuthCode(authCode: VerifyAuthCodeRequestDto) {
 		const foundAuthCode = await this.authCodesRepository
-			.createQueryBuilder('auth_code')
-			.where('auth_code.email = :email', { email: authCode.email })
-			.andWhere('auth_code.type = :type', { type })
+			.createQueryBuilder('authCode')
+			.where('authCode.email = :email', { email: authCode.email })
 			.getOne();
 
 		if (!foundAuthCode) throw new NotFoundException('Auth code not found');
@@ -77,46 +87,7 @@ export class AuthCodesService {
 		} else if (foundAuthCode.code !== authCode.code) {
 			throw new BadRequestException('Auth code is incorrect');
 		}
-		this.authCodesRepository.delete(foundAuthCode.id);
-		return new VerifyAuthCodeResponseDto({ email: authCode.email });
-	}
-
-	private async errIfExistEmailOrNot(email: string, type: AuthCodeType): Promise<boolean> {
-		const foundEmailUser = await this.usersRepository
-			.createQueryBuilder('user')
-			.where('user.email = :email', { email })
-			.getOne();
-		if (type === AuthCodeType.SignUp && foundEmailUser) {
-			throw new BadRequestException('Email is already exist');
-		} else if (type === AuthCodeType.FindPw && !foundEmailUser) {
-			throw new NotFoundException('User is not found');
-		}
+		await this.authCodesRepository.delete(foundAuthCode.id);
 		return true;
-	}
-
-	private sendAuthMail(type: AuthCodeType, email: string, code: string, expiredAt: number) {
-		if (type === AuthCodeType.SignUp) {
-			this.mailerService.sendMail({
-				to: email,
-				subject: '[지금,여기] 이메일 인증 메일입니다 :)',
-				// TODO: Template
-				html: `
-			<p>지금,여기에 오신 것을 환영해요! 아래 인증 코드를 지금,여기 앱에서 입력해주세요.</p>
-			<p>인증 코드: <span>${code}</span></p>
-			<p>인증코드는 이메일 발송 시점으로부터 ${expiredAt.toString()}분 동안 유효합니다.</p>
-			`,
-			});
-		} else if (type === AuthCodeType.FindPw) {
-			this.mailerService.sendMail({
-				to: email,
-				subject: '[지금,여기] 이메일 인증 메일입니다 :)',
-				// TODO: Template
-				html: `
-			<p>임시 비밀번호 발급을 위한 메일입니다! 아래 인증 코드를 지금,여기 앱에서 입력해주세요.</p>
-			<p>인증 코드: <span>${code}</span></p>
-			<p>인증코드는 이메일 발송 시점으로부터 ${expiredAt.toString()}분 동안 유효합니다.</p>
-			`,
-			});
-		}
 	}
 }

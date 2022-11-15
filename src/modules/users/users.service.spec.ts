@@ -7,7 +7,6 @@ import { User } from 'src/entities/users.entity';
 import { MockSpotsRepository } from 'test/mock/spots.mock';
 import { MockTasteSpotsRepository } from 'test/mock/taste-spots.mock';
 import { MockUsersRepository } from 'test/mock/users.mock';
-import { HashPassword } from '../auth/hash-password';
 import { UsersService } from './users.service';
 
 describe('UsersService', () => {
@@ -18,7 +17,6 @@ describe('UsersService', () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				UsersService,
-				HashPassword,
 				{
 					provide: getRepositoryToken(User),
 					useClass: MockUsersRepository,

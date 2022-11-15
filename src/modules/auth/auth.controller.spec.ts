@@ -5,7 +5,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
 import { User } from 'src/entities/users.entity';
-import { MailerModule } from 'src/mailer/mailer.module';
 import { MockUsersRepository } from '../../../test/mock/users.mock';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -19,7 +18,7 @@ describe('AuthController', () => {
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
-			imports: [HttpModule, MailerModule],
+			imports: [HttpModule],
 			controllers: [AuthController],
 			providers: [
 				AuthService,
