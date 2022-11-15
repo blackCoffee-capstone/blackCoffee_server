@@ -1,3 +1,4 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -18,6 +19,13 @@ describe('AuthService', () => {
 			providers: [
 				AuthService,
 				HashPassword,
+				{
+					provide: MailerService,
+					useValue: {
+						// eslint-disable-next-line @typescript-eslint/no-empty-function
+						post: jest.fn(() => {}),
+					},
+				},
 				{
 					provide: HttpService,
 					useValue: {

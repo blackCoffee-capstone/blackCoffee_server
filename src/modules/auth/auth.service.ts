@@ -1,3 +1,4 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { HttpService } from '@nestjs/axios';
 import {
 	BadRequestException,
@@ -31,6 +32,7 @@ export class AuthService {
 		private readonly configService: ConfigService,
 		private readonly jwtService: JwtService,
 		private readonly httpService: HttpService,
+		private readonly mailerService: MailerService,
 	) {}
 	#oauthConfig = this.configService.get<OauthConfig>('oauthConfig').kakao;
 	#jwtConfig = this.configService.get<JwtConfig>('jwtConfig');
@@ -171,17 +173,40 @@ export class AuthService {
 		}
 	}
 
-	async getUserIdIfExist(id: number, role: UserType) {
-		try {
-			const user = await this.usersRepository.findOne({
-				where: { id, type: role },
-			});
-			if (user) {
-				return { id: user.id, type: user.type };
-			} else throw new UnauthorizedException();
-		} catch (error) {
-			throw new UnauthorizedException();
+	async generateTempPw(email: string): Promise<boolean> {
+		const foundEmailUser = await this.usersRepository
+			.createQueryBuilder('user')
+			.where('user.email = :email', { email })
+			.getOne();
+		if (!foundEmailUser) {
+			throw new NotFoundException('User is not found');
 		}
+
+		const tempPw: string = Math.random().toString(36).slice(2);
+		const tempHashPw = await this.hashPassword.hash(tempPw);
+		await this.usersRepository.update(foundEmailUser.id, {
+			password: tempHashPw,
+		});
+
+		this.mailerService.sendMail({
+			to: email,
+			subject: '[지금,여기] 임시 비밀번호 발급 메일입니다 :)',
+			// TODO: Template
+			html: `
+		<p>지금,여기 서비스 입니다! 아래 임시 비밀번호로 지금,여기 앱에 로그인해주세요.</p>
+		<p>임시 비밀번호: <span>${tempPw}</span></p>
+		`,
+		});
+		return true;
+	}
+
+	async getUserIdIfExist(id: number, role: UserType) {
+		const user = await this.usersRepository.findOne({
+			where: { id, type: role },
+		});
+		if (user) {
+			return { id: user.id, type: user.type };
+		} else throw new UnauthorizedException();
 	}
 
 	private oauthUserIsCompareUser(compareUser: any, oauthUser: OauthUserDto, userType: UserType): boolean {
