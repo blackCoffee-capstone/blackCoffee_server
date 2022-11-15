@@ -20,11 +20,27 @@ export class FiltersService {
 	) {}
 
 	async createLocation(requestLocation: LocationRequestDto) {
-		return await this.locationsRepository.save(requestLocation);
+		const IsLocation = await this.locationsRepository.findOne({
+			where: { metroName: requestLocation.metroName, localName: requestLocation.localName },
+		});
+		if (IsLocation) return IsLocation.id;
+		try {
+			const location = await this.locationsRepository.save(requestLocation);
+			return location.id;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async createTheme(requestTheme: ThemeRequestDto) {
-		return await this.themeRepository.save(requestTheme);
+		const IsTheme = await this.themeRepository.findOne({ where: { name: requestTheme.name } });
+		if (IsTheme) return IsTheme.id;
+		try {
+			const theme = await this.themeRepository.save(requestTheme);
+			return theme.id;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async getFilterList(): Promise<FiltersResponseDto<LocationResponseDto, ThemeResponseDto>> {

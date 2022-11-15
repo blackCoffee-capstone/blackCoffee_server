@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { boolean } from 'joi';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
@@ -7,6 +7,7 @@ import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
+import { SaveRequestDto } from './dto/save-request.dto';
 import { SpotsController } from './spots.controller';
 
 export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
@@ -15,6 +16,9 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 			ApiOperation({
 				summary,
 				description: 'Spot/Sns Post/Rank 저장 및 업데이트',
+			}),
+			ApiBody({
+				type: [SaveRequestDto],
 			}),
 			ApiResponse({
 				status: 201,

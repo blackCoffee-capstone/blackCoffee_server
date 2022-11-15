@@ -10,10 +10,15 @@ import { Rank } from 'src/entities/rank.entity';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
+import { LocationRequestDto } from '../filters/dto/location-request.dto';
+import { SnsPostRequestDto } from './dto/sns-post-request.dto';
+import { ThemeRequestDto } from '../filters/dto/theme-request.dto';
+import { SpotRequestDto } from './dto/spot-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
-import { SnsPostRequestDto } from './dto/sns-post-request.dto';
-import { SpotRequestDto } from './dto/spot-request.dto';
+import { SaveRequestDto } from './dto/save-request.dto';
+import { FiltersService } from '../filters/filters.service';
+import { RankRequestDto } from './dto/rank-request.dto';
 
 @Injectable()
 export class SpotsService {
@@ -28,43 +33,122 @@ export class SpotsService {
 		private readonly snsPostRepository: Repository<SnsPost>,
 		@InjectRepository(Rank)
 		private readonly rankRepository: Repository<Rank>,
+		private readonly filtersService: FiltersService,
 	) {}
 
-	async saveSpot() {
-		const saveRanking = await this.saveRankRecord();
-		return saveRanking;
+	async saveSpot(metaData: SaveRequestDto[]) {
+		try {
+			const spots = await this.spotsRepository.find();
+			spots.forEach(async (spot) => {
+				await this.spotsRepository.update(spot.id, { rank: null });
+			});
+			metaData.forEach(async (meta) => {
+				const locationId = await this.filtersService.createLocation(new LocationRequestDto(meta));
+				const themeId = await this.filtersService.createTheme(new ThemeRequestDto(meta));
+				const spotId = await this.createSpot(new SpotRequestDto({ ...meta, locationId: locationId }));
+				await this.createSnsPost(new SnsPostRequestDto({ ...meta, themeId: themeId, spotId: spotId }));
+			});
+			await this.updateSpotSns();
+			return true;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
-	async saveRankRecord() {
-		const rankingSpots = await this.spotsRepository
-			.createQueryBuilder('spot')
-			.select('id')
-			.orderBy('rank', 'ASC')
-			.where('rank is not null')
-			.getRawMany();
-		return await this.rankRepository.save({ ranking: rankingSpots.flatMap(({ id }) => [id]) });
+	async updateSpotSns() {
+		try {
+			const spots = await this.spotsRepository
+				.createQueryBuilder('spot')
+				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
+				.getMany();
+			spots.forEach(async (spot) => {
+				let likeSum = 0;
+				spot.snsPosts.forEach((snsPost) => {
+					likeSum += snsPost.likeNumber;
+				});
+				await this.spotsRepository.update(spot.id, {
+					snsPostCount: spot.snsPosts.length,
+					snsPostLikeNumber: likeSum,
+				});
+			});
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
+	// 임시 계산: 다시 수정 예정
+	async week() {
+		const date = new Date();
+		const cudate = date.getDate();
+		const start = new Date(date.setDate(1));
+		const day = start.getDay();
+		const week = parseInt(`${(day - 1 + cudate) / 7 + 1}`);
+		return week;
+	}
+
+	async updateRank(requestRank, spotId: number) {
+		try {
+			await this.spotsRepository.update(spotId, { rank: requestRank.rank });
+
+			const week = await this.week();
+			const date = new Date();
+			const rankRequestDto = new RankRequestDto({
+				year: date.getFullYear(),
+				month: date.getMonth() + 1,
+				week: week,
+				spotId: spotId,
+				rank: requestRank.rank,
+			});
+			const rank = await this.rankRepository.findOne({ where: { ...rankRequestDto } });
+			if (!rank) await this.rankRepository.save(rankRequestDto);
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async createSpot(requestSpot: SpotRequestDto) {
-		const location = await this.locationsRepository.findOne({
-			where: { id: requestSpot.locationId },
-		});
-		return await this.spotsRepository.save({
-			...requestSpot,
-			location: location,
-		});
+		const IsSpot = await this.spotsRepository.findOne({ where: { name: requestSpot.name } });
+		if (IsSpot) {
+			if (requestSpot.rank) await this.updateRank(requestSpot, IsSpot.id);
+			return IsSpot.id;
+		}
+		try {
+			const location = await this.locationsRepository.findOne({
+				where: { id: requestSpot.locationId },
+			});
+			const spot = await this.spotsRepository.save({
+				...requestSpot,
+				location: location,
+			});
+			if (requestSpot.rank) await this.updateRank(requestSpot, IsSpot.id);
+			return spot.id;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async createSnsPost(requestSnsPost: SnsPostRequestDto) {
-		const theme = await this.themeRepository.findOne({ where: { id: requestSnsPost.themeId } });
-		const spot = await this.spotsRepository.findOne({ where: { id: requestSnsPost.spotId } });
+		const IsSnsPost = await this.snsPostRepository.findOne({ where: { photoUrl: requestSnsPost.photoUrl } });
+		if (IsSnsPost) {
+			if (requestSnsPost.likeNumber !== IsSnsPost.likeNumber)
+				await this.snsPostRepository.update(IsSnsPost.id, {
+					likeNumber: requestSnsPost.likeNumber,
+				});
+			return IsSnsPost.id;
+		}
+		try {
+			const theme = await this.themeRepository.findOne({ where: { id: requestSnsPost.themeId } });
+			const spot = await this.spotsRepository.findOne({ where: { id: requestSnsPost.spotId } });
 
-		return await this.snsPostRepository.save({ ...requestSnsPost, theme, spot });
+			await this.snsPostRepository.save({ ...requestSnsPost, theme, spot });
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async getSearchSpot(searchRequest: SearchRequestDto) {
 		try {
-			let searchSpots = await this.spotsRepository
+			let searchSpots = this.spotsRepository
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.location', 'location')
 				.orderBy(`spot.${searchRequest.sorter}`, 'ASC');
@@ -96,7 +180,7 @@ export class SpotsService {
 		const IsSpot = await this.spotsRepository.findOne({ where: { id: spotId } });
 		if (!IsSpot) throw new NotFoundException('Spot is not found');
 		try {
-			let detailSnsPost = await this.snsPostRepository
+			let detailSnsPost = this.snsPostRepository
 				.createQueryBuilder('snsPost')
 				.leftJoinAndSelect('snsPost.spot', 'spot')
 				.leftJoinAndSelect('snsPost.theme', 'theme')

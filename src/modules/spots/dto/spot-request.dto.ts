@@ -35,4 +35,15 @@ export class SpotRequestDto {
 	@IsNumber()
 	@ApiProperty({ example: 100, description: 'sns 게시글 좋아요 수' })
 	readonly snsPostLikeNumber: number;
+
+	constructor({ locationId, name, latitude, longitude, rank }) {
+		this.locationId = locationId;
+		this.name = name;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.geom = `(${latitude.toString()},${longitude.toString()})`;
+		this.rank = rank;
+		this.snsPostCount = 0;
+		this.snsPostLikeNumber = 0;
+	}
 }

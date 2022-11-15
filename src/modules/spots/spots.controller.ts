@@ -1,7 +1,8 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
+import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { ApiDocs } from './spots.docs';
 import { SpotsService } from './spots.service';
@@ -13,8 +14,8 @@ export class SpotsController {
 
 	@Post()
 	@ApiDocs.saveSpot('Spot/Sns Post/Rank 저장 및 업데이트')
-	async saveSpot() {
-		return await this.spotsService.saveSpot();
+	async saveSpot(@Body() metaData: SaveRequestDto[]) {
+		return await this.spotsService.saveSpot(metaData);
 	}
 
 	@Get()

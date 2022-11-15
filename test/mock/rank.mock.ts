@@ -1,6 +1,10 @@
 export const mockRank = {
 	id: 1,
-	ranking: [1, 2, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 24],
+	year: 2022,
+	month: 11,
+	week: 3,
+	spotId: 1,
+	rank: 1,
 };
 
 export class MockRankRepository {
