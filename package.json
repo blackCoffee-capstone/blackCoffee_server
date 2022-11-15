@@ -37,7 +37,7 @@
 		"@types/jsonwebtoken": "^8.5.9",
 		"@types/passport-facebook": "^2.1.11",
 		"aws-sdk": "^2.1248.0",
-		"bcrypt": "^5.0.1",
+		"bcryptjs": "^2.4.3",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.13.2",
 		"cross-env": "^7.0.3",
