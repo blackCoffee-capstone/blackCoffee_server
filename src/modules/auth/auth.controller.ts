@@ -88,6 +88,7 @@ export class AuthController {
 	}
 
 	@Post('find-pw')
+	@ApiDocs.generateTempPw('임시 비밀번호 메일로 발송')
 	async generateTempPw(@Body() authCodeReq: AuthCodeRequestDto) {
 		return await this.authService.generateTempPw(authCodeReq.email);
 	}
