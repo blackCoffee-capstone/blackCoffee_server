@@ -1,0 +1,62 @@
+* {
+	box-sizing: border-box;
+	font-family: 'Nanum Gothic', sans-serif;
+}
+
+body {
+	margin: 0;
+}
+
+h1 {
+	font-size: 26px;
+	padding-bottom: 16px;
+	color: #8a2be2;
+	font-weight: 1000;
+	margin: 30px 60px 30px 60px;
+}
+
+.login_form {
+	width: 350px;
+	border-top: solid 5px #8a2be2;
+	background-color: #f2f2f2;
+	margin-right: auto;
+	margin-left: auto;
+	margin-top: 200px;
+	padding: 20px;
+	border-radius: 5px;
+	box-shadow: 0 8px 20px rgba(35, 0, 77, 0.2);
+}
+
+.text_field {
+	width: 100%;
+	border: none;
+	font-size: 14px;
+	font-weight: 600;
+	padding: 14px;
+	margin-bottom: 12px;
+	border-radius: 5px;
+}
+
+.text_field:focus,
+.text_field:active {
+	border: 1.5px solid #8a2be2;
+	outline: none;
+}
+
+.submit_btn {
+	width: 100%;
+	border: none;
+	color: white;
+	font-size: 14px;
+	background-color: #ab6fe3;
+	font-weight: 600;
+	padding: 14px;
+	margin-top: 16px;
+	margin-bottom: 18px;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.submit_btn:hover {
+	background-color: #8a2be2;
+}

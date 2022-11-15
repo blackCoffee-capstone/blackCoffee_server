@@ -38,4 +38,6 @@ lerna-debug.log*
 *.env.*
 *.env
 
+# Package-lock
+package-lock.json
 data

@@ -23,6 +23,6 @@ services:
         restart: always
         env_file:
             - ./.env.integ
-        command: ['npm', 'run', 'start:dev'] # TODO: change command (dev -> integ)
+        command: ['npm', 'run', 'start:integ']
         depends_on:
             - db

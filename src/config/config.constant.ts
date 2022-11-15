@@ -20,6 +20,38 @@ export type DatabaseConfig = {
 	dbname: string;
 };
 
+export type OauthConfig = {
+	kakao: {
+		clientId: string;
+		callbackUrl: string;
+	};
+	facebook: {
+		clientId: string;
+		secretKey: string;
+		callbackUrl: string;
+	};
+};
+
+export type JwtConfig = {
+	jwtAccessTokenSecret: string;
+	jwtAccessTokenExpire: string;
+	jwtAccessTokenExpireAdmin: string;
+	jwtRefreshTokenSecret: string;
+	jwtRefreshTokenExpire: string;
+};
+
+export type EmailConfig = {
+	email: string;
+	emailPassword: string;
+};
+
+export type NcloudConfig = {
+	accessKeyId: string;
+	secretAccessKey: string;
+	storageEndPoint: string;
+	storageBucket: string;
+};
+
 export const appConfig = (): { appConfig: AppConfig } => ({
 	appConfig: {
 		env: process.env.NODE_ENV as NodeEnv,
@@ -37,5 +69,45 @@ export const databaseConfig = (): { databaseConfig: DatabaseConfig } => ({
 		host: process.env.DATABASE_HOST,
 		port: +process.env.DATABASE_PORT,
 		dbname: process.env.DATABASE_DB,
+	},
+});
+
+export const oauthConfig = (): { oauthConfig: OauthConfig } => ({
+	oauthConfig: {
+		kakao: {
+			clientId: process.env.KAKAO_CLIENT_ID,
+			callbackUrl: process.env.KAKAO_CALLBACK_URL,
+		},
+		facebook: {
+			clientId: process.env.FACEBOOK_CLIENT_ID,
+			secretKey: process.env.FACEBOOK_SECRET_KEY,
+			callbackUrl: process.env.FACEBOOK_CALLBACK_URL,
+		},
+	},
+});
+
+export const jwtConfig = (): { jwtConfig: JwtConfig } => ({
+	jwtConfig: {
+		jwtAccessTokenSecret: process.env.JWT_ACCESS_TOKEN_SECRET,
+		jwtAccessTokenExpire: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
+		jwtAccessTokenExpireAdmin: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME_ADMIN,
+		jwtRefreshTokenSecret: process.env.JWT_REFRESH_TOKEN_SECRET,
+		jwtRefreshTokenExpire: process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
+	},
+});
+
+export const emailConfig = (): { emailConfig: EmailConfig } => ({
+	emailConfig: {
+		email: process.env.EMAIL,
+		emailPassword: process.env.EMAIL_PASSWORD,
+	},
+});
+
+export const ncloudConfig = (): { ncloudConfig: NcloudConfig } => ({
+	ncloudConfig: {
+		accessKeyId: process.env.NCLOUD_ACCESS_KEY_ID,
+		secretAccessKey: process.env.NCLOUD_SECRET_ACCESS_KEY,
+		storageEndPoint: process.env.NCLOUD_STORAGE_ENDPOINT,
+		storageBucket: process.env.NCLOUD_STORAGE_BUCKET,
 	},
 });
