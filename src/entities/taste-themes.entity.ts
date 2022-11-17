@@ -6,7 +6,7 @@ import { Theme } from './theme.entity';
 import { User } from './users.entity';
 
 @Entity()
-@Unique(['userId', 'spotId'])
+@Unique(['userId', 'themeId'])
 export class TasteTheme extends CommonEntity {
 	@IsNumber()
 	@IsNotEmpty()
