@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
 import { Spot } from 'src/entities/spots.entity';
-import { TasteSpot } from 'src/entities/taste-spots.entity';
+import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { User } from 'src/entities/users.entity';
 import { MockSpotsRepository } from 'test/mock/spots.mock';
 import { MockTasteSpotsRepository } from 'test/mock/taste-spots.mock';
@@ -24,7 +24,7 @@ describe('UsersService', () => {
 					useClass: MockUsersRepository,
 				},
 				{
-					provide: getRepositoryToken(TasteSpot),
+					provide: getRepositoryToken(TasteTheme),
 					useClass: MockTasteSpotsRepository,
 				},
 				{

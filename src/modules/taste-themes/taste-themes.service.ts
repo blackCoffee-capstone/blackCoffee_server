@@ -4,11 +4,11 @@ import { Repository } from 'typeorm';
 
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
-import { TasteSpotsLocationResponseDto } from './dto/taste-spots-location-response.dto';
-import { TasteSpotsResponseDto } from './dto/taste-spots-response.dto';
+import { TasteThemesLocationResponseDto } from './dto/taste-themes-location-response.dto';
+import { TasteThemesResponseDto } from './dto/taste-themes-response.dto';
 
 @Injectable()
-export class TasteSpotsService {
+export class TasteThemesService {
 	constructor(
 		@InjectRepository(Spot)
 		private readonly spotsRepository: Repository<Spot>,
@@ -16,7 +16,7 @@ export class TasteSpotsService {
 		private readonly snsPostsRepository: Repository<SnsPost>,
 	) {}
 
-	async getTasteSpots(): Promise<TasteSpotsResponseDto[]> {
+	async getTasteThemes(): Promise<TasteThemesResponseDto[]> {
 		//TODO: 알고리즘 수정 예정
 		let snsPosts = await this.snsPostsRepository
 			.createQueryBuilder('sns_post')
@@ -38,10 +38,10 @@ export class TasteSpotsService {
 
 		return tasteSpots.map(
 			(tasteSpot) =>
-				new TasteSpotsResponseDto({
+				new TasteThemesResponseDto({
 					id: tasteSpot.id,
 					name: tasteSpot.name,
-					location: new TasteSpotsLocationResponseDto({
+					location: new TasteThemesLocationResponseDto({
 						metroName: tasteSpot.metro_name,
 						localName: tasteSpot.local_name,
 					}),

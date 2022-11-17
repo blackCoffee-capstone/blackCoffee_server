@@ -5,17 +5,15 @@ import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { MockSnsPostsRepository } from 'test/mock/snsPosts.mock';
 import { MockSpotsRepository } from 'test/mock/spots.mock';
-import { TasteSpotsController } from './taste-spots.controller';
-import { TasteSpotsService } from './taste-spots.service';
+import { TasteThemesService } from './taste-themes.service';
 
-describe('TasteSpotsController', () => {
-	let tasteSpotsController: TasteSpotsController;
+describe('TasteThemesService', () => {
+	let tasteThemesService: TasteThemesService;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
-			controllers: [TasteSpotsController],
 			providers: [
-				TasteSpotsService,
+				TasteThemesService,
 				{
 					provide: getRepositoryToken(Spot),
 					useClass: MockSpotsRepository,
@@ -27,10 +25,10 @@ describe('TasteSpotsController', () => {
 			],
 		}).compile();
 
-		tasteSpotsController = module.get<TasteSpotsController>(TasteSpotsController);
+		tasteThemesService = module.get<TasteThemesService>(TasteThemesService);
 	});
 
 	it('should be defined', () => {
-		expect(tasteSpotsController).toBeDefined();
+		expect(tasteThemesService).toBeDefined();
 	});
 });

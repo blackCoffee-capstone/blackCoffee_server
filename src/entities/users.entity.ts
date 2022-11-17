@@ -3,7 +3,7 @@ import { Column, Entity, OneToMany } from 'typeorm';
 
 import { UserType } from 'src/types/users.types';
 import { CommonEntity } from './common.entity';
-import { TasteSpot } from './taste-spots.entity';
+import { TasteTheme } from './taste-themes.entity';
 
 @Entity()
 export class User extends CommonEntity {
@@ -40,8 +40,8 @@ export class User extends CommonEntity {
 	@Column({ name: 'is_new_user', type: 'boolean', nullable: false, default: true })
 	isNewUser: boolean;
 
-	@OneToMany(() => TasteSpot, (tasteSpot: TasteSpot) => tasteSpot.user, {
+	@OneToMany(() => TasteTheme, (tasteTheme: TasteTheme) => tasteTheme.user, {
 		cascade: true,
 	})
-	tasteSpots: TasteSpot[];
+	tasteSpots: TasteTheme[];
 }

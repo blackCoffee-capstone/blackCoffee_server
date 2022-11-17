@@ -5,7 +5,6 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { Location } from './locations.entity';
 import { SnsPost } from './sns-posts.entity';
-import { TasteSpot } from './taste-spots.entity';
 
 @Entity()
 export class Spot extends CommonEntity {
@@ -53,11 +52,6 @@ export class Spot extends CommonEntity {
 	@IsNumber()
 	@Column({ name: 'sns_post_like_number', type: 'int', nullable: false })
 	snsPostLikeNumber: number;
-
-	@OneToMany(() => TasteSpot, (tasteSpot: TasteSpot) => tasteSpot.spot, {
-		cascade: true,
-	})
-	tasteSpots: TasteSpot[];
 
 	@OneToMany(() => SnsPost, (snsPost: SnsPost) => snsPost.spot, {
 		cascade: true,

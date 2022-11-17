@@ -3,12 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
-import { TasteSpotsController } from './taste-spots.controller';
-import { TasteSpotsService } from './taste-spots.service';
+import { TasteThemesController } from './taste-themes.controller';
+import { TasteThemesService } from './taste-themes.service';
 
 @Module({
 	imports: [TypeOrmModule.forFeature([Spot, SnsPost])],
-	controllers: [TasteSpotsController],
-	providers: [TasteSpotsService],
+	controllers: [TasteThemesController],
+	providers: [TasteThemesService],
 })
-export class TasteSpotsModule {}
+export class TasteThemesModule {}

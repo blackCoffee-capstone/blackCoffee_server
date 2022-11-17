@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Spot } from 'src/entities/spots.entity';
-import { TasteSpot } from 'src/entities/taste-spots.entity';
+import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { User } from 'src/entities/users.entity';
 import { UserType } from 'src/types/users.types';
 import { HashPassword } from '../auth/hash-password';
@@ -21,8 +21,8 @@ export class UsersService {
 	constructor(
 		@InjectRepository(User)
 		private readonly usersRepository: Repository<User>,
-		@InjectRepository(TasteSpot)
-		private readonly tasteSpotsRepository: Repository<TasteSpot>,
+		@InjectRepository(TasteTheme)
+		private readonly tasteThemesRepository: Repository<TasteTheme>,
 		@InjectRepository(Spot)
 		private readonly spotsRepository: Repository<Spot>,
 		private hashPassword: HashPassword,
@@ -40,7 +40,7 @@ export class UsersService {
 	}
 
 	async createUsersTasteSpots(userId: number, tasteSpots: number[]): Promise<boolean> {
-		const isUsersTasteSpots = await this.tasteSpotsRepository.findOne({
+		const isUsersTasteSpots = await this.tasteThemesRepository.findOne({
 			where: { userId },
 		});
 		if (this.isDuplicateArr(tasteSpots)) {
@@ -61,10 +61,10 @@ export class UsersService {
 				});
 			}
 
-			await this.tasteSpotsRepository
-				.createQueryBuilder('taste_spot')
+			await this.tasteThemesRepository
+				.createQueryBuilder('taste_theme')
 				.insert()
-				.into(TasteSpot)
+				.into(TasteTheme)
 				.values(usersTasteSpots)
 				.execute();
 			return true;

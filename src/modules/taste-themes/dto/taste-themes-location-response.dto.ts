@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class TasteSpotsLocationResponseDto {
+export class TasteThemesLocationResponseDto {
 	@ApiProperty({ example: '경기도', description: '광역자치단체 이름' })
 	readonly metroName: string;
 
