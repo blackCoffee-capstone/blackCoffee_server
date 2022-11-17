@@ -5,7 +5,7 @@ import { Location } from 'src/entities/locations.entity';
 import { Rank } from 'src/entities/rank.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
-import { TasteSpot } from 'src/entities/taste-spots.entity';
+import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { User } from 'src/entities/users.entity';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
@@ -22,7 +22,7 @@ const config = {
 	username: dbConfig.username,
 	password: dbConfig.password,
 	database: dbConfig.dbname,
-	entities: [User, AdForm, AuthCode, Theme, Location, Spot, SnsPost, TasteSpot, Rank],
+	entities: [User, AdForm, AuthCode, Theme, Location, Spot, SnsPost, TasteTheme, Rank],
 	seeds: [
 		seedUrl + 'users.seed.ts',
 		seedUrl + 'themes.seed.ts',

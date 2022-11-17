@@ -1,3 +1,3 @@
 export enum MailAuthType {
-	ExpiredAt = 30,
+	ExpiredAt = 3,
 }

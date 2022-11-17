@@ -55,6 +55,8 @@ export class AuthService {
 	}
 
 	async createOauthUser(oauthUserData: OauthUserDto, userType: UserType): Promise<UserResponseDto> {
+		const userNickname: string = userType + oauthUserData.socialId.toString();
+		oauthUserData.socialId;
 		if (oauthUserData.email) {
 			let compareUser = await this.usersRepository.findOne({
 				where: { email: oauthUserData.email },
@@ -70,7 +72,7 @@ export class AuthService {
 				else {
 					const newOauthUser = await this.usersRepository.save({
 						name: oauthUserData.name,
-						nickname: oauthUserData.name,
+						nickname: userNickname,
 						email: oauthUserData.email,
 						socialId: oauthUserData.socialId,
 						type: userType,
@@ -104,7 +106,7 @@ export class AuthService {
 			.where('user.email = :email', { email: signUpRequestDto.email })
 			.getOne();
 
-		if (await this.errIfDuplicateEmail(foundUser)) {
+		if ((await this.errIfDuplicateEmail(foundUser)) || (await this.errIfDuplicateNickname(foundUser))) {
 			signUpRequestDto.password = await this.hashPassword.hash(signUpRequestDto.password);
 			const user = this.usersRepository.create({
 				...signUpRequestDto,
@@ -235,6 +237,17 @@ export class AuthService {
 			throw new BadRequestException('User is kakao user');
 		} else if (user && user.type === UserType.Facebook) {
 			throw new BadRequestException('User is facebook user');
+		} else return true;
+	}
+
+	private async errIfDuplicateNickname(user) {
+		const foundNicknameUser = await this.usersRepository
+			.createQueryBuilder('user')
+			.where('user.nickname = :nickname', { nickname: user.nickname })
+			.getOne();
+
+		if (foundNicknameUser) {
+			throw new BadRequestException('Nickname is already exist');
 		} else return true;
 	}
 

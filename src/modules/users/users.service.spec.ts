@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
-import { Spot } from 'src/entities/spots.entity';
-import { TasteSpot } from 'src/entities/taste-spots.entity';
+import { TasteTheme } from 'src/entities/taste-themes.entity';
+import { Theme } from 'src/entities/theme.entity';
 import { User } from 'src/entities/users.entity';
-import { MockSpotsRepository } from 'test/mock/spots.mock';
 import { MockTasteSpotsRepository } from 'test/mock/taste-spots.mock';
+import { MockThemeRepository } from 'test/mock/theme.mock';
 import { MockUsersRepository } from 'test/mock/users.mock';
 import { HashPassword } from '../auth/hash-password';
 import { UsersService } from './users.service';
@@ -24,12 +24,12 @@ describe('UsersService', () => {
 					useClass: MockUsersRepository,
 				},
 				{
-					provide: getRepositoryToken(TasteSpot),
+					provide: getRepositoryToken(TasteTheme),
 					useClass: MockTasteSpotsRepository,
 				},
 				{
-					provide: getRepositoryToken(Spot),
-					useClass: MockSpotsRepository,
+					provide: getRepositoryToken(Theme),
+					useClass: MockThemeRepository,
 				},
 			],
 		}).compile();

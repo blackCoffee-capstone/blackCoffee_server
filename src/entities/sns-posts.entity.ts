@@ -8,22 +8,24 @@ import { Theme } from './theme.entity';
 export class SnsPost extends CommonEntity {
 	@IsNumber()
 	@IsNotEmpty()
-	@Column({ name: 'theme_id' })
+	@Column({ name: 'theme_id', nullable: true })
 	themeId: number;
 
 	@ManyToOne(() => Theme, (theme: Theme) => theme.snsPosts, {
 		onDelete: 'SET NULL',
+		nullable: true,
 	})
 	@JoinColumn([{ name: 'theme_id', referencedColumnName: 'id' }])
 	theme: Theme;
 
 	@IsNumber()
 	@IsNotEmpty()
-	@Column({ name: 'spot_id' })
+	@Column({ name: 'spot_id', nullable: true })
 	spotId: number;
 
 	@ManyToOne(() => Spot, (spot: Spot) => spot.snsPosts, {
 		onDelete: 'SET NULL',
+		nullable: true,
 	})
 	@JoinColumn([{ name: 'spot_id', referencedColumnName: 'id' }])
 	spot: Spot;
