@@ -117,20 +117,19 @@ export class SpotsService {
 	private async updateSpotSns(changeSpots) {
 		try {
 			const noDupSpots = [...new Set(changeSpots)];
-			const spots = await this.spotsRepository
-				.createQueryBuilder('spot')
-				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
-				.where('spot.id IN (:...ids)', { ids: noDupSpots })
-				.getMany();
+			const updateSpots = await this.snsPostRepository
+				.createQueryBuilder('snsPost')
+				.select('snsPost.spotId', 'spotId')
+				.addSelect('SUM(snsPost.likeNumber)', 'likeSum')
+				.addSelect('COUNT (*)', 'snsPost')
+				.where('snsPost.spotId IN (:...spotId)', { spotId: noDupSpots })
+				.groupBy('snsPost.spotId')
+				.getRawMany();
 
-			for (const spot of spots) {
-				let likeSum = 0;
-				for (const snsPost of spot.snsPosts) {
-					likeSum += snsPost.likeNumber;
-				}
-				await this.spotsRepository.update(spot.id, {
-					snsPostCount: spot.snsPosts.length,
-					snsPostLikeNumber: likeSum,
+			for (const spot of updateSpots) {
+				await this.spotsRepository.update(spot.spotId, {
+					snsPostCount: spot.snsPost,
+					snsPostLikeNumber: spot.likeSum,
 				});
 			}
 		} catch (error) {
