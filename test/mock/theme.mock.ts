@@ -6,8 +6,9 @@ export const mockTheme = {
 
 export class MockThemeRepository {
 	save = jest.fn().mockResolvedValue(mockTheme);
+	find = jest.fn().mockReturnThis();
 
-	async find() {
+	async findTheme() {
 		return mockTheme;
 	}
 }

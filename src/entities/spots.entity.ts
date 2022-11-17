@@ -4,6 +4,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 import { CommonEntity } from './common.entity';
 import { Location } from './locations.entity';
+import { Rank } from './rank.entity';
 import { SnsPost } from './sns-posts.entity';
 
 @Entity()
@@ -58,4 +59,9 @@ export class Spot extends CommonEntity {
 		eager: true,
 	})
 	snsPosts: SnsPost[];
+
+	@OneToMany(() => Rank, (ranking: Rank) => ranking.spot, {
+		cascade: true,
+	})
+	rankings: Rank[];
 }

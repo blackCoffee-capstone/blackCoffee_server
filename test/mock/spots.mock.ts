@@ -21,6 +21,7 @@ export class MockSpotsRepository {
 		where: jest.fn().mockReturnThis(),
 		andWhere: jest.fn().mockReturnThis(),
 		getMany: jest.fn().mockReturnThis(),
+		getRawMany: jest.fn().mockReturnThis(),
 	});
 	findOne = jest.fn().mockReturnThis();
 
