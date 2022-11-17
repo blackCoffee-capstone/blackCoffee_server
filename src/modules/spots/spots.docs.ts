@@ -1,62 +1,30 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { boolean } from 'joi';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
-import { SpotsController } from './spots.controller';
+import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
+import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
+import { SaveRequestDto } from './dto/save-request.dto';
+import { SpotsController } from './spots.controller';
 
 export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
-	createSpot(summary: string) {
+	saveSpot(summary: string) {
 		return applyDecorators(
 			ApiOperation({
 				summary,
-				description: '여행지 정보 생성',
+				description: 'Spot/Sns Post/Rank 저장 및 업데이트',
+			}),
+			ApiBody({
+				type: [SaveRequestDto],
 			}),
 			ApiResponse({
 				status: 201,
 				description: '',
+				type: boolean,
 			}),
-			ApiBearerAuth('Authorization'),
-		);
-	},
-	createLocation(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '위치 정보 생성',
-			}),
-			ApiResponse({
-				status: 201,
-				description: '',
-			}),
-			ApiBearerAuth('Authorization'),
-		);
-	},
-	createTheme(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '테마 정보 생성',
-			}),
-			ApiResponse({
-				status: 201,
-				description: '',
-			}),
-			ApiBearerAuth('Authorization'),
-		);
-	},
-	createSnsPost(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: 'sns post 생성',
-			}),
-			ApiResponse({
-				status: 201,
-				description: '',
-			}),
-			ApiBearerAuth('Authorization'),
 		);
 	},
 	searchSpot(summary: string) {
@@ -65,12 +33,14 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 				summary,
 				description: '여행지 검색(단어 검색, 정렬, 필터링, 페이지네이션)',
 			}),
+			ApiQuery({
+				type: SearchRequestDto,
+			}),
 			ApiResponse({
 				status: 200,
 				description: '',
-				type: SearchResponseDto,
+				type: [SearchResponseDto],
 			}),
-			ApiBearerAuth('Authorization'),
 		);
 	},
 	detailSpot(summary: string) {
@@ -79,12 +49,18 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 				summary,
 				description: '여행지 상세 페이지(여행지 기본 정보, 연관 sns posts',
 			}),
+			ApiQuery({
+				type: DetailSpotRequestDto,
+			}),
+			ApiParam({
+				name: 'spodId',
+				type: Number,
+			}),
 			ApiResponse({
 				status: 200,
 				description: '',
 				type: DetailSpotResponseDto,
 			}),
-			ApiBearerAuth('Authorization'),
 		);
 	},
 };

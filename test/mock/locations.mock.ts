@@ -6,8 +6,9 @@ export const mockLocation = {
 
 export class MockLocationsRepository {
 	save = jest.fn().mockResolvedValue(mockLocation);
+	find = jest.fn().mockReturnThis();
 
-	async find() {
+	async findLocation() {
 		return mockLocation;
 	}
 }

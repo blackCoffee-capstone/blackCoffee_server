@@ -25,4 +25,13 @@ export class SnsPostRequestDto {
 	@IsString()
 	@ApiProperty({ example: '해변가 캠핑', description: 'sns 게시글 내용' })
 	readonly content: string;
+
+	constructor({ themeId, spotId, date, likeNumber, photoUrl, content }) {
+		this.themeId = themeId;
+		this.spotId = spotId;
+		this.date = date;
+		this.likeNumber = likeNumber;
+		this.photoUrl = photoUrl;
+		this.content = content;
+	}
 }
