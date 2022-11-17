@@ -1,4 +1,4 @@
-import { IsBoolean, IsDateString, IsEmail, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
+import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
 import { Column, Entity, OneToMany } from 'typeorm';
 
 import { UserType } from 'src/types/users.types';
@@ -32,13 +32,9 @@ export class User extends CommonEntity {
 	type: UserType;
 
 	@IsString()
-	@Length(8, 24)
-	@Column({ type: 'varchar', nullable: true }) //TODO: strong pw
+	@Length(8, 15)
+	@Column({ type: 'varchar', nullable: true }) //TODO: strong pw (영어+숫자+특수문자 1개)
 	password: string;
-
-	@IsDateString()
-	@Column({ type: 'date', nullable: true })
-	birthdate: Date;
 
 	@IsBoolean()
 	@Column({ name: 'is_new_user', type: 'boolean', nullable: false, default: true })
