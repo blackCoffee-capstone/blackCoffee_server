@@ -37,6 +37,10 @@ const seedLocationDatas = [
 		localName: null,
 	},
 	{
+		metroName: '제주',
+		localName: null,
+	},
+	{
 		metroName: '경기도',
 		localName: '고양시',
 	},
