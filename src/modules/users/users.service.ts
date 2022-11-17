@@ -8,8 +8,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Spot } from 'src/entities/spots.entity';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
+import { Theme } from 'src/entities/theme.entity';
 import { User } from 'src/entities/users.entity';
 import { UserType } from 'src/types/users.types';
 import { HashPassword } from '../auth/hash-password';
@@ -23,8 +23,8 @@ export class UsersService {
 		private readonly usersRepository: Repository<User>,
 		@InjectRepository(TasteTheme)
 		private readonly tasteThemesRepository: Repository<TasteTheme>,
-		@InjectRepository(Spot)
-		private readonly spotsRepository: Repository<Spot>,
+		@InjectRepository(Theme)
+		private readonly themesRepository: Repository<Theme>,
 		private hashPassword: HashPassword,
 	) {}
 
@@ -39,25 +39,25 @@ export class UsersService {
 		}
 	}
 
-	async createUsersTasteSpots(userId: number, tasteSpots: number[]): Promise<boolean> {
-		const isUsersTasteSpots = await this.tasteThemesRepository.findOne({
+	async createUsersTasteThemes(userId: number, tasteThemes: number[]): Promise<boolean> {
+		const isUsersTasteThemes = await this.tasteThemesRepository.findOne({
 			where: { userId },
 		});
-		if (this.isDuplicateArr(tasteSpots)) {
+		if (this.isDuplicateArr(tasteThemes)) {
 			throw new BadRequestException(`Duplicate value exists in user's taste list`);
 		}
-		if (isUsersTasteSpots) {
+		if (isUsersTasteThemes) {
 			throw new BadRequestException(`User's taste is already exist`);
 		}
-		if (await this.notFoundSpots(tasteSpots)) {
-			throw new NotFoundException('Spot is not found');
+		if (await this.notFoundThemes(tasteThemes)) {
+			throw new NotFoundException('Theme is not found');
 		}
 		try {
-			const usersTasteSpots = [];
-			for (let i = 0; i < tasteSpots.length; i++) {
-				usersTasteSpots.push({
+			const usersTasteThemes = [];
+			for (let i = 0; i < tasteThemes.length; i++) {
+				usersTasteThemes.push({
 					userId: userId,
-					spotId: tasteSpots[i],
+					themeId: tasteThemes[i],
 				});
 			}
 
@@ -65,7 +65,7 @@ export class UsersService {
 				.createQueryBuilder('taste_theme')
 				.insert()
 				.into(TasteTheme)
-				.values(usersTasteSpots)
+				.values(usersTasteThemes)
 				.execute();
 			return true;
 		} catch (error) {
@@ -96,13 +96,13 @@ export class UsersService {
 		if (arr.length !== set.size) return true;
 		return false;
 	}
-	private async notFoundSpots(spots: number[]): Promise<boolean> {
-		const foundSpots = await this.spotsRepository
-			.createQueryBuilder('spot')
-			.where('spot.id IN (:...spotIds)', { spotIds: spots })
+	private async notFoundThemes(themes: number[]): Promise<boolean> {
+		const foundThemes = await this.themesRepository
+			.createQueryBuilder('theme')
+			.where('theme.id IN (:...themeIds)', { themeIds: themes })
 			.getMany();
 
-		if (foundSpots.length !== spots.length) return true;
+		if (foundThemes.length !== themes.length) return true;
 		return false;
 	}
 
