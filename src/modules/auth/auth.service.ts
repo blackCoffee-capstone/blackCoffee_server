@@ -111,8 +111,8 @@ export class AuthService {
 			.getOne();
 
 		if (
-			(await this.errIfDuplicateEmail(foundUser)) ||
-			(await this.errIfNotVerifyEmail(signUpRequestDto)) ||
+			(await this.errIfDuplicateEmail(foundUser)) &&
+			(await this.errIfNotVerifyEmail(signUpRequestDto)) &&
 			(await this.errIfDuplicateNickname(signUpRequestDto))
 		) {
 			signUpRequestDto.password = await this.hashPassword.hash(signUpRequestDto.password);
@@ -256,6 +256,7 @@ export class AuthService {
 			.where('auth_code.email = :email', { email: signUpRequestDto.email })
 			.getOne();
 
+		console.log('kk', foundAuthCodeUser);
 		if (!foundAuthCodeUser || foundAuthCodeUser.type === AuthCodeType.SignUp) {
 			throw new BadRequestException('User did not verify the email');
 		} else if (foundAuthCodeUser.type === AuthCodeType.SignUpAble) {
