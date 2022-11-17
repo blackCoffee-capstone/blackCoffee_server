@@ -61,6 +61,7 @@ export class SpotsService {
 				const location = await this.locationsRepository.findOne({
 					where: { metroName: spot[4], localName: spot[5] },
 				});
+				if (!location) continue;
 				await this.createSpot(
 					new SpotRequestDto({
 						locationId: location.id,
@@ -92,7 +93,7 @@ export class SpotsService {
 			for (const sns of noDupSnsPosts) {
 				const spot = await this.spotsRepository.findOne({ where: { name: sns[5] } });
 				const theme = await this.themeRepository.findOne({ where: { name: sns[4] } });
-
+				if (!theme || !spot) continue;
 				changeSpots.push(spot.id);
 				await this.createSnsPost(
 					new SnsPostRequestDto({
