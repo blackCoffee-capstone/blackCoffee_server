@@ -77,7 +77,7 @@ export class AuthCodesService {
 		} else if (foundAuthCode.code !== authCode.code) {
 			throw new BadRequestException('Auth code is incorrect');
 		}
-		this.authCodesRepository.delete(foundAuthCode.id);
+		await this.approveAuthCode(foundAuthCode, type);
 		return new VerifyAuthCodeResponseDto({ email: authCode.email });
 	}
 
@@ -91,6 +91,19 @@ export class AuthCodesService {
 		} else if (type === AuthCodeType.FindPw && !foundEmailUser) {
 			throw new NotFoundException('User is not found');
 		}
+		return true;
+	}
+
+	private async approveAuthCode(foundAuthCode: any, type: AuthCodeType): Promise<boolean> {
+		if (type === AuthCodeType.FindPw) {
+			await this.authCodesRepository.delete(foundAuthCode.id);
+		} else if (type === AuthCodeType.SignUp) {
+			await this.authCodesRepository.update(foundAuthCode.id, {
+				type: AuthCodeType.SignUpAble,
+				code: null,
+			});
+		}
+
 		return true;
 	}
 
