@@ -10,7 +10,7 @@ export const ApiDocs: SwaggerMethodDoc<TasteThemesController> = {
 		return applyDecorators(
 			ApiOperation({
 				summary,
-				description: '여행지 취향 선택 리스트 반환',
+				description: '테마 취향 선택 리스트 반환',
 			}),
 			ApiResponse({
 				status: 200,

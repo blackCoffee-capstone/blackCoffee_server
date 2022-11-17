@@ -1,19 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { TasteThemesLocationResponseDto } from './taste-themes-location-response.dto';
 
 export class TasteThemesResponseDto {
-	@ApiProperty({ example: 1, description: '여행지 id' })
+	@ApiProperty({ example: 1, description: '테마 id' })
 	readonly id: number;
 
-	@ApiProperty({ example: 'test', description: '여행지 이름' })
+	@ApiProperty({ example: '산', description: '테마 이름' })
 	readonly name: string;
 
-	@ApiProperty({ description: '여행지 위치' })
-	readonly location: TasteThemesLocationResponseDto;
+	@ApiProperty({ example: 'test.png', description: '테마 사진 url' })
+	readonly photoUrl: string;
 
-	constructor({ id, name, location }) {
+	constructor({ id, name, photoUrl }) {
 		this.id = id;
 		this.name = name;
-		this.location = location;
+		this.photoUrl = photoUrl;
 	}
 }
