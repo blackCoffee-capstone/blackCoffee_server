@@ -11,11 +11,12 @@ import { SnsPost } from './sns-posts.entity';
 export class Spot extends CommonEntity {
 	@IsNumber()
 	@IsNotEmpty()
-	@Column({ name: 'location_id' })
+	@Column({ name: 'location_id', nullable: true })
 	locationId: number;
 
 	@ManyToOne(() => Location, (location: Location) => location.spots, {
 		onDelete: 'SET NULL',
+		nullable: true,
 	})
 	@JoinColumn([{ name: 'location_id', referencedColumnName: 'id' }])
 	location: Location;

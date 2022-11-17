@@ -21,11 +21,12 @@ export class Rank extends CommonEntity {
 
 	@IsNumber()
 	@IsNotEmpty()
-	@Column({ name: 'spot_id' })
+	@Column({ name: 'spot_id', nullable: true })
 	spotId: number;
 
 	@ManyToOne(() => Spot, (spot: Spot) => spot.rankings, {
 		onDelete: 'SET NULL',
+		nullable: true,
 	})
 	@JoinColumn([{ name: 'spot_id', referencedColumnName: 'id' }])
 	spot: Spot;
