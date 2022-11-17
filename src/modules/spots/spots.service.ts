@@ -10,14 +10,11 @@ import { Rank } from 'src/entities/rank.entity';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
-import { LocationRequestDto } from '../filters/dto/location-request.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
-import { ThemeRequestDto } from '../filters/dto/theme-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { SaveRequestDto } from './dto/save-request.dto';
-import { FiltersService } from '../filters/filters.service';
 import { RankRequestDto } from './dto/rank-request.dto';
 
 @Injectable()
@@ -33,15 +30,12 @@ export class SpotsService {
 		private readonly snsPostRepository: Repository<SnsPost>,
 		@InjectRepository(Rank)
 		private readonly rankRepository: Repository<Rank>,
-		private readonly filtersService: FiltersService,
 	) {}
 
 	async saveSpot(metaData: SaveRequestDto[]) {
 		try {
 			await this.spotsRepository.update({}, { rank: null });
 
-			await this.noDuplicateLocation(metaData);
-			await this.noDuplicateTheme(metaData);
 			await this.noDuplicateSpot(metaData);
 			await this.noDuplicateSnsPost(metaData);
 
@@ -51,82 +45,72 @@ export class SpotsService {
 		}
 	}
 
-	private async noDuplicateLocation(metaData: SaveRequestDto[]) {
-		const addLocations = Array.from(metaData).map((meta) => [meta.metroName, meta.localName]);
-		const noDupLocations = [...new Set(addLocations.join('|').split('|'))].map((l) => l.split(','));
-		for (const location of noDupLocations) {
-			await this.filtersService.createLocation(
-				new LocationRequestDto({ metroName: location[0], localName: location[1] }),
-			);
-		}
-	}
-
-	private async noDuplicateTheme(metaData: SaveRequestDto[]) {
-		const addThemes = Array.from(metaData).map((meta) => meta.themeName);
-		const noDupThemes = [...new Set(addThemes)];
-		for (const theme of noDupThemes) {
-			await this.filtersService.createTheme(new ThemeRequestDto({ themeName: theme }));
-		}
-	}
-
 	private async noDuplicateSpot(metaData: SaveRequestDto[]) {
-		const addSpots = Array.from(metaData).map((meta) => [
-			meta.name,
-			meta.latitude,
-			meta.longitude,
-			meta.rank,
-			meta.metroName,
-			meta.localName,
-		]);
-		const noDupSpots = [...new Set(addSpots.join('|').split('|'))].map((s) => s.split(','));
-		for (const spot of noDupSpots) {
-			if (spot[5] === '') spot[5] = null;
-			const location = await this.locationsRepository.findOne({
-				where: { metroName: spot[4], localName: spot[5] },
-			});
-			await this.createSpot(
-				new SpotRequestDto({
-					locationId: location.id,
-					name: spot[0],
-					latitude: +spot[1],
-					longitude: +spot[2],
-					rank: +spot[3],
-				}),
-				location,
-			);
+		try {
+			const addSpots = Array.from(metaData).map((meta) => [
+				meta.name,
+				meta.latitude,
+				meta.longitude,
+				meta.rank,
+				meta.metroName,
+				meta.localName,
+			]);
+			const noDupSpots = [...new Set(addSpots.join('|').split('|'))].map((s) => s.split(','));
+			for (const spot of noDupSpots) {
+				if (spot[5] === '') spot[5] = null;
+				const location = await this.locationsRepository.findOne({
+					where: { metroName: spot[4], localName: spot[5] },
+				});
+				await this.createSpot(
+					new SpotRequestDto({
+						locationId: location.id,
+						name: spot[0],
+						latitude: +spot[1],
+						longitude: +spot[2],
+						rank: +spot[3],
+					}),
+					location,
+				);
+			}
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
 		}
 	}
 
 	private async noDuplicateSnsPost(metaData: SaveRequestDto[]) {
-		const addSnsPosts = Array.from(metaData).map((meta) => [
-			meta.date,
-			meta.likeNumber,
-			meta.photoUrl,
-			meta.content,
-			meta.themeName,
-			meta.name,
-		]);
-		const noDupSnsPosts = [...new Set(addSnsPosts.join('|').split('|'))].map((s) => s.split(','));
-		const changeSpots = [];
-		for (const sns of noDupSnsPosts) {
-			const spot = await this.spotsRepository.findOne({ where: { name: sns[5] } });
-			const theme = await this.themeRepository.findOne({ where: { name: sns[4] } });
+		try {
+			const addSnsPosts = Array.from(metaData).map((meta) => [
+				meta.date,
+				meta.likeNumber,
+				meta.photoUrl,
+				meta.content,
+				meta.themeName,
+				meta.name,
+			]);
+			const noDupSnsPosts = [...new Set(addSnsPosts.join('|').split('|'))].map((s) => s.split(','));
+			const changeSpots = [];
+			for (const sns of noDupSnsPosts) {
+				const spot = await this.spotsRepository.findOne({ where: { name: sns[5] } });
+				const theme = await this.themeRepository.findOne({ where: { name: sns[4] } });
 
-			changeSpots.push(spot.id);
-			await this.createSnsPost(
-				new SnsPostRequestDto({
-					themeId: theme.id,
-					spotId: spot.id,
-					date: sns[0],
-					likeNumber: +sns[1],
-					photoUrl: sns[2],
-					content: sns[3],
-				}),
-				spot,
-				theme,
-			);
+				changeSpots.push(spot.id);
+				await this.createSnsPost(
+					new SnsPostRequestDto({
+						themeId: theme.id,
+						spotId: spot.id,
+						date: sns[0],
+						likeNumber: +sns[1],
+						photoUrl: sns[2],
+						content: sns[3],
+					}),
+					spot,
+					theme,
+				);
+			}
+			await this.updateSpotSns(changeSpots);
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
 		}
-		await this.updateSpotSns(changeSpots);
 	}
 
 	private async updateSpotSns(changeSpots) {

@@ -10,6 +10,5 @@ import { FiltersService } from './filters.service';
 	imports: [TypeOrmModule.forFeature([Location, Theme])],
 	controllers: [FiltersController],
 	providers: [FiltersService],
-	exports: [FiltersService],
 })
 export class FiltersModule {}
