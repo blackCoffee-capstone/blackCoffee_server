@@ -13,6 +13,7 @@ import { Theme } from 'src/entities/theme.entity';
 import { User } from 'src/entities/users.entity';
 import { UserType } from 'src/types/users.types';
 import { HashPassword } from '../auth/hash-password';
+import { UsersTasteThemesResponseDto } from '../taste-themes/dto/users-taste-themes-response.dto';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 
@@ -68,6 +69,23 @@ export class UsersService {
 				.values(usersTasteThemes)
 				.execute();
 			return true;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
+	async getUsersTasteThemes(userId: number): Promise<UsersTasteThemesResponseDto[]> {
+		try {
+			//taste
+			const foundUsersThemes = await this.tasteThemesRepository
+				.createQueryBuilder('taste_theme')
+				.select('theme.id, theme.name')
+				.leftJoin('taste_theme.user', 'user')
+				.leftJoin('taste_theme.theme', 'theme')
+				.where('user.id = :id', { id: userId })
+				.getRawMany();
+
+			return foundUsersThemes.map((theme) => new UsersTasteThemesResponseDto({ id: theme.id, name: theme.name }));
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}

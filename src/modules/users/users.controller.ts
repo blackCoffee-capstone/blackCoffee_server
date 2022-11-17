@@ -37,6 +37,12 @@ export class UsersController {
 		return await this.usersService.createUsersTasteThemes(userData.id, tasteThemesDto.tasteThemes);
 	}
 
+	@Get('/taste-themes')
+	@ApiDocs.getUsersTasteThemes('사용자의 테마 취향 반환')
+	async getUsersTasteThemes(@AuthUser() userData) {
+		return await this.usersService.getUsersTasteThemes(userData.id);
+	}
+
 	@Patch('/change-pw')
 	@ApiDocs.updateUsersPw('사용자 비밀번호 변경')
 	async updateUsersPw(@AuthUser() userData, @Body() changePwDto: ChangePwRequestDto) {

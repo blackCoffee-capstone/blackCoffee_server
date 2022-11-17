@@ -52,6 +52,20 @@ export const ApiDocs: SwaggerMethodDoc<UsersController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
+	getUsersTasteThemes(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '사용자의 테마 취향 반환',
+			}),
+			ApiResponse({
+				status: 200,
+				description: '',
+				type: Boolean,
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
 	updateUsersPw(summary: string) {
 		return applyDecorators(
 			ApiOperation({
