@@ -6,7 +6,6 @@ import * as path from 'path';
 import { Repository } from 'typeorm';
 
 import { Location } from 'src/entities/locations.entity';
-import { Rank } from 'src/entities/rank.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
@@ -14,7 +13,6 @@ import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
-import { RankRequestDto } from './dto/rank-request.dto';
 import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
