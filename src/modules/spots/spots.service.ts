@@ -34,11 +34,12 @@ export class SpotsService {
 
 	async saveSpot(metaData: SaveRequestDto[]) {
 		try {
-			await this.spotsRepository.update({}, { rank: null });
+			if (metaData.length) {
+				await this.spotsRepository.update({}, { rank: null });
 
-			await this.noDuplicateSpot(metaData);
-			await this.noDuplicateSnsPost(metaData);
-
+				await this.noDuplicateSpot(metaData);
+				await this.noDuplicateSnsPost(metaData);
+			}
 			return true;
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
