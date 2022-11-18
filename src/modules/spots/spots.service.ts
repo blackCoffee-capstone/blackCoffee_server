@@ -39,7 +39,8 @@ export class SpotsService {
 		const snsPosts = await this.readCsv(path.resolve('src/database/datas', fileName));
 		//TODO: ml로 전달
 		const metaData: SaveRequestDto[] = [];
-		return this.saveSpot(metaData);
+		// return this.saveSpot(metaData);
+		return snsPosts;
 	}
 
 	private async readCsv(filePath: string) {
