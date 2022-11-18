@@ -1,8 +1,20 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	HttpException,
+	HttpStatus,
+	Param,
+	Post,
+	Query,
+	UploadedFile,
+	UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
+import { existsSync, mkdirSync } from 'fs';
+import { diskStorage } from 'multer';
 
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
-import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { ApiDocs } from './spots.docs';
 import { SpotsService } from './spots.service';
@@ -13,9 +25,41 @@ export class SpotsController {
 	constructor(private readonly spotsService: SpotsService) {}
 
 	@Post()
-	@ApiDocs.saveSpot('Spot/Sns Post/Rank 저장 및 업데이트')
-	async saveSpot(@Body() metaData: SaveRequestDto[]) {
-		return await this.spotsService.saveSpot(metaData);
+	@ApiDocs.createSpots('csv 파일 속 데이터를 DB에 저장')
+	@UseInterceptors(
+		FileInterceptor('file', {
+			storage: diskStorage({
+				destination: (request, file, callback) => {
+					const uploadPath = 'src/database/datas';
+					if (!existsSync(uploadPath)) {
+						mkdirSync(uploadPath);
+					}
+					callback(null, uploadPath);
+				},
+				filename: (request, file, callback) => {
+					callback(null, `${Date.now()}${file.originalname}`);
+				},
+			}),
+			fileFilter: (request, file, callback) => {
+				if (file.mimetype.match(/\/(csv)$/)) {
+					callback(null, true);
+				} else {
+					callback(
+						new HttpException(
+							{
+								message: 1,
+								error: '지원하지 않는 이미지 형식입니다.',
+							},
+							HttpStatus.BAD_REQUEST,
+						),
+						false,
+					);
+				}
+			},
+		}),
+	)
+	async createSpots(@UploadedFile() snsPostsCsvFile: Express.Multer.File) {
+		return await this.spotsService.createSpots(snsPostsCsvFile);
 	}
 
 	@Get()

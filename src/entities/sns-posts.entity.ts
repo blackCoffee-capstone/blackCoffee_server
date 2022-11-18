@@ -4,6 +4,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { Spot } from './spots.entity';
 import { Theme } from './theme.entity';
+
 @Entity()
 export class SnsPost extends CommonEntity {
 	@IsNumber()
