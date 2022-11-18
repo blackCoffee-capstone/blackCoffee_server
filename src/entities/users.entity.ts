@@ -1,9 +1,9 @@
-import { IsBoolean, IsDateString, IsEmail, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
+import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
 import { Column, Entity, OneToMany } from 'typeorm';
 
 import { UserType } from 'src/types/users.types';
 import { CommonEntity } from './common.entity';
-import { TasteSpot } from './taste-spots.entity';
+import { TasteTheme } from './taste-themes.entity';
 
 @Entity()
 export class User extends CommonEntity {
@@ -14,7 +14,7 @@ export class User extends CommonEntity {
 
 	@IsString()
 	@IsNotEmpty()
-	@Column({ type: 'varchar', nullable: false })
+	@Column({ type: 'varchar', nullable: false, unique: true })
 	nickname: string;
 
 	@IsEmail()
@@ -32,20 +32,16 @@ export class User extends CommonEntity {
 	type: UserType;
 
 	@IsString()
-	@Length(8, 24)
-	@Column({ type: 'varchar', nullable: true }) //TODO: strong pw
+	@Length(8, 15)
+	@Column({ type: 'varchar', nullable: true }) //TODO: strong pw (영어+숫자+특수문자 1개)
 	password: string;
-
-	@IsDateString()
-	@Column({ type: 'date', nullable: true })
-	birthdate: Date;
 
 	@IsBoolean()
 	@Column({ name: 'is_new_user', type: 'boolean', nullable: false, default: true })
 	isNewUser: boolean;
 
-	@OneToMany(() => TasteSpot, (tasteSpot: TasteSpot) => tasteSpot.user, {
+	@OneToMany(() => TasteTheme, (tasteTheme: TasteTheme) => tasteTheme.user, {
 		cascade: true,
 	})
-	tasteSpots: TasteSpot[];
+	tasteSpots: TasteTheme[];
 }

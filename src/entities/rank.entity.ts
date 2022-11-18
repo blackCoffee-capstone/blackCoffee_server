@@ -17,7 +17,7 @@ export class Rank extends CommonEntity {
 	spotId: number;
 
 	@ManyToOne(() => Spot, (spot: Spot) => spot.rankings, {
-		onDelete: 'SET NULL',
+		onDelete: 'CASCADE',
 	})
 	@JoinColumn([{ name: 'spot_id', referencedColumnName: 'id' }])
 	spot: Spot;

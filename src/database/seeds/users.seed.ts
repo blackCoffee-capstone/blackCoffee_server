@@ -6,10 +6,10 @@ import { UserType } from 'src/types/users.types';
 import { Connection } from 'typeorm';
 
 const seedAdminUserData = {
-	name: 'testAdmin',
-	nickname: 'testAdmin',
-	email: 'testAdmin@gmail.com',
-	password: 'testAdmin',
+	name: 'admin',
+	nickname: 'admin',
+	email: process.env.EMAIL,
+	password: process.env.EMAIL_PASSWORD,
 	type: UserType.Admin,
 };
 

@@ -7,7 +7,7 @@ import { UserType } from 'src/types/users.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/role.guard';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
-import { UserTasteSpotsRequestDto } from './dto/user-taste-spots-request.dto';
+import { UserTasteThemesRequestDto } from './dto/user-taste-themes-request.dto';
 import { ApiDocs } from './users.docs';
 import { UsersService } from './users.service';
 
@@ -31,10 +31,16 @@ export class UsersController {
 		return 'User is Admin';
 	}
 
-	@Post('/taste-spots')
-	@ApiDocs.createUsersTasteSpots('사용자의 여행지 취향 저장')
-	async createUsersTasteSpots(@AuthUser() userData, @Body() tasteSpotsDto: UserTasteSpotsRequestDto) {
-		return await this.usersService.createUsersTasteSpots(userData.id, tasteSpotsDto.tasteSpots);
+	@Post('/taste-themes')
+	@ApiDocs.createUsersTasteThemes('사용자의 테마 취향 저장')
+	async createUsersTasteThemes(@AuthUser() userData, @Body() tasteThemesDto: UserTasteThemesRequestDto) {
+		return await this.usersService.createUsersTasteThemes(userData.id, tasteThemesDto.tasteThemes);
+	}
+
+	@Get('/taste-themes')
+	@ApiDocs.getUsersTasteThemes('사용자의 테마 취향 반환')
+	async getUsersTasteThemes(@AuthUser() userData) {
+		return await this.usersService.getUsersTasteThemes(userData.id);
 	}
 
 	@Patch('/change-pw')

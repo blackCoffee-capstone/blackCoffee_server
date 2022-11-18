@@ -11,7 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { FiltersModule } from './modules/filters/filters.module';
 import { RanksModule } from './modules/ranks/ranks.module';
 import { SpotsModule } from './modules/spots/spots.module';
-import { TasteSpotsModule } from './modules/taste-spots/taste-spots.module';
+import { TasteThemesModule } from './modules/taste-themes/taste-themes.module';
 import { UsersModule } from './modules/users/users.module';
 import { ViewController } from './views/view.controller';
 
@@ -25,7 +25,7 @@ import { ViewController } from './views/view.controller';
 		AuthCodesModule,
 		SpotsModule,
 		AdFormsModule,
-		TasteSpotsModule,
+		TasteThemesModule,
 		FiltersModule,
 		RanksModule,
 	],

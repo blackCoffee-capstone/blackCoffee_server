@@ -41,3 +41,4 @@ lerna-debug.log*
 # Package-lock
 package-lock.json
 data
+datas

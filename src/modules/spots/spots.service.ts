@@ -1,8 +1,12 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fastcsv from 'fast-csv';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Repository } from 'typeorm';
 
 import { Location } from 'src/entities/locations.entity';
+import { Rank } from 'src/entities/rank.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
@@ -10,11 +14,12 @@ import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
-import { SnsPostRequestDto } from './dto/sns-post-request.dto';
-import { SpotRequestDto } from './dto/spot-request.dto';
+import { RankRequestDto } from './dto/rank-request.dto';
+import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
-import { SaveRequestDto } from './dto/save-request.dto';
+import { SnsPostRequestDto } from './dto/sns-post-request.dto';
+import { SpotRequestDto } from './dto/spot-request.dto';
 import { RanksService } from '../ranks/ranks.service';
 
 @Injectable()
@@ -31,10 +36,54 @@ export class SpotsService {
 		private readonly ranksService: RanksService,
 	) {}
 
-	async saveSpot(metaData: SaveRequestDto[]) {
+	async createSpots(file: Express.Multer.File) {
+		if (!file) throw new BadRequestException('File is not exist');
+		const fileName: string = file.filename;
+		const snsPosts = await this.readCsv(path.resolve('src/database/datas', fileName));
+		//TODO: ml로 전달
+		const metaData: SaveRequestDto[] = [];
+		// return this.saveSpot(metaData);
+		return snsPosts;
+	}
+
+	private async readCsv(filePath: string) {
+		return new Promise((resolve, reject) => {
+			const csvData = [];
+			const csvStream = fs.createReadStream(filePath);
+			const csvParser = fastcsv.parse({ headers: true });
+
+			csvStream
+				.pipe(csvParser)
+				.on('error', (err) => {
+					throw new InternalServerErrorException(err);
+				})
+				.on('data', (row) => {
+					const place = row.place;
+					const latitude = Number(row.latitude);
+					const longitude = Number(row.longitude);
+					const link = row.link;
+					const datetime = new Date(row.datetime);
+					const like = row.like;
+					const text = row.text;
+					csvData.push({
+						place,
+						latitude,
+						longitude,
+						link,
+						datetime,
+						like,
+						text,
+					});
+				})
+				.on('end', () => {
+					resolve(csvData);
+				});
+		});
+	}
+
+	private async saveSpot(metaData: SaveRequestDto[]) {
 		try {
 			await this.spotsRepository.update({}, { rank: null });
-
 			await this.noDuplicateSpot(metaData);
 			await this.noDuplicateSnsPost(metaData);
 
@@ -57,9 +106,11 @@ export class SpotsService {
 			const noDupSpots = [...new Set(addSpots.join('|').split('|'))].map((s) => s.split(','));
 			for (const spot of noDupSpots) {
 				if (spot[5] === '') spot[5] = null;
-				const location = await this.locationsRepository.findOne({
-					where: { metroName: spot[4], localName: spot[5] },
-				});
+				const location = await this.locationsRepository
+					.createQueryBuilder('location')
+					.where('metro_name = :metro', { metro: spot[4] })
+					.andWhere('local_name = :local', { local: spot[5] })
+					.getOne();
 				if (!location) continue;
 				await this.createSpot(
 					new SpotRequestDto({
@@ -90,8 +141,14 @@ export class SpotsService {
 			const noDupSnsPosts = [...new Set(addSnsPosts.join('|').split('|'))].map((s) => s.split(','));
 			const changeSpots = [];
 			for (const sns of noDupSnsPosts) {
-				const spot = await this.spotsRepository.findOne({ where: { name: sns[5] } });
-				const theme = await this.themeRepository.findOne({ where: { name: sns[4] } });
+				const spot = await this.spotsRepository
+					.createQueryBuilder('spot')
+					.where('name = :name', { name: sns[5] })
+					.getOne();
+				const theme = await this.themeRepository
+					.createQueryBuilder('theme')
+					.where('name = :name', { name: sns[4] })
+					.getOne();
 				if (!theme || !spot) continue;
 				changeSpots.push(spot.id);
 				await this.createSnsPost(

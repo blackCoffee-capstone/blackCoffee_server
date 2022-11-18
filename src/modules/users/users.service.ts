@@ -8,11 +8,12 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Spot } from 'src/entities/spots.entity';
-import { TasteSpot } from 'src/entities/taste-spots.entity';
+import { TasteTheme } from 'src/entities/taste-themes.entity';
+import { Theme } from 'src/entities/theme.entity';
 import { User } from 'src/entities/users.entity';
 import { UserType } from 'src/types/users.types';
 import { HashPassword } from '../auth/hash-password';
+import { UsersTasteThemesResponseDto } from '../taste-themes/dto/users-taste-themes-response.dto';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 
@@ -21,10 +22,10 @@ export class UsersService {
 	constructor(
 		@InjectRepository(User)
 		private readonly usersRepository: Repository<User>,
-		@InjectRepository(TasteSpot)
-		private readonly tasteSpotsRepository: Repository<TasteSpot>,
-		@InjectRepository(Spot)
-		private readonly spotsRepository: Repository<Spot>,
+		@InjectRepository(TasteTheme)
+		private readonly tasteThemesRepository: Repository<TasteTheme>,
+		@InjectRepository(Theme)
+		private readonly themesRepository: Repository<Theme>,
 		private hashPassword: HashPassword,
 	) {}
 
@@ -39,35 +40,52 @@ export class UsersService {
 		}
 	}
 
-	async createUsersTasteSpots(userId: number, tasteSpots: number[]): Promise<boolean> {
-		const isUsersTasteSpots = await this.tasteSpotsRepository.findOne({
+	async createUsersTasteThemes(userId: number, tasteThemes: number[]): Promise<boolean> {
+		const isUsersTasteThemes = await this.tasteThemesRepository.findOne({
 			where: { userId },
 		});
-		if (this.isDuplicateArr(tasteSpots)) {
+		if (this.isDuplicateArr(tasteThemes)) {
 			throw new BadRequestException(`Duplicate value exists in user's taste list`);
 		}
-		if (isUsersTasteSpots) {
+		if (isUsersTasteThemes) {
 			throw new BadRequestException(`User's taste is already exist`);
 		}
-		if (await this.notFoundSpots(tasteSpots)) {
-			throw new NotFoundException('Spot is not found');
+		if (await this.notFoundThemes(tasteThemes)) {
+			throw new NotFoundException('Theme is not found');
 		}
 		try {
-			const usersTasteSpots = [];
-			for (let i = 0; i < tasteSpots.length; i++) {
-				usersTasteSpots.push({
+			const usersTasteThemes = [];
+			for (let i = 0; i < tasteThemes.length; i++) {
+				usersTasteThemes.push({
 					userId: userId,
-					spotId: tasteSpots[i],
+					themeId: tasteThemes[i],
 				});
 			}
 
-			await this.tasteSpotsRepository
-				.createQueryBuilder('taste_spot')
+			await this.tasteThemesRepository
+				.createQueryBuilder('taste_theme')
 				.insert()
-				.into(TasteSpot)
-				.values(usersTasteSpots)
+				.into(TasteTheme)
+				.values(usersTasteThemes)
 				.execute();
 			return true;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
+	async getUsersTasteThemes(userId: number): Promise<UsersTasteThemesResponseDto[]> {
+		try {
+			//taste
+			const foundUsersThemes = await this.tasteThemesRepository
+				.createQueryBuilder('taste_theme')
+				.select('theme.id, theme.name')
+				.leftJoin('taste_theme.user', 'user')
+				.leftJoin('taste_theme.theme', 'theme')
+				.where('user.id = :id', { id: userId })
+				.getRawMany();
+
+			return foundUsersThemes.map((theme) => new UsersTasteThemesResponseDto({ id: theme.id, name: theme.name }));
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
@@ -96,13 +114,13 @@ export class UsersService {
 		if (arr.length !== set.size) return true;
 		return false;
 	}
-	private async notFoundSpots(spots: number[]): Promise<boolean> {
-		const foundSpots = await this.spotsRepository
-			.createQueryBuilder('spot')
-			.where('spot.id IN (:...spotIds)', { spotIds: spots })
+	private async notFoundThemes(themes: number[]): Promise<boolean> {
+		const foundThemes = await this.themesRepository
+			.createQueryBuilder('theme')
+			.where('theme.id IN (:...themeIds)', { themeIds: themes })
 			.getMany();
 
-		if (foundSpots.length !== spots.length) return true;
+		if (foundThemes.length !== themes.length) return true;
 		return false;
 	}
 
