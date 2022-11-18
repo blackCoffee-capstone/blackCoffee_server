@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 import { AdForm } from 'src/entities/ad-form.entity';
 import { AuthCode } from 'src/entities/auth-code.entity';
 import { Location } from 'src/entities/locations.entity';
+import { MlSnsPost } from 'src/entities/ml-sns-posts.entity';
 import { Rank } from 'src/entities/rank.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
@@ -22,7 +23,7 @@ const config = {
 	username: dbConfig.username,
 	password: dbConfig.password,
 	database: dbConfig.dbname,
-	entities: [User, AdForm, AuthCode, Theme, Location, Spot, SnsPost, TasteTheme, Rank],
+	entities: [User, AdForm, AuthCode, Theme, Location, Spot, SnsPost, TasteTheme, Rank, MlSnsPost],
 	seeds: [
 		seedUrl + 'users.seed.ts',
 		seedUrl + 'themes.seed.ts',
