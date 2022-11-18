@@ -6,6 +6,7 @@ import { Rank } from 'src/entities/rank.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { RankingRequestDto } from './dto/ranking-request.dto';
 import { RanksRecordRequestDto } from './dto/ranks-record-request.dto';
+import { RanksUpdateRequestDto } from './dto/ranks-update-request.dto';
 import { RankingListResponseDto } from './dto/ranking-list-response.dto';
 import { RankingMapResponseDto } from './dto/ranking-map-response.dto';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
@@ -19,7 +20,7 @@ export class RanksService {
 		private readonly ranksRepository: Repository<Rank>,
 	) {}
 
-	async checkWeek(rankingRequest: RankingRequestDto) {
+	private async checkWeek(rankingRequest: RankingRequestDto) {
 		const nextCheckWeek = await this.ranksRepository.createQueryBuilder('rank').orderBy('date', 'DESC').getOne();
 		if (!nextCheckWeek) throw new NotFoundException('Rank is not found');
 		if (rankingRequest.date > nextCheckWeek.date) throw new NotFoundException('Next is not found');
@@ -28,7 +29,7 @@ export class RanksService {
 		if (rankingRequest.date < previousCheckWeek.date) throw new NotFoundException('Previous is not found');
 	}
 
-	async beforeWeek(rankingRequest: RankingRequestDto) {
+	private async beforeWeek(rankingRequest: RankingRequestDto) {
 		let beforeDate = rankingRequest.date - 1;
 		if ((rankingRequest.date - 1) / 10) {
 			const beforeCheckWeek = await this.ranksRepository
@@ -112,17 +113,25 @@ export class RanksService {
 		}
 	}
 
-	async updateRank(rankNumer: number, spotId: number) {
+	async updateRank(updateRequest: RanksUpdateRequestDto) {
 		try {
-			await this.spotsRepository.update(spotId, { rank: rankNumer });
+			await this.spotsRepository.update(updateRequest.spotId, { rank: updateRequest.rank });
 
 			const rankingRequestDto = new RankingRequestDto();
+			const rank = await this.ranksRepository.findOne({
+				where: { date: rankingRequestDto.getDate, rank: updateRequest.rank },
+			});
+			if (rank && rank.spotId !== updateRequest.spotId) {
+				await this.ranksRepository.update(
+					{ date: rankingRequestDto.getDate, rank: updateRequest.rank },
+					{ spotId: updateRequest.spotId },
+				);
+			}
 			const ranksRequestDto = new RanksRecordRequestDto({
 				date: rankingRequestDto.getDate,
-				spotId: spotId,
-				rank: rankNumer,
+				spotId: updateRequest.spotId,
+				rank: updateRequest.rank,
 			});
-			const rank = await this.ranksRepository.findOne({ where: { ...ranksRequestDto } });
 			if (!rank) await this.ranksRepository.save(ranksRequestDto);
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);

@@ -6,6 +6,7 @@ import { Location } from 'src/entities/locations.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
@@ -146,9 +147,14 @@ export class SpotsService {
 					...requestSpot,
 					location: location,
 				});
-				if (requestSpot.rank) await this.ranksService.updateRank(requestSpot.rank, spot.id);
+				if (requestSpot.rank)
+					await this.ranksService.updateRank(
+						new RanksUpdateRequestDto({ spotId: spot.id, rank: requestSpot.rank }),
+					);
 			} else {
-				if (requestSpot.rank) await this.ranksService.updateRank(requestSpot.rank, IsSpot.id);
+				await this.ranksService.updateRank(
+					new RanksUpdateRequestDto({ spotId: IsSpot.id, rank: requestSpot.rank }),
+				);
 			}
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
