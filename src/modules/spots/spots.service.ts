@@ -6,7 +6,6 @@ import { Location } from 'src/entities/locations.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
-import { Rank } from 'src/entities/rank.entity';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
@@ -15,7 +14,7 @@ import { SpotRequestDto } from './dto/spot-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { SaveRequestDto } from './dto/save-request.dto';
-import { RankRequestDto } from './dto/rank-request.dto';
+import { RanksService } from '../ranks/ranks.service';
 
 @Injectable()
 export class SpotsService {
@@ -28,8 +27,7 @@ export class SpotsService {
 		private readonly themeRepository: Repository<Theme>,
 		@InjectRepository(SnsPost)
 		private readonly snsPostRepository: Repository<SnsPost>,
-		@InjectRepository(Rank)
-		private readonly rankRepository: Repository<Rank>,
+		private readonly ranksService: RanksService,
 	) {}
 
 	async saveSpot(metaData: SaveRequestDto[]) {
@@ -139,36 +137,6 @@ export class SpotsService {
 		}
 	}
 
-	// 임시 계산: 다시 수정 예정
-	private async week() {
-		const date = new Date();
-		const cudate = date.getDate();
-		const start = new Date(date.setDate(1));
-		const day = start.getDay();
-		const week = parseInt(`${(day - 1 + cudate) / 7 + 1}`);
-		return week;
-	}
-
-	private async updateRank(requestRank, spotId: number) {
-		try {
-			await this.spotsRepository.update(spotId, { rank: requestRank.rank });
-
-			const week = await this.week();
-			const date = new Date();
-			const rankRequestDto = new RankRequestDto({
-				year: date.getFullYear(),
-				month: date.getMonth() + 1,
-				week: week,
-				spotId: spotId,
-				rank: requestRank.rank,
-			});
-			const rank = await this.rankRepository.findOne({ where: { ...rankRequestDto } });
-			if (!rank) await this.rankRepository.save(rankRequestDto);
-		} catch (error) {
-			throw new InternalServerErrorException(error.message, error);
-		}
-	}
-
 	private async createSpot(requestSpot: SpotRequestDto, location: Location) {
 		const IsSpot = await this.spotsRepository.findOne({ where: { name: requestSpot.name } });
 		try {
@@ -178,9 +146,9 @@ export class SpotsService {
 					...requestSpot,
 					location: location,
 				});
-				if (requestSpot.rank) await this.updateRank(requestSpot, spot.id);
+				if (requestSpot.rank) await this.ranksService.updateRank(requestSpot, spot.id);
 			} else {
-				if (requestSpot.rank) await this.updateRank(requestSpot, IsSpot.id);
+				if (requestSpot.rank) await this.ranksService.updateRank(requestSpot, IsSpot.id);
 			}
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);

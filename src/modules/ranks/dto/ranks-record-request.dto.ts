@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber } from 'class-validator';
 
-export class RankRequestDto {
+export class RanksRecordRequestDto {
 	@IsNumber()
 	@ApiProperty({ example: 2022, description: '연도' })
 	readonly year: number;
