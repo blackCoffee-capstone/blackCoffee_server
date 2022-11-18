@@ -1,9 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { AdFormsController } from './ad-forms.controller';
-import { AdFormsRequestDto } from './dto/ad-forms-request.dto';
 import { AdFormsResponseDto } from './dto/ad-forms-response.dto';
 
 export const ApiDocs: SwaggerMethodDoc<AdFormsController> = {
@@ -13,9 +12,37 @@ export const ApiDocs: SwaggerMethodDoc<AdFormsController> = {
 				summary,
 				description: '광고 요청 등록',
 			}),
+			ApiConsumes('multipart/form-data'),
 			ApiBody({
-				type: AdFormsRequestDto,
+				schema: {
+					type: 'object',
+					properties: {
+						businessName: {
+							type: 'string',
+						},
+						latitude: {
+							type: 'number',
+						},
+						longitude: {
+							type: 'number',
+						},
+						email: {
+							type: 'string',
+						},
+						phoneNumber: {
+							type: 'string',
+						},
+						requirement: {
+							type: 'string',
+						},
+						file: {
+							type: 'string',
+							format: 'binary',
+						},
+					},
+				},
 			}),
+
 			ApiResponse({
 				status: 201,
 				description: '',

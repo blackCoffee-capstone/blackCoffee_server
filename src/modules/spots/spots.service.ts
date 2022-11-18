@@ -1,21 +1,24 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fastcsv from 'fast-csv';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Repository } from 'typeorm';
 
 import { Location } from 'src/entities/locations.entity';
+import { Rank } from 'src/entities/rank.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
-import { Rank } from 'src/entities/rank.entity';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
-import { SnsPostRequestDto } from './dto/sns-post-request.dto';
-import { SpotRequestDto } from './dto/spot-request.dto';
+import { RankRequestDto } from './dto/rank-request.dto';
+import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
-import { SaveRequestDto } from './dto/save-request.dto';
-import { RankRequestDto } from './dto/rank-request.dto';
+import { SnsPostRequestDto } from './dto/sns-post-request.dto';
+import { SpotRequestDto } from './dto/spot-request.dto';
 
 @Injectable()
 export class SpotsService {
@@ -32,7 +35,49 @@ export class SpotsService {
 		private readonly rankRepository: Repository<Rank>,
 	) {}
 
-	async saveSpot(metaData: SaveRequestDto[]) {
+	async createSpots(fileName: string) {
+		const snsPosts = await this.readCsv(path.resolve('src/database/datas', fileName));
+		//TODO: ml로 전달
+		const metaData: SaveRequestDto[] = [];
+		return this.saveSpot(metaData);
+	}
+
+	private async readCsv(filePath: string) {
+		return new Promise((resolve, reject) => {
+			const csvData = [];
+			const csvStream = fs.createReadStream(filePath);
+			const csvParser = fastcsv.parse({ headers: true });
+
+			csvStream
+				.pipe(csvParser)
+				.on('error', (err) => {
+					throw new InternalServerErrorException(err);
+				})
+				.on('data', (row) => {
+					const place = row.place;
+					const latitude = Number(row.latitude);
+					const longitude = Number(row.longitude);
+					const link = row.link;
+					const datetime = new Date(row.datetime);
+					const like = row.like;
+					const text = row.text;
+					csvData.push({
+						place,
+						latitude,
+						longitude,
+						link,
+						datetime,
+						like,
+						text,
+					});
+				})
+				.on('end', () => {
+					resolve(csvData);
+				});
+		});
+	}
+
+	private async saveSpot(metaData: SaveRequestDto[]) {
 		try {
 			await this.spotsRepository.update({}, { rank: null });
 
