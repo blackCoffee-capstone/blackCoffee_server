@@ -5,19 +5,11 @@ import { CommonEntity } from './common.entity';
 import { Spot } from './spots.entity';
 
 @Entity()
-@Index(['year', 'month', 'week', 'spotId', 'rank'], { unique: true })
+@Index(['date', 'spotId', 'rank'], { unique: true })
 export class Rank extends CommonEntity {
 	@IsNumber()
-	@Column({ type: 'smallint', nullable: false })
-	year: number;
-
-	@IsNumber()
-	@Column({ type: 'smallint', nullable: false })
-	month: number;
-
-	@IsNumber()
-	@Column({ type: 'smallint', nullable: false })
-	week: number;
+	@Column({ type: 'int', nullable: false })
+	date: number;
 
 	@IsNumber()
 	@IsNotEmpty()

@@ -3,16 +3,8 @@ import { IsNumber } from 'class-validator';
 
 export class RanksRecordRequestDto {
 	@IsNumber()
-	@ApiProperty({ example: 2022, description: '연도' })
-	readonly year: number;
-
-	@IsNumber()
-	@ApiProperty({ example: 1, description: '월' })
-	readonly month: number;
-
-	@IsNumber()
-	@ApiProperty({ example: 1, description: '주차' })
-	readonly week: number;
+	@ApiProperty({ example: 1, description: '요청 날짜(연도 + 월 + 주차)' })
+	readonly date: number;
 
 	@IsNumber()
 	@ApiProperty({ example: 1, description: '여행지 id' })
@@ -22,10 +14,8 @@ export class RanksRecordRequestDto {
 	@ApiProperty({ example: 1, description: '순위' })
 	readonly rank: number;
 
-	constructor({ year, month, week, spotId, rank }) {
-		this.year = year;
-		this.month = month;
-		this.week = week;
+	constructor({ date, spotId, rank }) {
+		this.date = date;
 		this.spotId = spotId;
 		this.rank = rank;
 	}

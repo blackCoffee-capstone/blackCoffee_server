@@ -146,9 +146,9 @@ export class SpotsService {
 					...requestSpot,
 					location: location,
 				});
-				if (requestSpot.rank) await this.ranksService.updateRank(requestSpot, spot.id);
+				if (requestSpot.rank) await this.ranksService.updateRank(requestSpot.rank, spot.id);
 			} else {
-				if (requestSpot.rank) await this.ranksService.updateRank(requestSpot, IsSpot.id);
+				if (requestSpot.rank) await this.ranksService.updateRank(requestSpot.rank, IsSpot.id);
 			}
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);

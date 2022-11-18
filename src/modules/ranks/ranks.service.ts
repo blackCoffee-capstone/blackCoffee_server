@@ -5,10 +5,10 @@ import { Repository } from 'typeorm';
 import { Rank } from 'src/entities/rank.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { RankingRequestDto } from './dto/ranking-request.dto';
-import { RankingListResponseDto } from './dto/ranking-list-response.dto';
 import { RanksRecordRequestDto } from './dto/ranks-record-request.dto';
-import { LocationResponseDto } from '../filters/dto/location-response.dto';
+import { RankingListResponseDto } from './dto/ranking-list-response.dto';
 import { RankingMapResponseDto } from './dto/ranking-map-response.dto';
+import { LocationResponseDto } from '../filters/dto/location-response.dto';
 
 @Injectable()
 export class RanksService {
@@ -29,7 +29,6 @@ export class RanksService {
 	}
 
 	async getRanksList(rankingRequest: RankingRequestDto) {
-		console.log(rankingRequest);
 		try {
 			const rankingListSpots = await this.spotsRepository
 				.createQueryBuilder('spot')
@@ -40,7 +39,7 @@ export class RanksService {
 				.addSelect((afterRank) => {
 					return afterRank
 						.select('rankings.rank', 'after_rank')
-						.where('rankings.week = :afterWeek', { afterWeek: rankingRequest.week })
+						.where('rankings.date = :afterDate', { afterDate: rankingRequest.date })
 						.andWhere('rankings.spotId = spot.id')
 						.from(Rank, 'rankings')
 						.limit(1);
@@ -48,7 +47,7 @@ export class RanksService {
 				.addSelect((berforRank) => {
 					return berforRank
 						.select('rankings.rank', 'before_rank')
-						.where('rankings.week = :beforeWeek', { beforeWeek: rankingRequest.week - 1 })
+						.where('rankings.Date = :beforeDate', { beforeDate: rankingRequest.date - 1 })
 						.andWhere('rankings.spotId = spot.id')
 						.from(Rank, 'rankings')
 						.limit(1);
@@ -77,7 +76,7 @@ export class RanksService {
 			const rankingMapSpots = await this.spotsRepository
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.rankings', 'rankings')
-				.where('rankings.week = :week', { week: rankingRequest.week })
+				.where('rankings.date = :date', { date: rankingRequest.date })
 				.getMany();
 
 			return Array.from(rankingMapSpots).map((post) => new RankingMapResponseDto(post));
@@ -86,18 +85,15 @@ export class RanksService {
 		}
 	}
 
-	async updateRank(requestRank, spotId: number) {
+	async updateRank(rankNumer: number, spotId: number) {
 		try {
-			await this.spotsRepository.update(spotId, { rank: requestRank.rank });
+			await this.spotsRepository.update(spotId, { rank: rankNumer });
 
-			const week = requestRank.getWeek;
-			const date = new Date();
+			const rankingRequestDto = new RankingRequestDto();
 			const ranksRequestDto = new RanksRecordRequestDto({
-				year: date.getFullYear(),
-				month: date.getMonth() + 1,
-				week: week,
+				date: rankingRequestDto.getDate,
 				spotId: spotId,
-				rank: requestRank.rank,
+				rank: rankNumer,
 			});
 			const rank = await this.ranksRepository.findOne({ where: { ...ranksRequestDto } });
 			if (!rank) await this.ranksRepository.save(ranksRequestDto);
