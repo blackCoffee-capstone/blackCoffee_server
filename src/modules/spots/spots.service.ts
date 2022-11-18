@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fastcsv from 'fast-csv';
 import * as fs from 'fs';
@@ -35,7 +35,9 @@ export class SpotsService {
 		private readonly rankRepository: Repository<Rank>,
 	) {}
 
-	async createSpots(fileName: string) {
+	async createSpots(file: Express.Multer.File) {
+		if (!file) throw new BadRequestException('File is not exist');
+		const fileName: string = file.filename;
 		const snsPosts = await this.readCsv(path.resolve('src/database/datas', fileName));
 		//TODO: ml로 전달
 		const metaData: SaveRequestDto[] = [];

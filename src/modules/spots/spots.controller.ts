@@ -59,7 +59,7 @@ export class SpotsController {
 		}),
 	)
 	async createSpots(@UploadedFile() snsPostsCsvFile: Express.Multer.File) {
-		return await this.spotsService.createSpots(snsPostsCsvFile.filename);
+		return await this.spotsService.createSpots(snsPostsCsvFile);
 	}
 
 	@Get()
