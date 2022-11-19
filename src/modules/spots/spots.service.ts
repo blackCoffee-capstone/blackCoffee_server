@@ -13,6 +13,7 @@ import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
+import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
@@ -256,7 +257,17 @@ export class SpotsService {
 				.offset((searchRequest.page - 1) * searchRequest.take)
 				.getMany();
 
-			return Array.from(responseSpots).map((spot) => new SearchResponseDto(spot));
+			return Array.from(responseSpots).map(
+				(spot) =>
+					new SearchResponseDto({
+						...spot,
+						location: new LocationResponseDto({
+							id: spot.location.id,
+							metroName: spot.location.metroName,
+							localName: spot.location.localName,
+						}),
+					}),
+			);
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
@@ -278,10 +289,12 @@ export class SpotsService {
 
 			const filterSnsPosts = await detailSnsPost.limit(detailRequest.take).getMany();
 			const detailSnsPostsDto = Array.from(filterSnsPosts).map((post) => new DetailSnsPostResponseDto(post));
+			const location = await this.locationsRepository.findOne({ where: { id: IsSpot.locationId } });
 
 			return new DetailSpotResponseDto({
 				...IsSpot,
 				detailSnsPost: detailSnsPostsDto,
+				location: new LocationResponseDto(location),
 			});
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
