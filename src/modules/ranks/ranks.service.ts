@@ -77,17 +77,17 @@ export class RanksService {
 				}, 'before_rank')
 				.getRawMany();
 
-			return Array.from(rankingListSpots).map(function (post) {
+			return Array.from(rankingListSpots).map(function (spot) {
 				let variance = null;
-				if (post.before_rank) variance = post.before_rank - post.after_rank;
+				if (spot.before_rank) variance = spot.before_rank - spot.after_rank;
 				return new RankingListResponseDto({
-					...post,
-					rank: post.after_rank,
+					...spot,
+					rank: spot.after_rank,
 					variance: variance,
 					location: new LocationResponseDto({
-						id: post.location_id,
-						metroName: post.metro,
-						localName: post.local,
+						id: spot.location_id,
+						metroName: spot.metro,
+						localName: spot.local,
 					}),
 				});
 			});
@@ -107,7 +107,7 @@ export class RanksService {
 				.where('rankings.date = :date', { date: rankingRequest.date })
 				.getMany();
 
-			return Array.from(rankingMapSpots).map((post) => new RankingMapResponseDto(post));
+			return Array.from(rankingMapSpots).map((spot) => new RankingMapResponseDto(spot));
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
@@ -127,12 +127,14 @@ export class RanksService {
 					{ spotId: updateRequest.spotId },
 				);
 			}
-			const ranksRequestDto = new RanksRecordRequestDto({
-				date: rankingRequestDto.getDate,
-				spotId: updateRequest.spotId,
-				rank: updateRequest.rank,
-			});
-			if (!rank) await this.ranksRepository.save(ranksRequestDto);
+			if (!rank) {
+				const ranksRequestDto = new RanksRecordRequestDto({
+					date: rankingRequestDto.getDate,
+					spotId: updateRequest.spotId,
+					rank: updateRequest.rank,
+				});
+				await this.ranksRepository.save(ranksRequestDto);
+			}
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}

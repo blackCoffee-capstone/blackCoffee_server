@@ -256,7 +256,7 @@ export class SpotsService {
 				.offset((searchRequest.page - 1) * searchRequest.take)
 				.getMany();
 
-			return Array.from(responseSpots).map((post) => new SearchResponseDto(post));
+			return Array.from(responseSpots).map((spot) => new SearchResponseDto(spot));
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
