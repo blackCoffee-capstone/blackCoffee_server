@@ -17,7 +17,7 @@ export class RankingListResponseDto {
 	readonly rank: number;
 
 	@IsNumber()
-	@ApiProperty({ example: -1, description: '변동' })
+	@ApiProperty({ example: -1, description: '순위 변동' })
 	readonly variance: number;
 
 	@ApiProperty({ description: '위치 정보' })

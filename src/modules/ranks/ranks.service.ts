@@ -75,6 +75,7 @@ export class RanksService {
 						.from(Rank, 'rankings')
 						.limit(1);
 				}, 'before_rank')
+				.orderBy('after_rank', 'ASC')
 				.getRawMany();
 
 			return Array.from(rankingListSpots).map(function (spot) {
@@ -103,11 +104,34 @@ export class RanksService {
 		try {
 			const rankingMapSpots = await this.spotsRepository
 				.createQueryBuilder('spot')
-				.leftJoinAndSelect('spot.rankings', 'rankings')
+				.innerJoinAndSelect('spot.location', 'location')
+				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
-				.getMany();
+				.select('spot.id AS id, spot.name AS name, spot.latitude AS latitude, spot.longitude AS longitude')
+				.addSelect('location.id AS location_id, location.metroName AS metro, location.localName AS local')
+				.addSelect((currentRank) => {
+					return currentRank
+						.select('rankings.rank', 'current_rank')
+						.where('rankings.date = :currentDate', { currentDate: rankingRequest.date })
+						.andWhere('rankings.spotId = spot.id')
+						.from(Rank, 'rankings')
+						.limit(1);
+				}, 'current_rank')
+				.orderBy('current_rank', 'ASC')
+				.getRawMany();
 
-			return Array.from(rankingMapSpots).map((spot) => new RankingMapResponseDto(spot));
+			return Array.from(rankingMapSpots).map(
+				(spot) =>
+					new RankingMapResponseDto({
+						...spot,
+						rank: spot.current_rank,
+						location: new LocationResponseDto({
+							id: spot.location_id,
+							metroName: spot.metro,
+							localName: spot.local,
+						}),
+					}),
+			);
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
