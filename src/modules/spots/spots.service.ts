@@ -6,19 +6,19 @@ import * as path from 'path';
 import { Repository } from 'typeorm';
 
 import { Location } from 'src/entities/locations.entity';
-import { Rank } from 'src/entities/rank.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
-import { RankRequestDto } from './dto/rank-request.dto';
 import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
+import { RanksService } from '../ranks/ranks.service';
 
 @Injectable()
 export class SpotsService {
@@ -31,8 +31,7 @@ export class SpotsService {
 		private readonly themeRepository: Repository<Theme>,
 		@InjectRepository(SnsPost)
 		private readonly snsPostRepository: Repository<SnsPost>,
-		@InjectRepository(Rank)
-		private readonly rankRepository: Repository<Rank>,
+		private readonly ranksService: RanksService,
 	) {}
 
 	async createSpots(file: Express.Multer.File) {
@@ -194,36 +193,6 @@ export class SpotsService {
 		}
 	}
 
-	// 임시 계산: 다시 수정 예정
-	private async week() {
-		const date = new Date();
-		const cudate = date.getDate();
-		const start = new Date(date.setDate(1));
-		const day = start.getDay();
-		const week = parseInt(`${(day - 1 + cudate) / 7 + 1}`);
-		return week;
-	}
-
-	private async updateRank(requestRank, spotId: number) {
-		try {
-			await this.spotsRepository.update(spotId, { rank: requestRank.rank });
-
-			const week = await this.week();
-			const date = new Date();
-			const rankRequestDto = new RankRequestDto({
-				year: date.getFullYear(),
-				month: date.getMonth() + 1,
-				week: week,
-				spotId: spotId,
-				rank: requestRank.rank,
-			});
-			const rank = await this.rankRepository.findOne({ where: { ...rankRequestDto } });
-			if (!rank) await this.rankRepository.save(rankRequestDto);
-		} catch (error) {
-			throw new InternalServerErrorException(error.message, error);
-		}
-	}
-
 	private async createSpot(requestSpot: SpotRequestDto, location: Location) {
 		const IsSpot = await this.spotsRepository.findOne({ where: { name: requestSpot.name } });
 		try {
@@ -233,9 +202,14 @@ export class SpotsService {
 					...requestSpot,
 					location: location,
 				});
-				if (requestSpot.rank) await this.updateRank(requestSpot, spot.id);
+				if (requestSpot.rank)
+					await this.ranksService.updateRank(
+						new RanksUpdateRequestDto({ spotId: spot.id, rank: requestSpot.rank }),
+					);
 			} else {
-				if (requestSpot.rank) await this.updateRank(requestSpot, IsSpot.id);
+				await this.ranksService.updateRank(
+					new RanksUpdateRequestDto({ spotId: IsSpot.id, rank: requestSpot.rank }),
+				);
 			}
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
@@ -282,7 +256,7 @@ export class SpotsService {
 				.offset((searchRequest.page - 1) * searchRequest.take)
 				.getMany();
 
-			return Array.from(responseSpots).map((post) => new SearchResponseDto(post));
+			return Array.from(responseSpots).map((spot) => new SearchResponseDto(spot));
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}

@@ -15,11 +15,11 @@ import { SearchRequestDto } from './dto/search-request.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 
 import { SpotsService } from './spots.service';
-import { FiltersService } from '../filters/filters.service';
+import { RanksService } from '../ranks/ranks.service';
 
 describe('SpotsService', () => {
 	let spotsService: SpotsService;
-	let filtersServie: FiltersService;
+	let ranksService: RanksService;
 	let spotsRepository: MockSpotsRepository;
 	let themeRepository: MockThemeRepository;
 	let snsPostRepository: MockSnsPostsRepository;
@@ -30,7 +30,6 @@ describe('SpotsService', () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				SpotsService,
-
 				{
 					provide: getRepositoryToken(Spot),
 					useClass: MockSpotsRepository,
@@ -51,12 +50,12 @@ describe('SpotsService', () => {
 					provide: getRepositoryToken(Rank),
 					useClass: MockRankRepository,
 				},
-				FiltersService,
+				RanksService,
 			],
 		}).compile();
 
 		spotsService = module.get<SpotsService>(SpotsService);
-		filtersServie = module.get<FiltersService>(FiltersService);
+		ranksService = module.get<RanksService>(RanksService);
 		locationsRepository = module.get(getRepositoryToken(Location));
 		snsPostRepository = module.get(getRepositoryToken(SnsPost));
 		themeRepository = module.get(getRepositoryToken(Theme));

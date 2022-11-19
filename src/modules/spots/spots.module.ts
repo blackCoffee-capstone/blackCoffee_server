@@ -8,10 +8,12 @@ import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { SpotsController } from './spots.controller';
 import { SpotsService } from './spots.service';
+import { RanksService } from '../ranks/ranks.service';
+import { RanksModule } from '../ranks/ranks.module';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([Spot, Location, Theme, SnsPost, Rank])],
+	imports: [RanksModule, TypeOrmModule.forFeature([Spot, Location, Theme, SnsPost, Rank])],
 	controllers: [SpotsController],
-	providers: [SpotsService],
+	providers: [SpotsService, RanksService],
 })
 export class SpotsModule {}

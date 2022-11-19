@@ -12,7 +12,7 @@ import { MockThemeRepository } from 'test/mock/theme.mock';
 import { MockSnsPostsRepository } from 'test/mock/snsPosts.mock';
 import { SpotsController } from './spots.controller';
 import { SpotsService } from './spots.service';
-import { FiltersService } from '../filters/filters.service';
+import { RanksService } from '../ranks/ranks.service';
 
 describe('SpotsController', () => {
 	let spotsController: SpotsController;
@@ -46,7 +46,7 @@ describe('SpotsController', () => {
 					provide: getRepositoryToken(Rank),
 					useClass: MockSnsPostsRepository,
 				},
-				FiltersService,
+				RanksService,
 			],
 		}).compile();
 
