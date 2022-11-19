@@ -52,6 +52,22 @@ const seedSnsPostDatas = [
 		photoUrl: '100',
 		content: 'test1',
 	},
+	{
+		themeId: 3,
+		spotId: 7,
+		date: '2022-02-01',
+		likeNumber: 100,
+		photoUrl: '100',
+		content: 'test1',
+	},
+	{
+		themeId: 4,
+		spotId: 7,
+		date: '2022-02-01',
+		likeNumber: 100,
+		photoUrl: '100',
+		content: 'test1',
+	},
 ];
 
 export default class SnsPostsSeed implements Seeder {

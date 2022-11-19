@@ -64,6 +64,16 @@ const seedSpotDatas = [
 		snsPostCount: 50,
 		snsPostLikeNumber: 100,
 	},
+	{
+		locationId: 3,
+		name: 'test7',
+		latitude: 37.253452,
+		longitude: 126.234523,
+		geom: '(37.253452, 126.234523)',
+		rank: null,
+		snsPostCount: 50,
+		snsPostLikeNumber: 100,
+	},
 ];
 
 export default class SpotsSeed implements Seeder {
