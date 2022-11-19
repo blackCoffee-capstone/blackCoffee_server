@@ -3,7 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Spot } from 'src/entities/spots.entity';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { Repository } from 'typeorm';
+import { SearchResponseDto } from '../spots/dto/search-response.dto';
 import { UsersTasteThemesResponseDto } from '../taste-themes/dto/users-taste-themes-response.dto';
+import { RecommendationsMapResponseDto } from './dto/recommendations-map-response.dto';
 import { RecommendationsSpotResponseDto } from './dto/recommendations-spot-response.dto';
 
 @Injectable()
@@ -15,7 +17,7 @@ export class RecommendationsService {
 		private readonly tasteThemesRepository: Repository<TasteTheme>,
 	) {}
 
-	async recommendationsSpotsList(userId: number) {
+	async recommendationsSpotsList(userId: number): Promise<SearchResponseDto[]> {
 		const usersTastes: UsersTasteThemesResponseDto[] = await this.getUsersTasteThemes(userId);
 		const spots: UsersTasteThemesResponseDto[] = await this.getSpotsThemes();
 
@@ -25,12 +27,25 @@ export class RecommendationsService {
 		});
 
 		// ml에서 받아온 id들
-		const recommSpotIds = [];
-
-		return true;
+		const recommSpotIds = [1, 2];
+		const recommSpots = await this.getSpotsUseId(recommSpotIds);
+		return recommSpots.map((recommSpot) => new SearchResponseDto(recommSpot));
 	}
 
-	// async recommendationsSpotsMap(userId: number) {}
+	async recommendationsSpotsMap(userId: number): Promise<RecommendationsMapResponseDto[]> {
+		const usersTastes: UsersTasteThemesResponseDto[] = await this.getUsersTasteThemes(userId);
+		const spots: UsersTasteThemesResponseDto[] = await this.getSpotsThemes();
+
+		console.log({
+			usersTastes,
+			spots,
+		});
+
+		// ml에서 받아온 id들
+		const recommSpotIds = [1, 2];
+		const recommSpots = await this.getSpotsUseId(recommSpotIds);
+		return recommSpots.map((recommSpot) => new RecommendationsMapResponseDto(recommSpot));
+	}
 
 	private async getUsersTasteThemes(userId: number): Promise<UsersTasteThemesResponseDto[]> {
 		try {
@@ -62,6 +77,20 @@ export class RecommendationsService {
 				.getRawMany();
 
 			return spots.map((spot) => new RecommendationsSpotResponseDto(spot));
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
+	private async getSpotsUseId(spotIds: number[]) {
+		try {
+			const spots = await this.spotsRepository
+				.createQueryBuilder('spot')
+				.leftJoinAndSelect('spot.location', 'location')
+				.where('spot.id IN (:...spotIds)', { spotIds })
+				.getMany();
+
+			return spots;
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}

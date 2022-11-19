@@ -2,6 +2,8 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
+import { SearchResponseDto } from '../spots/dto/search-response.dto';
+import { RecommendationsMapResponseDto } from './dto/recommendations-map-response.dto';
 import { RecommendationsController } from './recommendations.controller';
 
 export const ApiDocs: SwaggerMethodDoc<RecommendationsController> = {
@@ -14,7 +16,7 @@ export const ApiDocs: SwaggerMethodDoc<RecommendationsController> = {
 			ApiResponse({
 				status: 200,
 				description: '',
-				// type: [RankingListResponseDto],
+				type: [SearchResponseDto],
 			}),
 		);
 	},
@@ -27,7 +29,7 @@ export const ApiDocs: SwaggerMethodDoc<RecommendationsController> = {
 			ApiResponse({
 				status: 200,
 				description: '',
-				// type: RankingMapResponseDto,
+				type: [RecommendationsMapResponseDto],
 			}),
 		);
 	},

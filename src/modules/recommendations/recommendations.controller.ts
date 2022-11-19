@@ -20,6 +20,6 @@ export class RecommendationsController {
 	@Get('/map')
 	@ApiDocs.recommendationsSpotsMap('추천 여행지 페이지 지도 기준')
 	async recommendationsSpotsMap(@AuthUser() userData) {
-		return await this.recommendationsService.recommendationsSpotsList(userData.id);
+		return await this.recommendationsService.recommendationsSpotsMap(userData.id);
 	}
 }
