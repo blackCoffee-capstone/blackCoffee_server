@@ -2,20 +2,20 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
 import { Location } from 'src/entities/locations.entity';
-import { SnsPost } from 'src/entities/sns-posts.entity';
-import { Theme } from 'src/entities/theme.entity';
-import { Spot } from 'src/entities/spots.entity';
 import { Rank } from 'src/entities/rank.entity';
+import { SnsPost } from 'src/entities/sns-posts.entity';
+import { Spot } from 'src/entities/spots.entity';
+import { Theme } from 'src/entities/theme.entity';
 import { MockLocationsRepository } from 'test/mock/locations.mock';
-import { MockSnsPostsRepository } from 'test/mock/snsPosts.mock';
-import { MockThemeRepository } from 'test/mock/theme.mock';
-import { MockSpotsRepository } from 'test/mock/spots.mock';
 import { MockRankRepository } from 'test/mock/rank.mock';
-import { SearchRequestDto } from './dto/search-request.dto';
+import { MockSnsPostsRepository } from 'test/mock/snsPosts.mock';
+import { MockSpotsRepository } from 'test/mock/spots.mock';
+import { MockThemeRepository } from 'test/mock/theme.mock';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
+import { SearchRequestDto } from './dto/search-request.dto';
 
-import { SpotsService } from './spots.service';
 import { RanksService } from '../ranks/ranks.service';
+import { SpotsService } from './spots.service';
 
 describe('SpotsService', () => {
 	let spotsService: SpotsService;

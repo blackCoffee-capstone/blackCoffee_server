@@ -43,5 +43,5 @@ export class User extends CommonEntity {
 	@OneToMany(() => TasteTheme, (tasteTheme: TasteTheme) => tasteTheme.user, {
 		cascade: true,
 	})
-	tasteSpots: TasteTheme[];
+	tasteThemes: TasteTheme[];
 }

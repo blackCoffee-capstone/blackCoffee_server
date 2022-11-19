@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { User } from 'src/entities/users.entity';
-import { MockTasteSpotsRepository } from 'test/mock/taste-spots.mock';
+import { MockTasteThemesRepository } from 'test/mock/taste-themes.mock';
 import { MockThemeRepository } from 'test/mock/theme.mock';
 import { MockUsersRepository } from 'test/mock/users.mock';
 import { HashPassword } from '../auth/hash-password';
@@ -25,7 +25,7 @@ describe('UsersService', () => {
 				},
 				{
 					provide: getRepositoryToken(TasteTheme),
-					useClass: MockTasteSpotsRepository,
+					useClass: MockTasteThemesRepository,
 				},
 				{
 					provide: getRepositoryToken(Theme),
