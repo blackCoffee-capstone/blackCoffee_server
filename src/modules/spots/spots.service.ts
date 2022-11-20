@@ -17,6 +17,7 @@ import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
+import { SearchPageResponseDto } from './dto/search-page-response.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
 import { RanksService } from '../ranks/ranks.service';
@@ -257,7 +258,8 @@ export class SpotsService {
 				.offset((searchRequest.page - 1) * searchRequest.take)
 				.getMany();
 
-			return Array.from(responseSpots).map(
+			const totalPage = Math.ceil(responseSpots.length / searchRequest.take);
+			const spots = Array.from(responseSpots).map(
 				(spot) =>
 					new SearchResponseDto({
 						...spot,
@@ -268,6 +270,7 @@ export class SpotsService {
 						}),
 					}),
 			);
+			return new SearchPageResponseDto({ totalPage: totalPage, spots: spots });
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
