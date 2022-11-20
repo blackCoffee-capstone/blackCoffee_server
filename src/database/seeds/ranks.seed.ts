@@ -56,11 +56,26 @@ const seedRankDatas = [
 	},
 	{
 		date: 2022113,
+		spotId: 3,
+		rank: 3,
+	},
+	{
+		date: 2022113,
+		spotId: 1,
+		rank: 2,
+	},
+	{
+		date: 2022113,
+		spotId: 4,
+		rank: 1,
+	},
+	{
+		date: 2022114,
 		spotId: 1,
 		rank: 1,
 	},
 	{
-		date: 2022113,
+		date: 2022114,
 		spotId: 2,
 		rank: 2,
 	},
