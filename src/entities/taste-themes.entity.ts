@@ -13,7 +13,7 @@ export class TasteTheme extends CommonEntity {
 	@Column({ name: 'user_id' })
 	userId: number;
 
-	@ManyToOne(() => User, (user: User) => user.tasteSpots, {
+	@ManyToOne(() => User, (user: User) => user.tasteThemes, {
 		onDelete: 'CASCADE',
 	})
 	@JoinColumn([

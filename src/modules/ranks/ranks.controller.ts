@@ -15,7 +15,7 @@ export class RanksController {
 	}
 
 	@Get('/map')
-	@ApiDocs.ranksList('최신 트렌드 랭킹 페이지 지도 기준')
+	@ApiDocs.ranksMap('최신 트렌드 랭킹 페이지 지도 기준')
 	async ranksMap(@Query() rankingRequest: RankingRequestDto) {
 		return await this.ranksService.getRanksMap(rankingRequest);
 	}

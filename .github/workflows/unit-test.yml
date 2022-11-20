@@ -48,6 +48,15 @@ jobs:
                   echo JWT_REFRESH_TOKEN_EXPIRATION_TIME=${{secrets.JWT_REFRESH_TOKEN_EXPIRATION_TIME}} >> .env.test
                   echo EMAIL=${{secrets.EMAIL}} >> .env.test
                   echo EMAIL_PASSWORD=${{secrets.EMAIL_PASSWORD}} >> .env.test
+                  echo NCLOUD_ACCESS_KEY_ID=${{secrets.NCLOUD_ACCESS_KEY_ID}} >> .env.test
+                  echo NCLOUD_SECRET_ACCESS_KEY=${{secrets.NCLOUD_SECRET_ACCESS_KEY}} >> .env.test
+                  echo NCLOUD_STORAGE_ENDPOINT=${{secrets.NCLOUD_STORAGE_ENDPOINT}} >> .env.test
+                  echo NCLOUD_STORAGE_BUCKET=${{secrets.NCLOUD_STORAGE_BUCKET}} >> .env.test
+                  echo SSH_HOST=${{secrets.SSH_HOST}} >> .env.test
+                  echo SSH_USERNAME=${{secrets.SSH_USERNAME}} >> .env.test
+                  echo SSH_PORT=${{secrets.SSH_PORT}} >> .env.test
+                  echo SSH_PASSWORD=${{secrets.SSH_PASSWORD}} >> .env.test
+
             - name: Install packages
               run: npm install --force
             - name: Run unit test
