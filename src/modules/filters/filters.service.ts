@@ -22,25 +22,23 @@ export class FiltersService {
 			const locationFilterList = await this.locationsRepository.find();
 			const metroNames = await this.locationsRepository
 				.createQueryBuilder('location')
-				.select('metro_name, id')
-				.distinctOn(['metro_name'])
+				.select('location.metroName, location.id')
+				.where('location.localName is null')
 				.getRawMany();
 			const allLocationsDto = [];
-			let id = 1;
 			for (const metro of metroNames) {
 				const localsArray = locationFilterList.filter((location) => location.metroName === metro.metro_name);
-				const metroId = id++;
 				const locals = Array.prototype.flatMap.call(
 					localsArray.filter((local) => local.localName !== null),
-					({ localName }) => ({
-						id: id++,
+					({ id, localName }) => ({
+						id: id,
 						level: 2,
 						localName: localName,
 					}),
 				);
 				allLocationsDto.push(
 					new LocationFiltersResponseDto({
-						id: metroId,
+						id: metro.id,
 						level: 1,
 						metroName: metro.metro_name,
 						localNames: locals,
