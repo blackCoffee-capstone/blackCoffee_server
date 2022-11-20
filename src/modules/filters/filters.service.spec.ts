@@ -36,13 +36,4 @@ describe('FiltersService', () => {
 	it('should be defined', () => {
 		expect(filtersService).toBeDefined();
 	});
-	describe('getFilterList function', () => {
-		beforeEach(async () => {
-			await filtersService.getFilterList();
-		});
-		it('theme, location find가 정상적으로 실행된다.', async () => {
-			expect(themeRepository.find).toHaveBeenCalledTimes(1);
-			expect(locationsRepository.find).toHaveBeenCalledTimes(1);
-		});
-	});
 });
