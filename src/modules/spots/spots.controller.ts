@@ -13,9 +13,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
-
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
+
 import { ApiDocs } from './spots.docs';
 import { SpotsService } from './spots.service';
 
@@ -37,7 +37,10 @@ export class SpotsController {
 					callback(null, uploadPath);
 				},
 				filename: (request, file, callback) => {
-					callback(null, `${Date.now()}${file.originalname}`);
+					const fileOriginName = file.originalname.split(' ').join('');
+					const randomName = `${Date.now()}${fileOriginName}`;
+					randomName.split(' ').join('');
+					callback(null, randomName);
 				},
 			}),
 			fileFilter: (request, file, callback) => {
