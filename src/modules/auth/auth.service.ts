@@ -120,7 +120,7 @@ export class AuthService {
 				...signUpRequestDto,
 				type: UserType.Normal,
 			});
-
+			await this.authCodesRepository.delete({ email: signUpRequestDto.email });
 			const result = await this.usersRepository.save(user);
 			return new UserResponseDto(result);
 		}
@@ -256,11 +256,10 @@ export class AuthService {
 			.where('auth_code.email = :email', { email: signUpRequestDto.email })
 			.getOne();
 
-		console.log('kk', foundAuthCodeUser);
 		if (!foundAuthCodeUser || foundAuthCodeUser.type === AuthCodeType.SignUp) {
 			throw new BadRequestException('User did not verify the email');
 		} else if (foundAuthCodeUser.type === AuthCodeType.SignUpAble) {
-			await this.authCodesRepository.delete(foundAuthCodeUser.id);
+			return true;
 		}
 		return true;
 	}

@@ -45,4 +45,30 @@ export class SaveRequestDto {
 	@IsString()
 	@ApiProperty({ example: '산', description: '테마 이름' })
 	readonly themeName: string;
+
+	constructor({
+		metroName,
+		localName,
+		name,
+		latitude,
+		longitude,
+		rank,
+		date,
+		likeNumber,
+		photoUrl,
+		content,
+		themeName,
+	}) {
+		this.metroName = metroName;
+		this.localName = localName;
+		this.name = name;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.rank = rank;
+		this.date = date;
+		this.likeNumber = likeNumber;
+		this.photoUrl = photoUrl;
+		this.content = content;
+		this.themeName = themeName;
+	}
 }

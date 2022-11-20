@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fs from 'fs';
 import { SshConfig } from 'src/config/config.constant';
 import { Spot } from 'src/entities/spots.entity';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
@@ -24,72 +25,110 @@ export class RecommendationsService {
 	) {}
 	#sshConfig = this.configService.get<SshConfig>('sshConfig');
 
-	async recommendationsSpotsList(userId: number): Promise<SearchResponseDto[]> {
+	async recommendationsSpotsList(userId: number) {
 		const usersTastes: UsersTasteThemesResponseDto[] = await this.getUsersTasteThemes(userId);
 		const spots: UsersTasteThemesResponseDto[] = await this.getSpotsThemes();
-
-		console.log({
+		const allTasteThemes = await this.getAllTasteThemes();
+		const inputJson = {
 			usersTastes,
 			spots,
-		});
+			allTasteThemes,
+		};
 
-		const local_result_path = './src/modules/recommendations/results/result.json';
+		const inputJsonFile = JSON.stringify(inputJson);
 
-		const remote_path = 'data.json';
-		const remore_result_path = 'result.json';
+		fs.writeFileSync('./src/modules/recommendations/inputs/input.json', inputJsonFile);
 
-		//명령어 보내기
-		ssh.connect({
-			host: this.#sshConfig.host,
-			username: this.#sshConfig.userName,
-			port: this.#sshConfig.port,
-			password: this.#sshConfig.password,
-		}).then(function () {
-			ssh.execCommand('cd Desktop/blackcoffee/postClassifier/', {}).then(function () {
-				console.log('DONE1');
-				ssh.execCommand('conda activate test0', {}).then(function () {
-					console.log('DONE2');
-					ssh.execCommand('python classifyPost.py testingData/raw_data_set.xlsx result.json', {}).then(
-						function () {
-							console.log('DONE3');
-							ssh.getFile(local_result_path, 'Desktop/blackcoffee/postClassifier/result.json')
-								.then(
-									function (Contents) {
-										console.log(Contents);
-										console.log('DONE');
-									},
-									function (error) {
-										console.log(error);
-									},
-								)
-								.then(function () {
-									ssh.dispose(); //커넥션 종료
-								});
-						},
-					);
-				});
+		const localInputPath = './src/modules/recommendations/inputs/input.json';
+		const localResultPath = './src/modules/recommendations/results/result.json';
+
+		await ssh
+			.connect({
+				host: this.#sshConfig.host,
+				username: this.#sshConfig.userName,
+				port: this.#sshConfig.port,
+				password: this.#sshConfig.password,
+			}) //bash run_recommend.sh testingData/testTaste.json resultshell.json 1
+			.then(async function () {
+				await ssh
+					.putFile(localInputPath, `/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json`)
+					.then(async function () {
+						await ssh
+							.execCommand(
+								`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommend.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/result.json" "${userId}"`,
+								{},
+							)
+							.then(async function () {
+								await ssh
+									.getFile(
+										localResultPath,
+										'/home/iknow/Desktop/blackcoffee/placeRecommender/result.json',
+									)
+									.then(async function () {
+										await ssh.dispose();
+									});
+							});
+					});
 			});
-		});
-
-		// ml에서 받아온 id들
-		const recommSpotIds = [1, 2];
-		const recommSpots = await this.getSpotsUseId(recommSpotIds);
-		return recommSpots.map((recommSpot) => new SearchResponseDto(recommSpot));
+		const resultFile = fs.readFileSync(localResultPath);
+		const resultJson = JSON.parse(resultFile.toString());
+		const listRecommendationSpotIds = resultJson.listRecommendation;
+		const listRecommendationSpots = await this.getSpotsUseId(listRecommendationSpotIds);
+		return listRecommendationSpots.map((listRecommendationSpot) => new SearchResponseDto(listRecommendationSpot));
 	}
 
 	async recommendationsSpotsMap(userId: number): Promise<RecommendationsMapResponseDto[]> {
 		const usersTastes: UsersTasteThemesResponseDto[] = await this.getUsersTasteThemes(userId);
 		const spots: UsersTasteThemesResponseDto[] = await this.getSpotsThemes();
-
-		console.log({
+		const allTasteThemes = await this.getAllTasteThemes();
+		const inputJson = {
 			usersTastes,
 			spots,
-		});
+			allTasteThemes,
+		};
 
-		// ml에서 받아온 id들
-		const recommSpotIds = [1, 2];
-		const recommSpots = await this.getSpotsUseId(recommSpotIds);
-		return recommSpots.map((recommSpot) => new RecommendationsMapResponseDto(recommSpot));
+		const inputJsonFile = JSON.stringify(inputJson);
+
+		fs.writeFileSync('./src/modules/recommendations/inputs/input.json', inputJsonFile);
+
+		const localInputPath = './src/modules/recommendations/inputs/input.json';
+		const localResultPath = './src/modules/recommendations/results/result.json';
+
+		await ssh
+			.connect({
+				host: this.#sshConfig.host,
+				username: this.#sshConfig.userName,
+				port: this.#sshConfig.port,
+				password: this.#sshConfig.password,
+			}) //bash run_recommend.sh testingData/testTaste.json resultshell.json 1
+			.then(async function () {
+				await ssh
+					.putFile(localInputPath, `/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json`)
+					.then(async function () {
+						await ssh
+							.execCommand(
+								`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommend.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/result.json" "${userId}"`,
+								{},
+							)
+							.then(async function () {
+								await ssh
+									.getFile(
+										localResultPath,
+										'/home/iknow/Desktop/blackcoffee/placeRecommender/result.json',
+									)
+									.then(async function () {
+										await ssh.dispose();
+									});
+							});
+					});
+			});
+		const resultFile = fs.readFileSync(localResultPath);
+		const resultJson = JSON.parse(resultFile.toString());
+		const mapRecommendationSpotIds = resultJson.mapRecommendation;
+		const mapRecommendationSpots = await this.getSpotsUseId(mapRecommendationSpotIds);
+		return mapRecommendationSpots.map(
+			(mapRecommendationSpot) => new RecommendationsMapResponseDto(mapRecommendationSpot),
+		);
 	}
 
 	private async getUsersTasteThemes(userId: number): Promise<UsersTasteThemesResponseDto[]> {
@@ -122,6 +161,22 @@ export class RecommendationsService {
 				.getRawMany();
 
 			return spots.map((spot) => new RecommendationsSpotResponseDto(spot));
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
+	private async getAllTasteThemes() {
+		try {
+			const allTasteThemes = await this.tasteThemesRepository
+				.createQueryBuilder('taste_theme')
+				.select('user.id, array_agg("theme".name) as "themes"')
+				.leftJoin('taste_theme.user', 'user')
+				.leftJoin('taste_theme.theme', 'theme')
+				.groupBy('user.id')
+				.getRawMany();
+			return allTasteThemes;
+			// return allTasteThemes.map((spot) => new RecommendationsSpotResponseDto(spot));
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
