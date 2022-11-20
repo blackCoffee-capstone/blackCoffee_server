@@ -18,19 +18,15 @@ export class UserResponseDto {
 	@ApiProperty({ example: 'Kakao', description: '사용자 타입 (카카오유저, 페이스북유저, 관리자)' })
 	readonly type: UserType;
 
-	@ApiProperty({ example: '2000-01-01', description: '사용자 생년월일' })
-	readonly birthdate: Date | null;
-
 	@ApiProperty({ example: true, description: '첫 로그인 유무' })
 	readonly isNewUser: boolean;
 
-	constructor({ id, name, nickname, email, type, birthdate, isNewUser }) {
+	constructor({ id, name, nickname, email, type, isNewUser }) {
 		this.id = id;
 		this.name = name;
 		this.nickname = nickname;
 		this.email = email;
 		this.type = type;
-		this.birthdate = birthdate;
 		this.isNewUser = isNewUser;
 	}
 }

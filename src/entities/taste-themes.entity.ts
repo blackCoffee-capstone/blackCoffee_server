@@ -2,18 +2,18 @@ import { IsNotEmpty, IsNumber } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
 
 import { CommonEntity } from './common.entity';
-import { Spot } from './spots.entity';
+import { Theme } from './theme.entity';
 import { User } from './users.entity';
 
 @Entity()
-@Unique(['userId', 'spotId'])
-export class TasteSpot extends CommonEntity {
+@Unique(['userId', 'themeId'])
+export class TasteTheme extends CommonEntity {
 	@IsNumber()
 	@IsNotEmpty()
 	@Column({ name: 'user_id' })
 	userId: number;
 
-	@ManyToOne(() => User, (user: User) => user.tasteSpots, {
+	@ManyToOne(() => User, (user: User) => user.tasteThemes, {
 		onDelete: 'CASCADE',
 	})
 	@JoinColumn([
@@ -26,17 +26,17 @@ export class TasteSpot extends CommonEntity {
 
 	@IsNumber()
 	@IsNotEmpty()
-	@Column({ name: 'spot_id' })
-	spotId: number;
+	@Column({ name: 'theme_id' })
+	themeId: number;
 
-	@ManyToOne(() => Spot, (spot: Spot) => spot.tasteSpots, {
+	@ManyToOne(() => Theme, (theme: Theme) => theme.tasteThemes, {
 		onDelete: 'CASCADE',
 	})
 	@JoinColumn([
 		{
-			name: 'spot_id',
+			name: 'theme_id',
 			referencedColumnName: 'id',
 		},
 	])
-	spot: Spot;
+	theme: Theme;
 }

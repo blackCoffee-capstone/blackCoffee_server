@@ -4,18 +4,19 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 import { CommonEntity } from './common.entity';
 import { Location } from './locations.entity';
+import { Rank } from './rank.entity';
 import { SnsPost } from './sns-posts.entity';
-import { TasteSpot } from './taste-spots.entity';
 
 @Entity()
 export class Spot extends CommonEntity {
 	@IsNumber()
 	@IsNotEmpty()
-	@Column({ name: 'location_id' })
+	@Column({ name: 'location_id', nullable: true })
 	locationId: number;
 
 	@ManyToOne(() => Location, (location: Location) => location.spots, {
 		onDelete: 'SET NULL',
+		nullable: true,
 	})
 	@JoinColumn([{ name: 'location_id', referencedColumnName: 'id' }])
 	location: Location;
@@ -54,14 +55,14 @@ export class Spot extends CommonEntity {
 	@Column({ name: 'sns_post_like_number', type: 'int', nullable: false })
 	snsPostLikeNumber: number;
 
-	@OneToMany(() => TasteSpot, (tasteSpot: TasteSpot) => tasteSpot.spot, {
-		cascade: true,
-	})
-	tasteSpots: TasteSpot[];
-
 	@OneToMany(() => SnsPost, (snsPost: SnsPost) => snsPost.spot, {
 		cascade: true,
 		eager: true,
 	})
 	snsPosts: SnsPost[];
+
+	@OneToMany(() => Rank, (ranking: Rank) => ranking.spot, {
+		cascade: true,
+	})
+	rankings: Rank[];
 }

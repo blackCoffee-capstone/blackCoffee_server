@@ -14,7 +14,9 @@ import { firstValueFrom } from 'rxjs';
 import { Repository } from 'typeorm';
 
 import { JwtConfig, OauthConfig } from 'src/config/config.constant';
+import { AuthCode } from 'src/entities/auth-code.entity';
 import { User } from 'src/entities/users.entity';
+import { AuthCodeType } from 'src/types/auth-code.types';
 import { UserType } from 'src/types/users.types';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -28,6 +30,8 @@ export class AuthService {
 	constructor(
 		@InjectRepository(User)
 		private readonly usersRepository: Repository<User>,
+		@InjectRepository(AuthCode)
+		private readonly authCodesRepository: Repository<AuthCode>,
 		private hashPassword: HashPassword,
 		private readonly configService: ConfigService,
 		private readonly jwtService: JwtService,
@@ -55,6 +59,8 @@ export class AuthService {
 	}
 
 	async createOauthUser(oauthUserData: OauthUserDto, userType: UserType): Promise<UserResponseDto> {
+		const userNickname: string = userType + oauthUserData.socialId.toString();
+		oauthUserData.socialId;
 		if (oauthUserData.email) {
 			let compareUser = await this.usersRepository.findOne({
 				where: { email: oauthUserData.email },
@@ -70,7 +76,7 @@ export class AuthService {
 				else {
 					const newOauthUser = await this.usersRepository.save({
 						name: oauthUserData.name,
-						nickname: oauthUserData.name,
+						nickname: userNickname,
 						email: oauthUserData.email,
 						socialId: oauthUserData.socialId,
 						type: userType,
@@ -104,7 +110,11 @@ export class AuthService {
 			.where('user.email = :email', { email: signUpRequestDto.email })
 			.getOne();
 
-		if (await this.errIfDuplicateEmail(foundUser)) {
+		if (
+			(await this.errIfDuplicateEmail(foundUser)) &&
+			(await this.errIfNotVerifyEmail(signUpRequestDto)) &&
+			(await this.errIfDuplicateNickname(signUpRequestDto))
+		) {
 			signUpRequestDto.password = await this.hashPassword.hash(signUpRequestDto.password);
 			const user = this.usersRepository.create({
 				...signUpRequestDto,
@@ -235,6 +245,34 @@ export class AuthService {
 			throw new BadRequestException('User is kakao user');
 		} else if (user && user.type === UserType.Facebook) {
 			throw new BadRequestException('User is facebook user');
+		} else if (user && user.type === UserType.Admin) {
+			throw new BadRequestException('User is admin user');
+		} else return true;
+	}
+
+	private async errIfNotVerifyEmail(signUpRequestDto: SignUpRequestDto) {
+		const foundAuthCodeUser = await this.authCodesRepository
+			.createQueryBuilder('auth_code')
+			.where('auth_code.email = :email', { email: signUpRequestDto.email })
+			.getOne();
+
+		console.log('kk', foundAuthCodeUser);
+		if (!foundAuthCodeUser || foundAuthCodeUser.type === AuthCodeType.SignUp) {
+			throw new BadRequestException('User did not verify the email');
+		} else if (foundAuthCodeUser.type === AuthCodeType.SignUpAble) {
+			await this.authCodesRepository.delete(foundAuthCodeUser.id);
+		}
+		return true;
+	}
+
+	private async errIfDuplicateNickname(signUpRequestDto: SignUpRequestDto) {
+		const foundNicknameUser = await this.usersRepository
+			.createQueryBuilder('user')
+			.where('user.nickname = :nickname', { nickname: signUpRequestDto.nickname })
+			.getOne();
+
+		if (foundNicknameUser) {
+			throw new BadRequestException('Nickname is already exist');
 		} else return true;
 	}
 

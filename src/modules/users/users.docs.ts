@@ -4,7 +4,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagg
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-import { UserTasteSpotsRequestDto } from './dto/user-taste-spots-request.dto';
+import { UserTasteThemesRequestDto } from './dto/user-taste-themes-request.dto';
 import { UsersController } from './users.controller';
 
 export const ApiDocs: SwaggerMethodDoc<UsersController> = {
@@ -35,17 +35,31 @@ export const ApiDocs: SwaggerMethodDoc<UsersController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
-	createUsersTasteSpots(summary: string) {
+	createUsersTasteThemes(summary: string) {
 		return applyDecorators(
 			ApiOperation({
 				summary,
-				description: '사용자의 여행지 취향 저장',
+				description: '사용자의 테마 취향 저장',
 			}),
 			ApiBody({
-				type: UserTasteSpotsRequestDto,
+				type: UserTasteThemesRequestDto,
 			}),
 			ApiResponse({
 				status: 201,
+				description: '',
+				type: Boolean,
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
+	getUsersTasteThemes(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '사용자의 테마 취향 반환',
+			}),
+			ApiResponse({
+				status: 200,
 				description: '',
 				type: Boolean,
 			}),

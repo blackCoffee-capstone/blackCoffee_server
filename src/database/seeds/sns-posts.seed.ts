@@ -10,7 +10,7 @@ const seedSnsPostDatas = [
 		date: '2022-02-01',
 		likeNumber: 100,
 		photoUrl: '100',
-		content: '해변가 캠핑',
+		content: 'test1',
 	},
 	{
 		themeId: 2,
@@ -18,7 +18,7 @@ const seedSnsPostDatas = [
 		date: '2022-02-01',
 		likeNumber: 100,
 		photoUrl: '100',
-		content: '해변가 캠핑',
+		content: 'test1',
 	},
 	{
 		themeId: 1,
@@ -26,7 +26,7 @@ const seedSnsPostDatas = [
 		date: '2022-02-01',
 		likeNumber: 100,
 		photoUrl: '100',
-		content: '해변가 캠핑',
+		content: 'test1',
 	},
 	{
 		themeId: 1,
@@ -34,7 +34,7 @@ const seedSnsPostDatas = [
 		date: '2022-02-01',
 		likeNumber: 100,
 		photoUrl: '100',
-		content: '해변가 캠핑',
+		content: 'test1',
 	},
 	{
 		themeId: 2,
@@ -42,7 +42,7 @@ const seedSnsPostDatas = [
 		date: '2022-02-01',
 		likeNumber: 100,
 		photoUrl: '100',
-		content: '해변가 캠핑',
+		content: 'test1',
 	},
 	{
 		themeId: 3,
@@ -50,7 +50,23 @@ const seedSnsPostDatas = [
 		date: '2022-02-01',
 		likeNumber: 100,
 		photoUrl: '100',
-		content: '해변가 캠핑',
+		content: 'test1',
+	},
+	{
+		themeId: 3,
+		spotId: 7,
+		date: '2022-02-01',
+		likeNumber: 100,
+		photoUrl: '100',
+		content: 'test1',
+	},
+	{
+		themeId: 4,
+		spotId: 7,
+		date: '2022-02-01',
+		likeNumber: 100,
+		photoUrl: '100',
+		content: 'test1',
 	},
 ];
 

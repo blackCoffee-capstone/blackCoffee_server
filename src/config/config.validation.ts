@@ -24,4 +24,8 @@ export const configValidationSchema = Joi.object({
 	NCLOUD_SECRET_ACCESS_KEY: Joi.string().required(),
 	NCLOUD_STORAGE_ENDPOINT: Joi.string().required(),
 	NCLOUD_STORAGE_BUCKET: Joi.string().required(),
+	SSH_HOST: Joi.string().required(),
+	SSH_USERNAME: Joi.string().required(),
+	SSH_PORT: Joi.string().required(),
+	SSH_PASSWORD: Joi.string().required(),
 });

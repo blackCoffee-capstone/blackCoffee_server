@@ -2,30 +2,34 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
 import { Location } from 'src/entities/locations.entity';
+import { Rank } from 'src/entities/rank.entity';
+import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
-import { SnsPost } from 'src/entities/sns-posts.entity';
 import { MockLocationsRepository } from 'test/mock/locations.mock';
+import { MockRankRepository } from 'test/mock/rank.mock';
+import { MockSnsPostsRepository } from 'test/mock/snsPosts.mock';
 import { MockSpotsRepository } from 'test/mock/spots.mock';
 import { MockThemeRepository } from 'test/mock/theme.mock';
-import { MockSnsPostsRepository } from 'test/mock/snsPosts.mock';
-import { SearchRequestDto } from './dto/search-request.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
+import { SearchRequestDto } from './dto/search-request.dto';
 
+import { RanksService } from '../ranks/ranks.service';
 import { SpotsService } from './spots.service';
 
 describe('SpotsService', () => {
 	let spotsService: SpotsService;
+	let ranksService: RanksService;
 	let spotsRepository: MockSpotsRepository;
 	let themeRepository: MockThemeRepository;
 	let snsPostRepository: MockSnsPostsRepository;
 	let locationsRepository: MockLocationsRepository;
+	let rankRepository: MockRankRepository;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				SpotsService,
-
 				{
 					provide: getRepositoryToken(Spot),
 					useClass: MockSpotsRepository,
@@ -42,14 +46,21 @@ describe('SpotsService', () => {
 					provide: getRepositoryToken(Location),
 					useClass: MockLocationsRepository,
 				},
+				{
+					provide: getRepositoryToken(Rank),
+					useClass: MockRankRepository,
+				},
+				RanksService,
 			],
 		}).compile();
 
 		spotsService = module.get<SpotsService>(SpotsService);
-		spotsRepository = module.get(getRepositoryToken(Spot));
-		themeRepository = module.get(getRepositoryToken(Theme));
-		snsPostRepository = module.get(getRepositoryToken(SnsPost));
+		ranksService = module.get<RanksService>(RanksService);
 		locationsRepository = module.get(getRepositoryToken(Location));
+		snsPostRepository = module.get(getRepositoryToken(SnsPost));
+		themeRepository = module.get(getRepositoryToken(Theme));
+		spotsRepository = module.get(getRepositoryToken(Spot));
+		rankRepository = module.get(getRepositoryToken(Rank));
 	});
 
 	it('should be defined', () => {
@@ -85,7 +96,6 @@ describe('SpotsService', () => {
 			expect(spotsRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
 			expect(spotsRepository.createQueryBuilder().leftJoinAndSelect).toHaveBeenCalledTimes(1);
 			expect(spotsRepository.createQueryBuilder().orderBy).toHaveBeenCalledTimes(1);
-			expect(spotsRepository.createQueryBuilder().where).toHaveBeenCalledTimes(1);
 			expect(spotsRepository.createQueryBuilder().limit).toHaveBeenCalledTimes(1);
 			expect(spotsRepository.createQueryBuilder().offset).toHaveBeenCalledTimes(1);
 		});
