@@ -42,6 +42,10 @@ const seedLocationDatas = [
 	},
 	{
 		metroName: '경기도',
+		localName: null,
+	},
+	{
+		metroName: '경기도',
 		localName: '고양시',
 	},
 	{
@@ -162,6 +166,10 @@ const seedLocationDatas = [
 	},
 	{
 		metroName: '강원도',
+		localName: null,
+	},
+	{
+		metroName: '강원도',
 		localName: '강릉시',
 	},
 	{
@@ -231,6 +239,10 @@ const seedLocationDatas = [
 	{
 		metroName: '강원도',
 		localName: '양양군',
+	},
+	{
+		metroName: '충청도',
+		localName: null,
 	},
 	{
 		metroName: '충청도',
@@ -335,6 +347,10 @@ const seedLocationDatas = [
 	{
 		metroName: '충청도',
 		localName: '태안군',
+	},
+	{
+		metroName: '경상도',
+		localName: null,
 	},
 	{
 		metroName: '경상도',
@@ -499,6 +515,10 @@ const seedLocationDatas = [
 	{
 		metroName: '경상도',
 		localName: '합천군',
+	},
+	{
+		metroName: '전라도',
+		localName: null,
 	},
 	{
 		metroName: '전라도',

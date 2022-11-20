@@ -15,7 +15,7 @@ export class TasteThemesService {
 	async getTasteThemes(): Promise<TasteThemesResponseDto[]> {
 		const themes = await this.themesRepository
 			.createQueryBuilder('theme')
-			.select('theme.id, theme.name, theme.photo_url')
+			.select('theme.id, theme.name, theme.photoUrl')
 			.limit(25)
 			.getRawMany();
 
