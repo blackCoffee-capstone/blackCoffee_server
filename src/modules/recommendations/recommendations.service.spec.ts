@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Spot } from 'src/entities/spots.entity';
@@ -20,6 +21,17 @@ describe('RecommendationsService', () => {
 				{
 					provide: getRepositoryToken(Spot),
 					useClass: MockSpotsRepository,
+				},
+				{
+					provide: ConfigService,
+					useValue: {
+						get: jest.fn((key: string) => {
+							if (key === 'sshConfig') {
+								return 1;
+							}
+							return null;
+						}),
+					},
 				},
 			],
 		}).compile();
