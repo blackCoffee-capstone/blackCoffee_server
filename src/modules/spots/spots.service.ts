@@ -5,22 +5,27 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Repository } from 'typeorm';
 
+import { ConfigService } from '@nestjs/config';
+import { SshConfig } from 'src/config/config.constant';
 import { Location } from 'src/entities/locations.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
+import { RanksService } from '../ranks/ranks.service';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
-import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { SearchPageResponseDto } from './dto/search-page-response.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
-import { RanksService } from '../ranks/ranks.service';
+
+const { NodeSSH } = require('node-ssh');
+const ssh = new NodeSSH();
 
 @Injectable()
 export class SpotsService {
@@ -34,16 +39,51 @@ export class SpotsService {
 		@InjectRepository(SnsPost)
 		private readonly snsPostRepository: Repository<SnsPost>,
 		private readonly ranksService: RanksService,
+		private readonly configService: ConfigService,
 	) {}
+	#sshConfig = this.configService.get<SshConfig>('sshConfig');
 
 	async createSpots(file: Express.Multer.File) {
 		if (!file) throw new BadRequestException('File is not exist');
 		const fileName: string = file.filename;
 		const snsPosts = await this.readCsv(path.resolve('src/database/datas', fileName));
-		//TODO: ml로 전달
-		const metaData: SaveRequestDto[] = [];
-		// return this.saveSpot(metaData);
-		return snsPosts;
+		const localResultPath = './src/modules/spots/results/result.json';
+
+		await ssh
+			.connect({
+				host: this.#sshConfig.host,
+				username: this.#sshConfig.userName,
+				port: this.#sshConfig.port,
+				password: this.#sshConfig.password,
+			})
+			.then(async function () {
+				await ssh
+					.putFile(
+						`./src/database/datas/${fileName}`,
+						`/home/iknow/Desktop/blackcoffee/postClassifier/testingData/${fileName}`,
+					)
+					.then(async function () {
+						await ssh
+							.execCommand(
+								`bash "/home/iknow/Desktop/blackcoffee/postClassifier/run_classify.sh" "/home/iknow/Desktop/blackcoffee/postClassifier/testingData/${fileName}" "/home/iknow/Desktop/blackcoffee/postClassifier/spotresult4.json"`,
+								{},
+							)
+							.then(async function () {
+								await ssh
+									.getFile(
+										localResultPath,
+										'/home/iknow/Desktop/blackcoffee/postClassifier/spotresult4.json',
+									)
+									.then(async function () {
+										await ssh.dispose();
+									});
+							});
+					});
+			});
+		const spotsFile = fs.readFileSync(localResultPath);
+		const spots = JSON.parse(spotsFile.toString());
+		const metaData: SaveRequestDto[] = spots.map((spot) => new SaveRequestDto(spot));
+		return await this.saveSpot(metaData);
 	}
 
 	private async readCsv(filePath: string) {

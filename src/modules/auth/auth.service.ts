@@ -120,7 +120,7 @@ export class AuthService {
 				...signUpRequestDto,
 				type: UserType.Normal,
 			});
-
+			await this.authCodesRepository.delete({ email: signUpRequestDto.email });
 			const result = await this.usersRepository.save(user);
 			return new UserResponseDto(result);
 		}
@@ -139,8 +139,6 @@ export class AuthService {
 				secret: this.#jwtConfig.jwtRefreshTokenSecret,
 				expiresIn: this.#jwtConfig.jwtRefreshTokenExpire,
 			});
-
-			await this.updateUserIfNewUser(user);
 
 			return new LoginResponseDto({
 				accessToken,
@@ -256,11 +254,10 @@ export class AuthService {
 			.where('auth_code.email = :email', { email: signUpRequestDto.email })
 			.getOne();
 
-		console.log('kk', foundAuthCodeUser);
 		if (!foundAuthCodeUser || foundAuthCodeUser.type === AuthCodeType.SignUp) {
 			throw new BadRequestException('User did not verify the email');
 		} else if (foundAuthCodeUser.type === AuthCodeType.SignUpAble) {
-			await this.authCodesRepository.delete(foundAuthCodeUser.id);
+			return true;
 		}
 		return true;
 	}
@@ -278,15 +275,6 @@ export class AuthService {
 
 	private async isValidPassword(original: string, target: string) {
 		return await this.hashPassword.equal({ password: target, hashPassword: original });
-	}
-
-	private async updateUserIfNewUser(user: UserResponseDto) {
-		if (user.isNewUser) {
-			await this.usersRepository.update(user.id, {
-				isNewUser: false,
-			});
-		}
-		return true;
 	}
 
 	private jwtAccessTokenExpireByType(userType: UserType): string {

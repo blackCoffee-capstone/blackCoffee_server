@@ -68,6 +68,9 @@ export class UsersService {
 				.into(TasteTheme)
 				.values(usersTasteThemes)
 				.execute();
+
+			await this.updateUserIfNewUser(userId);
+
 			return true;
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
@@ -136,5 +139,12 @@ export class UsersService {
 
 	private async isValidPassword(original: string, target: string) {
 		return await this.hashPassword.equal({ password: target, hashPassword: original });
+	}
+
+	private async updateUserIfNewUser(userId: number) {
+		await this.usersRepository.update(userId, {
+			isNewUser: false,
+		});
+		return true;
 	}
 }

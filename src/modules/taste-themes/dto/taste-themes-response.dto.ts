@@ -10,9 +10,9 @@ export class TasteThemesResponseDto {
 	@ApiProperty({ example: 'test.png', description: '테마 사진 url' })
 	readonly photoUrl: string;
 
-	constructor({ id, name, photoUrl }) {
+	constructor({ id, name, photo_url }) {
 		this.id = id;
 		this.name = name;
-		this.photoUrl = photoUrl;
+		this.photoUrl = photo_url;
 	}
 }
