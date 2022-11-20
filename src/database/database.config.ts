@@ -29,6 +29,7 @@ const config = {
 		seedUrl + 'locations.seed.ts',
 		seedUrl + 'spots.seed.ts',
 		seedUrl + 'sns-posts.seed.ts',
+		seedUrl + 'ranks.seed.ts',
 	],
 	namingStrategy: new SnakeNamingStrategy(),
 	synchronize: process.env.NODE_ENV !== 'prod',

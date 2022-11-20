@@ -6,7 +6,7 @@ export class RankingRequestDto {
 	@IsNumber()
 	@IsOptional()
 	@Type(() => Number)
-	@ApiProperty({ example: 20221103, description: '날짜(연도 + 월 + 주차)' })
+	@ApiProperty({ example: 2022113, description: '날짜(연도 + 월 + 주차)' })
 	readonly date?: number = this.getDate;
 
 	get getDate(): number {
