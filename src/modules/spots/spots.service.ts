@@ -253,12 +253,13 @@ export class SpotsService {
 					.leftJoinAndSelect('snsPosts.theme', 'theme')
 					.andWhere('theme.id = :id', { id: searchRequest.themeId });
 			}
+			const totalPageSpots = await searchSpots.getMany();
 			const responseSpots = await searchSpots
 				.limit(searchRequest.take)
 				.offset((searchRequest.page - 1) * searchRequest.take)
 				.getMany();
 
-			const totalPage = Math.ceil(responseSpots.length / searchRequest.take);
+			const totalPage = Math.ceil(totalPageSpots.length / searchRequest.take);
 			const spots = Array.from(responseSpots).map(
 				(spot) =>
 					new SearchResponseDto({
