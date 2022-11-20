@@ -17,6 +17,7 @@ import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
+import { SearchPageResponseDto } from './dto/search-page-response.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
 import { RanksService } from '../ranks/ranks.service';
@@ -252,12 +253,14 @@ export class SpotsService {
 					.leftJoinAndSelect('snsPosts.theme', 'theme')
 					.andWhere('theme.id = :id', { id: searchRequest.themeId });
 			}
+			const totalPageSpots = await searchSpots.getMany();
 			const responseSpots = await searchSpots
 				.limit(searchRequest.take)
 				.offset((searchRequest.page - 1) * searchRequest.take)
 				.getMany();
 
-			return Array.from(responseSpots).map(
+			const totalPage = Math.ceil(totalPageSpots.length / searchRequest.take);
+			const spots = Array.from(responseSpots).map(
 				(spot) =>
 					new SearchResponseDto({
 						...spot,
@@ -268,6 +271,7 @@ export class SpotsService {
 						}),
 					}),
 			);
+			return new SearchPageResponseDto({ totalPage: totalPage, spots: spots });
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
