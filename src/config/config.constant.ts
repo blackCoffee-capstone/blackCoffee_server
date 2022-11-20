@@ -52,6 +52,13 @@ export type NcloudConfig = {
 	storageBucket: string;
 };
 
+export type SshConfig = {
+	host: string;
+	userName: string;
+	port: string;
+	password: string;
+};
+
 export const appConfig = (): { appConfig: AppConfig } => ({
 	appConfig: {
 		env: process.env.NODE_ENV as NodeEnv,
@@ -109,5 +116,14 @@ export const ncloudConfig = (): { ncloudConfig: NcloudConfig } => ({
 		secretAccessKey: process.env.NCLOUD_SECRET_ACCESS_KEY,
 		storageEndPoint: process.env.NCLOUD_STORAGE_ENDPOINT,
 		storageBucket: process.env.NCLOUD_STORAGE_BUCKET,
+	},
+});
+
+export const sshConfig = (): { sshConfig: SshConfig } => ({
+	sshConfig: {
+		host: process.env.SSH_HOST,
+		userName: process.env.SSH_USERNAME,
+		port: process.env.SSH_PORT,
+		password: process.env.SSH_PASSWORD,
 	},
 });

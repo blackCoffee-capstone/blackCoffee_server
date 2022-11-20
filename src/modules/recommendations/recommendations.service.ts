@@ -1,5 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { SshConfig } from 'src/config/config.constant';
 import { Spot } from 'src/entities/spots.entity';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { Repository } from 'typeorm';
@@ -8,6 +10,9 @@ import { UsersTasteThemesResponseDto } from '../taste-themes/dto/users-taste-the
 import { RecommendationsMapResponseDto } from './dto/recommendations-map-response.dto';
 import { RecommendationsSpotResponseDto } from './dto/recommendations-spot-response.dto';
 
+const { NodeSSH } = require('node-ssh');
+const ssh = new NodeSSH();
+
 @Injectable()
 export class RecommendationsService {
 	constructor(
@@ -15,7 +20,9 @@ export class RecommendationsService {
 		private readonly spotsRepository: Repository<Spot>,
 		@InjectRepository(TasteTheme)
 		private readonly tasteThemesRepository: Repository<TasteTheme>,
+		private readonly configService: ConfigService,
 	) {}
+	#sshConfig = this.configService.get<SshConfig>('sshConfig');
 
 	async recommendationsSpotsList(userId: number): Promise<SearchResponseDto[]> {
 		const usersTastes: UsersTasteThemesResponseDto[] = await this.getUsersTasteThemes(userId);
@@ -24,6 +31,44 @@ export class RecommendationsService {
 		console.log({
 			usersTastes,
 			spots,
+		});
+
+		const local_result_path = './src/modules/recommendations/results/result.json';
+
+		const remote_path = 'data.json';
+		const remore_result_path = 'result.json';
+
+		//명령어 보내기
+		ssh.connect({
+			host: this.#sshConfig.host,
+			username: this.#sshConfig.userName,
+			port: this.#sshConfig.port,
+			password: this.#sshConfig.password,
+		}).then(function () {
+			ssh.execCommand('cd Desktop/blackcoffee/postClassifier/', {}).then(function () {
+				console.log('DONE1');
+				ssh.execCommand('conda activate test0', {}).then(function () {
+					console.log('DONE2');
+					ssh.execCommand('python classifyPost.py testingData/raw_data_set.xlsx result.json', {}).then(
+						function () {
+							console.log('DONE3');
+							ssh.getFile(local_result_path, 'Desktop/blackcoffee/postClassifier/result.json')
+								.then(
+									function (Contents) {
+										console.log(Contents);
+										console.log('DONE');
+									},
+									function (error) {
+										console.log(error);
+									},
+								)
+								.then(function () {
+									ssh.dispose(); //커넥션 종료
+								});
+						},
+					);
+				});
+			});
 		});
 
 		// ml에서 받아온 id들
