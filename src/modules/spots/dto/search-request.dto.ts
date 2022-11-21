@@ -30,16 +30,4 @@ export class SearchRequestDto {
 	@Type(() => Number)
 	@ApiProperty({ default: 20, description: '페이지 별 데이터 개수' })
 	readonly take?: number = 20;
-
-	@IsNumber()
-	@IsOptional()
-	@Type(() => Number)
-	@ApiProperty({ example: 1, description: '위치 id' })
-	locationId?: number;
-
-	@IsNumber()
-	@IsOptional()
-	@Type(() => Number)
-	@ApiProperty({ example: 1, description: '테마 id' })
-	themeId?: number;
 }
