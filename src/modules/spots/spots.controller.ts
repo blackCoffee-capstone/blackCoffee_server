@@ -1,5 +1,4 @@
 import {
-	Body,
 	Controller,
 	Get,
 	HttpException,
@@ -14,9 +13,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
-import { SearchRequestDto } from './dto/search-request.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
-import { SearchFilterRequestDto } from './dto/search-filter-request.dto';
+import { SearchRequestDto } from './dto/search-request.dto';
 
 import { ApiDocs } from './spots.docs';
 import { SpotsService } from './spots.service';
@@ -69,8 +67,8 @@ export class SpotsController {
 
 	@Get()
 	@ApiDocs.searchSpot('여행지 검색(단어 검색, 정렬, 필터링, 페이지네이션)')
-	async searchSpot(@Query() searchRequest: SearchRequestDto, @Body() searchFilter: SearchFilterRequestDto) {
-		return await this.spotsService.getSearchSpot(searchRequest, searchFilter);
+	async searchSpot(@Query() searchRequest: SearchRequestDto) {
+		return await this.spotsService.getSearchSpot(searchRequest);
 	}
 
 	@Get(':spotId')
