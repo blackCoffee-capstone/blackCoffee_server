@@ -121,7 +121,7 @@ export class SpotsService {
 		});
 	}
 
-	private async saveSpot(metaData: SaveRequestDto[]) {
+	async saveSpot(metaData: SaveRequestDto[]) {
 		try {
 			await this.spotsRepository.update({}, { rank: null });
 			await this.noDuplicateSpot(metaData);
