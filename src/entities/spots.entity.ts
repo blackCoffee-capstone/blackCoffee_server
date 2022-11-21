@@ -22,7 +22,7 @@ export class Spot extends CommonEntity {
 	location: Location;
 
 	@IsString()
-	@Column({ type: 'varchar', nullable: false, unique: true })
+	@Column({ length: 30, type: 'varchar', nullable: false, unique: true })
 	name: string;
 
 	@IsLatitude()
