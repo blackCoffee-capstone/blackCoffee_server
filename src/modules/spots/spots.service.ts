@@ -297,7 +297,26 @@ export class SpotsService {
 				searchSpots = searchSpots.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
 			}
 			if (searchFilter.locationIds) {
-				const locationIds = searchFilter.locationIds;
+				let locationIds = searchFilter.locationIds;
+
+				const metroNames = await this.locationsRepository
+					.createQueryBuilder('location')
+					.select('metro_name')
+					.where('location.localName is null')
+					.andWhere('location.id IN (:...ids)', { ids: locationIds })
+					.getRawMany();
+				const metrosList = Array.from(metroNames).flatMap(({ metro_name }) => [metro_name]);
+
+				if (metroNames) {
+					const allLocals = await this.locationsRepository
+						.createQueryBuilder('location')
+						.select('id')
+						.where('location.metroName IN (:...metroLists)', { metroLists: metrosList })
+						.getRawMany();
+					const localsIds = Array.from(allLocals).flatMap(({ id }) => [id]);
+					locationIds = locationIds.concat(localsIds);
+					locationIds = [...new Set(locationIds)];
+				}
 				searchSpots = searchSpots.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
 			}
 			if (searchFilter.themeIds) {
