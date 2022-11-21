@@ -21,6 +21,7 @@ import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { SearchPageResponseDto } from './dto/search-page-response.dto';
+import { SearchFilterRequestDto } from './dto/search-filter-request.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
 
@@ -135,32 +136,40 @@ export class SpotsService {
 
 	private async noDuplicateSpot(metaData: SaveRequestDto[]) {
 		try {
-			const addSpots = Array.from(metaData).map((meta) => [
-				meta.name,
-				meta.latitude,
-				meta.longitude,
-				meta.rank,
-				meta.metroName,
-				meta.localName,
-			]);
-			const noDupSpots = [...new Set(addSpots.join('|').split('|'))].map((s) => s.split(','));
-			for (const spot of noDupSpots) {
-				if (spot[5] === '') spot[5] = null;
-				const location = await this.locationsRepository
+			const addSpots = metaData.filter((character, idx, arr) => {
+				return (
+					arr.findIndex(
+						(item) =>
+							item.name === character.name &&
+							item.metroName === character.metroName &&
+							item.localName === character.localName &&
+							item.latitude === character.latitude &&
+							item.longitude === character.longitude &&
+							item.rank === character.rank,
+					) === idx
+				);
+			});
+
+			for (const spot of addSpots) {
+				if (!spot.rank) spot.rank = null;
+				let location = await this.locationsRepository
 					.createQueryBuilder('location')
-					.where('metro_name = :metro', { metro: spot[4] })
-					.andWhere('local_name = :local', { local: spot[5] })
-					.getOne();
-				if (!location) continue;
+					.where('metro_name = :metro', { metro: spot.metroName });
+
+				if (spot.localName === null) location = await location.andWhere('location.local_name is null');
+				else location = await location.andWhere('local_name = :local', { local: spot.localName });
+				const oneLocation = await location.getOne();
+
+				if (!oneLocation) continue;
 				await this.createSpot(
 					new SpotRequestDto({
-						locationId: location.id,
-						name: spot[0],
-						latitude: +spot[1],
-						longitude: +spot[2],
-						rank: +spot[3],
+						locationId: oneLocation.id,
+						name: spot.name,
+						latitude: spot.latitude,
+						longitude: spot.longitude,
+						rank: spot.rank,
 					}),
-					location,
+					oneLocation,
 				);
 			}
 		} catch (error) {
@@ -170,24 +179,28 @@ export class SpotsService {
 
 	private async noDuplicateSnsPost(metaData: SaveRequestDto[]) {
 		try {
-			const addSnsPosts = Array.from(metaData).map((meta) => [
-				meta.date,
-				meta.likeNumber,
-				meta.photoUrl,
-				meta.content,
-				meta.themeName,
-				meta.name,
-			]);
-			const noDupSnsPosts = [...new Set(addSnsPosts.join('|').split('|'))].map((s) => s.split(','));
+			const addSnsPosts = metaData.filter((character, idx, arr) => {
+				return (
+					arr.findIndex(
+						(item) =>
+							item.date === character.date &&
+							item.likeNumber === character.likeNumber &&
+							item.photoUrl === character.photoUrl &&
+							item.content === character.content &&
+							item.themeName === character.themeName &&
+							item.name === character.name,
+					) === idx
+				);
+			});
 			const changeSpots = [];
-			for (const sns of noDupSnsPosts) {
+			for (const sns of addSnsPosts) {
 				const spot = await this.spotsRepository
 					.createQueryBuilder('spot')
-					.where('name = :name', { name: sns[5] })
+					.where('name = :name', { name: sns.name })
 					.getOne();
 				const theme = await this.themeRepository
 					.createQueryBuilder('theme')
-					.where('name = :name', { name: sns[4] })
+					.where('name = :name', { name: sns.themeName })
 					.getOne();
 				if (!theme || !spot) continue;
 				changeSpots.push(spot.id);
@@ -195,10 +208,10 @@ export class SpotsService {
 					new SnsPostRequestDto({
 						themeId: theme.id,
 						spotId: spot.id,
-						date: sns[0],
-						likeNumber: +sns[1],
-						photoUrl: sns[2],
-						content: sns[3],
+						date: sns.date,
+						likeNumber: sns.likeNumber,
+						photoUrl: sns.photoUrl,
+						content: sns.content,
 					}),
 					spot,
 					theme,
@@ -274,7 +287,7 @@ export class SpotsService {
 		}
 	}
 
-	async getSearchSpot(searchRequest: SearchRequestDto) {
+	async getSearchSpot(searchRequest: SearchRequestDto, searchFilter: SearchFilterRequestDto) {
 		try {
 			let searchSpots = this.spotsRepository
 				.createQueryBuilder('spot')
@@ -283,15 +296,34 @@ export class SpotsService {
 			if (searchRequest.word) {
 				searchSpots = searchSpots.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
 			}
-			if (searchRequest.locationId) {
-				const locationId = searchRequest.locationId;
-				searchSpots = searchSpots.andWhere('location.id = :locationId', { locationId });
+			if (searchFilter.locationIds) {
+				let locationIds = searchFilter.locationIds;
+
+				const metroNames = await this.locationsRepository
+					.createQueryBuilder('location')
+					.select('metro_name')
+					.where('location.localName is null')
+					.andWhere('location.id IN (:...ids)', { ids: locationIds })
+					.getRawMany();
+				const metrosList = Array.from(metroNames).flatMap(({ metro_name }) => [metro_name]);
+
+				if (metroNames) {
+					const allLocals = await this.locationsRepository
+						.createQueryBuilder('location')
+						.select('id')
+						.where('location.metroName IN (:...metroLists)', { metroLists: metrosList })
+						.getRawMany();
+					const localsIds = Array.from(allLocals).flatMap(({ id }) => [id]);
+					locationIds = locationIds.concat(localsIds);
+					locationIds = [...new Set(locationIds)];
+				}
+				searchSpots = searchSpots.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
 			}
-			if (searchRequest.themeId) {
+			if (searchFilter.themeIds) {
 				searchSpots = searchSpots
 					.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
 					.leftJoinAndSelect('snsPosts.theme', 'theme')
-					.andWhere('theme.id = :id', { id: searchRequest.themeId });
+					.andWhere('theme.id IN (:...themeIds)', { themeIds: searchFilter.themeIds });
 			}
 			const totalPageSpots = await searchSpots.getMany();
 			const responseSpots = await searchSpots
@@ -327,8 +359,10 @@ export class SpotsService {
 				.leftJoinAndSelect('snsPost.theme', 'theme')
 				.where('spot.id = :spotId', { spotId });
 
-			if (detailRequest.themeId) {
-				detailSnsPost = detailSnsPost.andWhere('theme.id = :id', { id: detailRequest.themeId });
+			if (detailRequest.themeIds) {
+				detailSnsPost = detailSnsPost.andWhere('theme.id IN (:...themeIds)', {
+					themeIds: detailRequest.themeIds,
+				});
 			}
 
 			const filterSnsPosts = await detailSnsPost.limit(detailRequest.take).getMany();
