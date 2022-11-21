@@ -24,7 +24,7 @@ export class SaveRequestDto {
 
 	@IsNumber()
 	@ApiProperty({ example: 1, description: '순위' })
-	readonly rank: number | null;
+	rank: number | null;
 
 	@IsDateString()
 	@ApiProperty({ example: '2022-02-01', description: 'sns 게시글 등록일' })
