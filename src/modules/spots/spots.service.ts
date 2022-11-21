@@ -21,6 +21,7 @@ import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { SearchPageResponseDto } from './dto/search-page-response.dto';
+import { SearchFilterRequestDto } from './dto/search-filter-request.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
 
@@ -121,7 +122,7 @@ export class SpotsService {
 		});
 	}
 
-	async saveSpot(metaData: SaveRequestDto[]) {
+	private async saveSpot(metaData: SaveRequestDto[]) {
 		try {
 			await this.spotsRepository.update({}, { rank: null });
 			await this.noDuplicateSpot(metaData);
@@ -286,7 +287,7 @@ export class SpotsService {
 		}
 	}
 
-	async getSearchSpot(searchRequest: SearchRequestDto) {
+	async getSearchSpot(searchRequest: SearchRequestDto, searchFilter: SearchFilterRequestDto) {
 		try {
 			let searchSpots = this.spotsRepository
 				.createQueryBuilder('spot')
@@ -295,15 +296,15 @@ export class SpotsService {
 			if (searchRequest.word) {
 				searchSpots = searchSpots.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
 			}
-			if (searchRequest.locationId) {
-				const locationId = searchRequest.locationId;
-				searchSpots = searchSpots.andWhere('location.id = :locationId', { locationId });
+			if (searchFilter.locationIds) {
+				const locationIds = searchFilter.locationIds;
+				searchSpots = searchSpots.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
 			}
-			if (searchRequest.themeId) {
+			if (searchFilter.themeIds) {
 				searchSpots = searchSpots
 					.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
 					.leftJoinAndSelect('snsPosts.theme', 'theme')
-					.andWhere('theme.id = :id', { id: searchRequest.themeId });
+					.andWhere('theme.id IN (:...themeIds)', { themeIds: searchFilter.themeIds });
 			}
 			const totalPageSpots = await searchSpots.getMany();
 			const responseSpots = await searchSpots
@@ -339,8 +340,10 @@ export class SpotsService {
 				.leftJoinAndSelect('snsPost.theme', 'theme')
 				.where('spot.id = :spotId', { spotId });
 
-			if (detailRequest.themeId) {
-				detailSnsPost = detailSnsPost.andWhere('theme.id = :id', { id: detailRequest.themeId });
+			if (detailRequest.themeIds) {
+				detailSnsPost = detailSnsPost.andWhere('theme.id IN (:...themeIds)', {
+					themeIds: detailRequest.themeIds,
+				});
 			}
 
 			const filterSnsPosts = await detailSnsPost.limit(detailRequest.take).getMany();
