@@ -3,6 +3,7 @@ import { Column, Entity, OneToMany } from 'typeorm';
 
 import { UserType } from 'src/types/users.types';
 import { CommonEntity } from './common.entity';
+import { Post } from './posts.entity';
 import { TasteTheme } from './taste-themes.entity';
 
 @Entity()
@@ -44,4 +45,9 @@ export class User extends CommonEntity {
 		cascade: true,
 	})
 	tasteThemes: TasteTheme[];
+
+	@OneToMany(() => Post, (posts: Post) => posts.user, {
+		cascade: true,
+	})
+	posts: Post[];
 }
