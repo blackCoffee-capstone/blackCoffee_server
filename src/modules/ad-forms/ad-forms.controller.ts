@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -13,7 +13,26 @@ export class AdFormsController {
 
 	@Post()
 	@ApiDocs.registerAdForm('광고 요청 등록')
-	@UseInterceptors(FileInterceptor('file'))
+	@UseInterceptors(
+		FileInterceptor('file', {
+			fileFilter: (request, file, callback) => {
+				if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+					callback(null, true);
+				} else {
+					callback(
+						new HttpException(
+							{
+								message: 1,
+								error: '지원하지 않는 이미지 형식입니다.',
+							},
+							HttpStatus.BAD_REQUEST,
+						),
+						false,
+					);
+				}
+			},
+		}),
+	)
 	async registerAdForm(@UploadedFile() licenseFile: Express.Multer.File, @Body() adFormData) {
 		return await this.adformsService.registerAdForm(licenseFile, adFormData as AdFormsRequestDto);
 	}
