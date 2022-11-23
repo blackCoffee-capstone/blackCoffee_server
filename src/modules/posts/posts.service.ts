@@ -10,6 +10,7 @@ import { uuid } from 'uuidv4';
 import { NcloudConfig, OauthConfig } from 'src/config/config.constant';
 import { Location } from 'src/entities/locations.entity';
 import { Post } from 'src/entities/posts.entity';
+import { GetPostsResponseDto } from './dto/get-posts-response.dto';
 import { PostsRequestDto } from './dto/posts-request.dto';
 import { PostsResponseDto } from './dto/posts-response.dto';
 import { UpdatePostsRequestDto } from './dto/update-posts-request.dto';
@@ -139,6 +140,22 @@ export class PostsService {
 		return new PostsResponseDto({ id: postId });
 	}
 
+	async getPost(userId: number, postId: number): Promise<GetPostsResponseDto> {
+		const foundUsersPost = await this.getUsersPost(userId, postId);
+
+		if (!foundUsersPost) {
+			throw new NotFoundException('Post is not found');
+		}
+		return new GetPostsResponseDto({
+			...foundUsersPost,
+			location: {
+				id: foundUsersPost.location_id,
+				metroName: foundUsersPost.metro_name,
+				localName: foundUsersPost.local_name,
+			},
+		});
+	}
+
 	async deletePost(userId: number, postId: number): Promise<boolean> {
 		const foundUsersPost = await this.getUsersPost(userId, postId);
 
@@ -260,7 +277,7 @@ export class PostsService {
 		return await this.postsRepository
 			.createQueryBuilder('post')
 			.select(
-				'post.id, post.title, post.content, post.latitude, post.longitude, post.geom, post.photoUrls, location.id AS location_id',
+				'post.id, post.title, post.content, post.latitude, post.longitude, post.geom, post.photoUrls, location.id AS location_id, location.metroName, location.localName',
 			)
 			.leftJoin('post.user', 'user')
 			.leftJoin('post.location', 'location')

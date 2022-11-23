@@ -2,6 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
+import { GetPostsResponseDto } from './dto/get-posts-response.dto';
 import { PostsResponseDto } from './dto/posts-response.dto';
 import { PostsController } from './posts.controller';
 
@@ -88,6 +89,24 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 				status: 201,
 				description: '',
 				type: PostsResponseDto,
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
+	getPost(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '커뮤니티 게시글 정보 반환',
+			}),
+			ApiParam({
+				name: 'postId',
+				type: Number,
+			}),
+			ApiResponse({
+				status: 200,
+				description: '',
+				type: GetPostsResponseDto,
 			}),
 			ApiBearerAuth('Authorization'),
 		);

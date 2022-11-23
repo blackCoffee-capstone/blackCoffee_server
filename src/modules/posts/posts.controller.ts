@@ -2,6 +2,7 @@ import {
 	Body,
 	Controller,
 	Delete,
+	Get,
 	HttpException,
 	HttpStatus,
 	Param,
@@ -85,6 +86,12 @@ export class PostsController {
 		@Body() postData?: UpdatePostsRequestDto,
 	) {
 		return await this.postsService.updatePost(userData.id, postId, photos, postData);
+	}
+
+	@Get(':postId')
+	@ApiDocs.getPost('커뮤니티 게시글 상세보기')
+	async getPost(@AuthUser() userData, @Param('postId') postId: number) {
+		return await this.postsService.getPost(userData.id, postId);
 	}
 
 	@Delete(':postId')
