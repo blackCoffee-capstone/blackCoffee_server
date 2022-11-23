@@ -24,11 +24,8 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 						content: {
 							type: 'string',
 						},
-						latitude: {
-							type: 'number',
-						},
-						longitude: {
-							type: 'number',
+						location: {
+							type: 'string',
 						},
 						files: {
 							type: 'array',
@@ -65,11 +62,8 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 						content: {
 							type: 'string',
 						},
-						latitude: {
-							type: 'number',
-						},
-						longitude: {
-							type: 'number',
+						location: {
+							type: 'string',
 						},
 						files: {
 							type: 'array',
