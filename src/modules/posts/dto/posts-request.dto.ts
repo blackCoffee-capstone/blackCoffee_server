@@ -11,10 +11,6 @@ export class PostsRequestDto {
 	readonly content: string;
 
 	@IsString()
-	@ApiProperty({ example: '37.253452', description: '위도' })
-	readonly latitude: string;
-
-	@IsString()
-	@ApiProperty({ example: '126.234523', description: '경도' })
-	readonly longitude: string;
+	@ApiProperty({ example: '서울특별시 ~~', description: '주소' })
+	readonly location: string;
 }

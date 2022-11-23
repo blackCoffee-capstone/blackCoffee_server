@@ -1,5 +1,4 @@
-import { IsArray, IsLatitude, IsLongitude, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Geometry } from 'geojson';
+import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { CommonEntity } from './common.entity';
@@ -44,24 +43,6 @@ export class Post extends CommonEntity {
 	@IsString()
 	@Column({ type: 'varchar', length: 1000, nullable: true })
 	content: string;
-
-	@IsLatitude()
-	@Column({ type: 'double precision', nullable: false })
-	latitude: number;
-
-	@IsLongitude()
-	@Column({ type: 'double precision', nullable: false })
-	longitude: number;
-
-	@Column({
-		name: 'geom',
-		type: 'point',
-		spatialFeatureType: 'Point',
-		srid: 5186,
-		nullable: false,
-		comment: 'geom',
-	})
-	geom: Geometry;
 
 	@IsArray()
 	@IsNotEmpty()
