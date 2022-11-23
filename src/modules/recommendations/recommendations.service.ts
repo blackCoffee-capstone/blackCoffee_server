@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
@@ -140,7 +140,9 @@ export class RecommendationsService {
 				.leftJoin('taste_theme.theme', 'theme')
 				.where('user.id = :id', { id: userId })
 				.getRawMany();
-
+			if (!foundUsersThemes) {
+				throw new BadRequestException('User taste theme is not found');
+			}
 			return foundUsersThemes.map((theme) => new UsersTasteThemesResponseDto({ id: theme.id, name: theme.name }));
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
