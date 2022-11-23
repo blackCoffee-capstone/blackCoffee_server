@@ -29,7 +29,11 @@ export class AdFormsService {
 			const licenseUrl = await this.uploadFileToS3('licenses', licenseFile);
 
 			const adForm = await this.adFormsRepository.save({
-				...adFormData,
+				businessName: adFormData.businessName,
+				latitude: Number(adFormData.latitude),
+				longitude: Number(adFormData.longitude),
+				email: adFormData.email ? adFormData.email : null,
+				requirement: adFormData.requirement,
 				licenseUrl,
 				geom,
 			});

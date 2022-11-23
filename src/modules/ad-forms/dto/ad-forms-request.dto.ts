@@ -1,18 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsLatitude, IsLongitude, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class AdFormsRequestDto {
 	@IsString()
 	@ApiProperty({ example: 'test', description: '사업자명' })
 	readonly businessName: string;
 
-	@IsLatitude()
-	@ApiProperty({ example: 37.253452, description: '위도' })
-	readonly latitude: number;
+	@IsString()
+	@ApiProperty({ example: '37.253452', description: '위도' })
+	readonly latitude: string;
 
-	@IsLongitude()
-	@ApiProperty({ example: 126.234523, description: '경도' })
-	readonly longitude: number;
+	@IsString()
+	@ApiProperty({ example: '126.234523', description: '경도' })
+	readonly longitude: string;
 
 	@IsEmail()
 	@ApiProperty({ example: 'test@gmail.com', description: '이메일' })

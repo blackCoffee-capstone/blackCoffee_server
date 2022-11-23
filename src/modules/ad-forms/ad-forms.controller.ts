@@ -33,7 +33,7 @@ export class AdFormsController {
 			},
 		}),
 	)
-	async registerAdForm(@UploadedFile() licenseFile: Express.Multer.File, @Body() adFormData) {
-		return await this.adformsService.registerAdForm(licenseFile, adFormData as AdFormsRequestDto);
+	async registerAdForm(@UploadedFile() licenseFile: Express.Multer.File, @Body() adFormData: AdFormsRequestDto) {
+		return await this.adformsService.registerAdForm(licenseFile, adFormData);
 	}
 }
