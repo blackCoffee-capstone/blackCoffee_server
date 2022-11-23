@@ -2,6 +2,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import { Column, Entity, OneToMany } from 'typeorm';
 
 import { CommonEntity } from './common.entity';
+import { PostTheme } from './post-themes.entity';
 import { SnsPost } from './sns-posts.entity';
 import { TasteTheme } from './taste-themes.entity';
 
@@ -27,4 +28,10 @@ export class Theme extends CommonEntity {
 		cascade: true,
 	})
 	tasteThemes: TasteTheme[];
+
+	@OneToMany(() => PostTheme, (postTheme: PostTheme) => postTheme.theme, {
+		cascade: true,
+		eager: true,
+	})
+	postThemes: PostTheme[];
 }

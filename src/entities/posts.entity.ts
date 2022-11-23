@@ -1,8 +1,9 @@
 import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 import { CommonEntity } from './common.entity';
 import { Location } from './locations.entity';
+import { PostTheme } from './post-themes.entity';
 import { User } from './users.entity';
 
 @Entity()
@@ -48,4 +49,10 @@ export class Post extends CommonEntity {
 	@IsNotEmpty()
 	@Column({ name: 'photo_urls', type: 'text', nullable: false, array: true })
 	photoUrls: string[];
+
+	@OneToMany(() => PostTheme, (postTheme: PostTheme) => postTheme.post, {
+		cascade: true,
+		eager: true,
+	})
+	postThemes: PostTheme[];
 }

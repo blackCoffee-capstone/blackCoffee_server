@@ -7,7 +7,9 @@ import { uuid } from 'uuidv4';
 
 import { NcloudConfig } from 'src/config/config.constant';
 import { Location } from 'src/entities/locations.entity';
+import { PostTheme } from 'src/entities/post-themes.entity';
 import { Post } from 'src/entities/posts.entity';
+import { Theme } from 'src/entities/theme.entity';
 import { GetPostsResponseDto } from './dto/get-posts-response.dto';
 import { PostsRequestDto } from './dto/posts-request.dto';
 import { PostsResponseDto } from './dto/posts-response.dto';
@@ -20,6 +22,10 @@ export class PostsService {
 		private readonly locationsRepository: Repository<Location>,
 		@InjectRepository(Post)
 		private readonly postsRepository: Repository<Post>,
+		@InjectRepository(Theme)
+		private readonly themesRepository: Repository<Theme>,
+		@InjectRepository(PostTheme)
+		private readonly postThemesRepository: Repository<PostTheme>,
 		private readonly configService: ConfigService,
 	) {}
 	#ncloudConfig = this.configService.get<NcloudConfig>('ncloudConfig');
@@ -31,8 +37,15 @@ export class PostsService {
 	): Promise<PostsResponseDto> {
 		if (!photos || photos.length === 0) {
 			throw new BadRequestException('File is not exist');
-		} else if (photos.length > 5) {
+		}
+		if (photos.length > 5) {
 			throw new BadRequestException('Files length exeeds 5');
+		}
+		if (this.isDuplicateArr(postData.themes)) {
+			throw new BadRequestException(`Duplicate value exists in theme list`);
+		}
+		if (await this.notFoundThemes(postData.themes)) {
+			throw new NotFoundException('Theme is not found');
 		}
 
 		const metroLocalName = this.getMetroLocalName(postData.location);
@@ -42,16 +55,34 @@ export class PostsService {
 			metroLocalName.localName,
 		);
 		const photoUrls = await this.uploadFilesToS3('posts', photos);
+		try {
+			const post = await this.postsRepository.save({
+				title: postData.title,
+				content: postData.content,
+				photoUrls,
+				userId,
+				locationId,
+			});
 
-		const post = await this.postsRepository.save({
-			title: postData.title,
-			content: postData.content,
-			photoUrls,
-			userId,
-			locationId,
-		});
+			const postsThemes = [];
+			for (let i = 0; i < postData.themes.length; i++) {
+				postsThemes.push({
+					postId: post.id,
+					themeId: postData.themes[i],
+				});
+			}
 
-		return new PostsResponseDto({ id: post.id });
+			await this.postThemesRepository
+				.createQueryBuilder('post_theme')
+				.insert()
+				.into(PostTheme)
+				.values(postsThemes)
+				.execute();
+
+			return new PostsResponseDto({ id: post.id });
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async updatePost(
@@ -64,8 +95,15 @@ export class PostsService {
 
 		if (photos && photos.length === 0) {
 			throw new BadRequestException('File is not exist');
-		} else if (photos.length > 5) {
+		}
+		if (photos.length > 5) {
 			throw new BadRequestException('Files length exeeds 5');
+		}
+		if (postData.themes && this.isDuplicateArr(postData.themes)) {
+			throw new BadRequestException(`Duplicate value exists in theme list`);
+		}
+		if (postData.themes && (await this.notFoundThemes(postData.themes))) {
+			throw new NotFoundException('Theme is not found');
 		}
 
 		const updateData = {
@@ -74,6 +112,7 @@ export class PostsService {
 			photoUrls: photos ? [] : foundUsersPost.photo_urls,
 			locationId: postData.location ? 0 : foundUsersPost.location_id,
 		};
+
 		if (!foundUsersPost) {
 			throw new NotFoundException('Post is not found');
 		}
@@ -90,14 +129,34 @@ export class PostsService {
 			await this.deleteFilesToS3('posts', foundUsersPost.photo_urls);
 			updateData.photoUrls = await this.uploadFilesToS3('posts', photos);
 		}
+		try {
+			if (postData.themes) {
+				await this.postThemesRepository.delete({ postId });
+				const postsThemes = [];
+				for (let i = 0; i < postData.themes.length; i++) {
+					postsThemes.push({
+						postId,
+						themeId: postData.themes[i],
+					});
+				}
 
-		await this.postsRepository.update(postId, updateData);
-		return new PostsResponseDto({ id: postId });
+				await this.postThemesRepository
+					.createQueryBuilder('post_theme')
+					.insert()
+					.into(PostTheme)
+					.values(postsThemes)
+					.execute();
+			}
+
+			await this.postsRepository.update(postId, updateData);
+			return new PostsResponseDto({ id: postId });
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async getPost(userId: number, postId: number): Promise<GetPostsResponseDto> {
 		const foundUsersPost = await this.getUsersPost(userId, postId);
-
 		if (!foundUsersPost) {
 			throw new NotFoundException('Post is not found');
 		}
@@ -108,6 +167,7 @@ export class PostsService {
 				metroName: foundUsersPost.metro_name,
 				localName: foundUsersPost.local_name,
 			},
+			themes: await this.getPostsThems(postId),
 		});
 	}
 
@@ -237,5 +297,32 @@ export class PostsService {
 			.where('user.id = :userId', { userId })
 			.andWhere('post.id = :postId', { postId })
 			.getRawOne();
+	}
+
+	private async getPostsThems(postId: number) {
+		return await this.postThemesRepository
+			.createQueryBuilder('post_theme')
+			.select('theme.id, theme.name')
+			.leftJoin('post_theme.post', 'post')
+			.leftJoin('post_theme.theme', 'theme')
+			.where('post.id = :postId', { postId })
+			.getRawMany();
+	}
+
+	private isDuplicateArr(arr: any): boolean {
+		const set = new Set(arr);
+
+		if (arr.length !== set.size) return true;
+		return false;
+	}
+
+	private async notFoundThemes(themes: number[]): Promise<boolean> {
+		const foundThemes = await this.themesRepository
+			.createQueryBuilder('theme')
+			.where('theme.id IN (:...themeIds)', { themeIds: themes })
+			.getMany();
+
+		if (foundThemes.length !== themes.length) return true;
+		return false;
 	}
 }

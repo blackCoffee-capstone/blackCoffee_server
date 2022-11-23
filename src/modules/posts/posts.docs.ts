@@ -27,6 +27,12 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 						location: {
 							type: 'string',
 						},
+						themes: {
+							type: 'array',
+							items: {
+								type: 'number',
+							},
+						},
 						files: {
 							type: 'array',
 							items: {
@@ -64,6 +70,12 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 						},
 						location: {
 							type: 'string',
+						},
+						themes: {
+							type: 'array',
+							items: {
+								type: 'number',
+							},
 						},
 						files: {
 							type: 'array',
