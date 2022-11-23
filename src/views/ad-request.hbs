@@ -11,6 +11,15 @@
 			rel='stylesheet'
 			href='https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0'
 		/>
+		<link
+			rel='stylesheet'
+			type='text/css'
+			href='https://cdn.datatables.net/v/bs4/dt-1.13.1/date-1.2.0/fh-3.3.1/r-2.4.0/sc-2.0.7/sb-1.4.0/sp-2.1.0/sl-1.5.0/datatables.css'
+		/>
+		<script
+			type='text/javascript'
+			src='https://cdn.datatables.net/v/bs4/dt-1.13.1/date-1.2.0/fh-3.3.1/r-2.4.0/sc-2.0.7/sb-1.4.0/sp-2.1.0/sl-1.5.0/datatables.js'
+		></script>
 	</head>
 	<body>
 
@@ -46,31 +55,6 @@
 		</div>
 
 		<div class='ad_request'>
-			<a>추가 입력</a>
-			<table id='append_table'>
-				<thead>
-					<tr>
-						<th><label for='add_no'>NO</label></th>
-						<th>ID</th>
-						<th>BUSINESS</th>
-						<th>EMAIL</th>
-						<th>DATE</th>
-						<th>STATUS</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td><input type='text' id='add_no' /></td>
-						<td><input type='text' id='add_id' /></td>
-						<td><input type='text' id='add_business' /></td>
-						<td><input type='text' id='add_email' /></td>
-						<td><input type='text' id='add_date' /></td>
-						<td><input type='text' id='add_status' /></td>
-						<td><button type='button' id='append_row'>데이터 추가</button></td>
-					</tr>
-				</tbody>
-			</table>
-
 			<table id='list_table'>
 				<thead>
 					<tr>
@@ -81,46 +65,15 @@
 						<th>DATE</th>
 						<th>STATUS</th>
 						<th>DETAIL</th>
-						<th>DELETE</th>
 					</tr>
 				</thead>
-				<tbody>
-					<tr>
-						<td>1</td>
-						<td>kkk1234</td>
-						<td>A</td>
-						<td>kkk1234@gmail.com</td>
-						<td>2022-11-10</td>
-						<td>NOT APPROVE</td>
-						<td>
-							<a href='#' class='detail-link'>DETAIL</a>
-						</td>
-						<td>
-							<a href='#' class='delete-link'>DELETE</a>
-						</td>
-					</tr>
-					<tr>
-						<td>2</td>
-						<td>abc9999</td>
-						<td>B</td>
-						<td>abc9999@gmail.com</td>
-						<td>2022-11-14</td>
-						<td>NOT APPROVE</td>
-						<td>
-							<a href='#' class='detail-link'>DETAIL</a>
-						</td>
-						<td>
-							<a href='#' class='delete-link'>DELETE</a>
-						</td>
-					</tr>
-				</tbody>
 			</table>
 		</div>
 		<div id='popup'>
 			<div class='close'>close</div>
 			<div style='text-align : center; margin-top:70px;'><img
-					src='https://scontent-ssn1-1.xx.fbcdn.net/v/t39.30808-6/273300062_5512099255560765_7231279751257498891_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=973b4a&_nc_ohc=9LgI2Z7Ags0AX_liZ1Z&_nc_ht=scontent-ssn1-1.xx&oh=00_AfBtTFCGHYlM26OBDv6FEjLKTk9_OeW9YdAayUK4GB2Vlg&oe=63766D1C'
-					style='width:70%; height:70%;'
+					src='https://w.namu.la/s/e8decef5597f0f5bbe9e8e71a1c151b165c0154c7c604fd8fc8d91d78e70c23d2de543310230e7a423b22ecd0cfab3336213582e05afaff09581afb367965bff572231c2cb09f4bb02ca66dae8d769a215326a190afccd3068d33f47208c5fc2'
+					style='width:100%; height:70%;'
 				/>
 			</div>
 		</div>
