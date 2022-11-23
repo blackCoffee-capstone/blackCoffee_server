@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { boolean } from 'joi';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
@@ -60,14 +60,14 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 				description: '페이지 별 데이터 개수',
 			}),
 			ApiQuery({
-				name: 'locationId',
+				name: 'locationIds',
 				required: false,
-				description: '위치 id',
+				description: '위치 필터링 id list',
 			}),
 			ApiQuery({
-				name: 'themeId',
+				name: 'themeIds',
 				required: false,
-				description: '테마 id',
+				description: '테마 필터링 id list',
 			}),
 			ApiResponse({
 				status: 200,
@@ -83,19 +83,9 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 				description: '여행지 상세 페이지(여행지 기본 정보, 연관 sns posts',
 			}),
 			ApiQuery({
-				name: 'themeId',
-				required: false,
-				description: '테마 id',
-			}),
-			ApiQuery({
 				name: 'take',
 				required: false,
 				description: '페이지 별 데이터 개수',
-			}),
-			ApiParam({
-				name: 'spotId',
-				required: true,
-				description: '여행지 id',
 			}),
 			ApiResponse({
 				status: 200,

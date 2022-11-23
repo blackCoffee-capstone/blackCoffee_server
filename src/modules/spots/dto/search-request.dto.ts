@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 import { SortType } from 'src/types/sort.types';
 
@@ -31,15 +31,13 @@ export class SearchRequestDto {
 	@ApiProperty({ default: 20, description: '페이지 별 데이터 개수' })
 	readonly take?: number = 20;
 
-	@IsNumber()
 	@IsOptional()
-	@Type(() => Number)
-	@ApiProperty({ example: 1, description: '위치 id' })
-	locationId?: number;
+	@Transform((params) => params.value.split(',').map(Number))
+	@ApiProperty({ example: [1, 10], description: '위치 필터링 id list' })
+	readonly locationIds?: number[];
 
-	@IsNumber()
 	@IsOptional()
-	@Type(() => Number)
-	@ApiProperty({ example: 1, description: '테마 id' })
-	themeId?: number;
+	@Transform((params) => params.value.split(',').map(Number))
+	@ApiProperty({ example: [1, 2, 3], description: '테마 필터링 id list' })
+	readonly themeIds?: string[];
 }

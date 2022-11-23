@@ -127,7 +127,7 @@ export class SpotsService {
 		});
 	}
 
-	async saveSpot(metaData: SaveRequestDto[]) {
+	private async saveSpot(metaData: SaveRequestDto[]) {
 		try {
 			await this.spotsRepository.update({}, { rank: null });
 			await this.noDuplicateSpot(metaData);
@@ -292,6 +292,26 @@ export class SpotsService {
 		}
 	}
 
+	private async allSelection(locationIds) {
+		return await this.locationsRepository
+			.createQueryBuilder('location')
+			.leftJoinAndSelect('location.spots', 'spots')
+			.select('location.id AS id')
+			.where((metroNames) => {
+				const subQuery = metroNames
+					.subQuery()
+					.select('location.metroName')
+					.where('location.localName is null')
+					.andWhere('location.id IN (:...ids)', { ids: locationIds })
+					.from(Location, 'location')
+					.getQuery();
+				return 'location.metroName IN' + subQuery;
+			})
+			.andWhere('spots.id is not null')
+			.distinctOn(['location.id'])
+			.getRawMany();
+	}
+
 	async getSearchSpot(searchRequest: SearchRequestDto) {
 		try {
 			let searchSpots = this.spotsRepository
@@ -301,15 +321,19 @@ export class SpotsService {
 			if (searchRequest.word) {
 				searchSpots = searchSpots.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
 			}
-			if (searchRequest.locationId) {
-				const locationId = searchRequest.locationId;
-				searchSpots = searchSpots.andWhere('location.id = :locationId', { locationId });
+			if (searchRequest.locationIds) {
+				let locationIds = searchRequest.locationIds;
+				const allMetros = await this.allSelection(locationIds);
+				const localsIds = Array.from(allMetros).flatMap(({ id }) => [id]);
+				locationIds = [...new Set(locationIds.concat(localsIds))];
+
+				searchSpots = searchSpots.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
 			}
-			if (searchRequest.themeId) {
+			if (searchRequest.themeIds) {
 				searchSpots = searchSpots
 					.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
 					.leftJoinAndSelect('snsPosts.theme', 'theme')
-					.andWhere('theme.id = :id', { id: searchRequest.themeId });
+					.andWhere('theme.id IN (:...themeIds)', { themeIds: searchRequest.themeIds });
 			}
 			const totalPageSpots = await searchSpots.getMany();
 			const responseSpots = await searchSpots
@@ -339,15 +363,11 @@ export class SpotsService {
 		const IsSpot = await this.spotsRepository.findOne({ where: { id: spotId } });
 		if (!IsSpot) throw new NotFoundException('Spot is not found');
 		try {
-			let detailSnsPost = this.snsPostRepository
+			const detailSnsPost = this.snsPostRepository
 				.createQueryBuilder('snsPost')
 				.leftJoinAndSelect('snsPost.spot', 'spot')
 				.leftJoinAndSelect('snsPost.theme', 'theme')
 				.where('spot.id = :spotId', { spotId });
-
-			if (detailRequest.themeId) {
-				detailSnsPost = detailSnsPost.andWhere('theme.id = :id', { id: detailRequest.themeId });
-			}
 
 			const filterSnsPosts = await detailSnsPost.limit(detailRequest.take).getMany();
 			const detailSnsPostsDto = Array.from(filterSnsPosts).map((post) => new DetailSnsPostResponseDto(post));
@@ -366,27 +386,31 @@ export class SpotsService {
 	}
 
 	private async getNearbyFacility(latitude, longitude) {
-		const keyword = '맛집';
-		const kakaoRequestApiMapResult = await firstValueFrom(
-			this.httpService.get(
-				`https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURI(keyword)}
+		try {
+			const keyword = '맛집';
+			const kakaoRequestApiMapResult = await firstValueFrom(
+				this.httpService.get(
+					`https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURI(keyword)}
 				&y=${latitude}&x=${longitude}&radius=10000&sort=distance`,
-				{
-					headers: {
-						Authorization: `KakaoAK ${this.#oauthConfig.clientId}`,
+					{
+						headers: {
+							Authorization: `KakaoAK ${this.#oauthConfig.clientId}`,
+						},
 					},
-				},
-			),
-		);
-		return kakaoRequestApiMapResult.data.documents.map(
-			(facility) =>
-				new NeayByFacilityResponseDto({
-					name: facility.place_name,
-					placeUrl: facility.place_url,
-					address: facility.address_name,
-					distance: +facility.distance,
-					category: facility.category_name,
-				}),
-		);
+				),
+			);
+			return kakaoRequestApiMapResult.data.documents.map(
+				(facility) =>
+					new NeayByFacilityResponseDto({
+						name: facility.place_name,
+						placeUrl: facility.place_url,
+						address: facility.address_name,
+						distance: +facility.distance,
+						category: facility.category_name,
+					}),
+			);
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 }
