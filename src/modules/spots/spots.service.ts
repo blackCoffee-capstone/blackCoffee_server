@@ -387,11 +387,9 @@ export class SpotsService {
 
 	private async getNearbyFacility(latitude, longitude) {
 		try {
-			const keyword = '맛집';
 			const kakaoRequestApiMapResult = await firstValueFrom(
 				this.httpService.get(
-					`https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURI(keyword)}
-				&y=${latitude}&x=${longitude}&radius=10000&sort=distance`,
+					`https://dapi.kakao.com/v2/local/search/category.json?category\_group\_code=PK6,FD6,CE7&y=${latitude}&x=${longitude}&radius=20000&sort=distance`,
 					{
 						headers: {
 							Authorization: `KakaoAK ${this.#oauthConfig.clientId}`,
