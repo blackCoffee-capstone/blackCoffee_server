@@ -7,13 +7,16 @@ import { Repository } from 'typeorm';
 
 import { ConfigService } from '@nestjs/config';
 import { SshConfig } from 'src/config/config.constant';
+import { OauthConfig } from 'src/config/config.constant';
+import { HttpService } from '@nestjs/axios';
+import { RanksService } from '../ranks/ranks.service';
 import { Location } from 'src/entities/locations.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
-import { RanksService } from '../ranks/ranks.service';
+import { NeayByFacilityResponseDto } from './dto/neayby-facility-response.dto';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
@@ -23,6 +26,7 @@ import { SearchResponseDto } from './dto/search-response.dto';
 import { SearchPageResponseDto } from './dto/search-page-response.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
+import { firstValueFrom } from 'rxjs';
 
 const { NodeSSH } = require('node-ssh');
 const ssh = new NodeSSH();
@@ -40,8 +44,10 @@ export class SpotsService {
 		private readonly snsPostRepository: Repository<SnsPost>,
 		private readonly ranksService: RanksService,
 		private readonly configService: ConfigService,
+		private readonly httpService: HttpService,
 	) {}
 	#sshConfig = this.configService.get<SshConfig>('sshConfig');
+	#oauthConfig = this.configService.get<OauthConfig>('oauthConfig').kakao;
 
 	async createSpots(file: Express.Multer.File) {
 		if (!file) throw new BadRequestException('File is not exist');
@@ -346,14 +352,41 @@ export class SpotsService {
 			const filterSnsPosts = await detailSnsPost.limit(detailRequest.take).getMany();
 			const detailSnsPostsDto = Array.from(filterSnsPosts).map((post) => new DetailSnsPostResponseDto(post));
 			const location = await this.locationsRepository.findOne({ where: { id: IsSpot.locationId } });
+			const facilitiesDto = await this.getNearbyFacility(IsSpot.latitude, IsSpot.longitude);
 
 			return new DetailSpotResponseDto({
 				...IsSpot,
 				detailSnsPost: detailSnsPostsDto,
+				neaybyFacility: facilitiesDto,
 				location: new LocationResponseDto(location),
 			});
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
+	}
+
+	private async getNearbyFacility(latitude, longitude) {
+		const keyword = '맛집';
+		const kakaoRequestApiMapResult = await firstValueFrom(
+			this.httpService.get(
+				`https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURI(keyword)}
+				&y=${latitude}&x=${longitude}&radius=10000&sort=distance`,
+				{
+					headers: {
+						Authorization: `KakaoAK ${this.#oauthConfig.clientId}`,
+					},
+				},
+			),
+		);
+		return kakaoRequestApiMapResult.data.documents.map(
+			(facility) =>
+				new NeayByFacilityResponseDto({
+					name: facility.place_name,
+					placeUrl: facility.place_url,
+					address: facility.address_name,
+					distance: +facility.distance,
+					category: facility.category_name,
+				}),
+		);
 	}
 }
