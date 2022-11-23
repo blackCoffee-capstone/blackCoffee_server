@@ -92,4 +92,22 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
+	deletePost(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '커뮤니티 게시글 삭제',
+			}),
+			ApiParam({
+				name: 'postId',
+				type: Number,
+			}),
+			ApiResponse({
+				status: 204,
+				description: '삭제 완료',
+				type: PostsResponseDto,
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
 };

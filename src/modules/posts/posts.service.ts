@@ -101,7 +101,6 @@ export class PostsService {
 			photoUrls: photos ? [] : foundUsersPost.photo_urls,
 			locationId: postData.latitude || postData.longitude ? 0 : foundUsersPost.location_id,
 		};
-
 		if (!foundUsersPost) {
 			throw new NotFoundException('Post is not found');
 		}
@@ -138,6 +137,18 @@ export class PostsService {
 
 		await this.postsRepository.update(postId, updateData);
 		return new PostsResponseDto({ id: postId });
+	}
+
+	async deletePost(userId: number, postId: number): Promise<boolean> {
+		const foundUsersPost = await this.getUsersPost(userId, postId);
+
+		if (!foundUsersPost) {
+			throw new NotFoundException('Post is not found');
+		}
+
+		await this.deleteFilesToS3('posts', foundUsersPost.photo_urls);
+		await this.postsRepository.delete(postId);
+		return true;
 	}
 
 	private getMetroLocalName(locationData) {
