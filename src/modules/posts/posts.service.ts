@@ -1,4 +1,3 @@
-import { HttpService } from '@nestjs/axios';
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,7 +5,7 @@ import * as AWS from 'aws-sdk';
 import { Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
 
-import { NcloudConfig, OauthConfig } from 'src/config/config.constant';
+import { NcloudConfig } from 'src/config/config.constant';
 import { Location } from 'src/entities/locations.entity';
 import { Post } from 'src/entities/posts.entity';
 import { GetPostsResponseDto } from './dto/get-posts-response.dto';
@@ -22,9 +21,7 @@ export class PostsService {
 		@InjectRepository(Post)
 		private readonly postsRepository: Repository<Post>,
 		private readonly configService: ConfigService,
-		private readonly httpService: HttpService,
 	) {}
-	#oauthConfig = this.configService.get<OauthConfig>('oauthConfig').kakao;
 	#ncloudConfig = this.configService.get<NcloudConfig>('ncloudConfig');
 
 	async createPost(

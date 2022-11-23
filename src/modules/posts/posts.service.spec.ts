@@ -1,4 +1,3 @@
-import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -24,18 +23,10 @@ describe('PostsService', () => {
 					useClass: MockPostsRepository,
 				},
 				{
-					provide: HttpService,
-					useValue: {
-						//TODO:
-						// eslint-disable-next-line @typescript-eslint/no-empty-function
-						post: jest.fn(() => {}),
-					},
-				},
-				{
 					provide: ConfigService,
 					useValue: {
 						get: jest.fn((key: string) => {
-							if (key === 'ncloudConfig' || key === 'oauthConfig') {
+							if (key === 'ncloudConfig') {
 								return 1;
 							}
 							return null;
