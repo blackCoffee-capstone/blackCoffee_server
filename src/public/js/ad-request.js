@@ -8,23 +8,30 @@ $(document).ready(function () {
 		}
 	});
 
-	$('#append_row').on('click', function () {
-		$('#list_table').append(
-			$('<tr>').append(
-				$('<td>').append($('#add_no').val()),
-				$('<td>').append($('#add_id').val()),
-				$('<td>').append($('#add_business').val()),
-				$('<td>').append($('#add_email').val()),
-				$('<td>').append($('#add_date').val()),
-				$('<td>').append($('#add_status').val()),
-				$('<td>').append($('<a>').prop('href', '#').addClass('detail-link').append('DETAIL')),
-				$('<td>').append($('<a>').prop('href', '#').addClass('delete-link').append('DELETE')),
-			),
-		);
-	});
-
-	$('#list_table').on('click', '.delete-link', function () {
-		$(this).parent().parent().remove();
+	$('#list_table').DataTable({
+		ajax: { url: '/js/ad-form.json', dataType: 'json' },
+		columns: [
+			{ data: 'id' },
+			{ data: 'user' },
+			{ data: 'business_name' },
+			{ orderable: false, data: 'email' },
+			{ data: 'created_at', width: 100 },
+			{ data: 'status' },
+			{
+				orderable: false,
+				title: 'DETAIL',
+				data: null,
+				render: function (data) {
+					return '<a href="#" class="detail-link">DETAIL</a>';
+				},
+			},
+		],
+		responsive: true,
+		ordering: true,
+		lengthChange: false,
+		pagingType: 'full_numbers',
+		info: true,
+		autoWidth: false,
 	});
 
 	$('#list_table').on('click', '.detail-link', function (event) {
