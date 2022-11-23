@@ -16,7 +16,7 @@ $(document).ready(function () {
 			{ data: 'business_name' },
 			{ orderable: false, data: 'email' },
 			{ data: 'created_at', width: 100 },
-			{ orderable: false, data: 'status' },
+			{ data: 'status' },
 			{
 				orderable: false,
 				title: 'DETAIL',
@@ -29,7 +29,8 @@ $(document).ready(function () {
 		responsive: true,
 		ordering: true,
 		lengthChange: false,
-		info: false,
+		pagingType: 'full_numbers',
+		info: true,
 		autoWidth: false,
 	});
 
