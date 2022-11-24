@@ -16,7 +16,7 @@ import { MockThemeRepository } from 'test/mock/theme.mock';
 import { PostsService } from './posts.service';
 
 describe('PostsService', () => {
-	let service: PostsService;
+	let postsService: PostsService;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -60,10 +60,10 @@ describe('PostsService', () => {
 			],
 		}).compile();
 
-		service = module.get<PostsService>(PostsService);
+		postsService = module.get<PostsService>(PostsService);
 	});
 
 	it('should be defined', () => {
-		expect(service).toBeDefined();
+		expect(postsService).toBeDefined();
 	});
 });

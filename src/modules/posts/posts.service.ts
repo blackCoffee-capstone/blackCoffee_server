@@ -20,6 +20,10 @@ import { PostCommentsResponseDto } from './dto/post-comments-response.dto';
 import { PostsRequestDto } from './dto/posts-request.dto';
 import { PostsResponseDto } from './dto/posts-response.dto';
 import { UpdatePostsRequestDto } from './dto/update-posts-request.dto';
+import { MainPostsRequestDto } from './dto/main-posts-request.dto';
+import { MainPostsResponseDto } from './dto/main-posts-response.dto';
+import { MainPostsPageResponseDto } from './dto/main-posts-page-response.dto';
+import { LocationResponseDto } from '../filters/dto/location-response.dto';
 
 @Injectable()
 export class PostsService {
@@ -440,5 +444,75 @@ export class PostsService {
 
 		if (foundThemes.length !== themes.length) return true;
 		return false;
+	}
+
+	private async allSelection(locationIds) {
+		return await this.locationsRepository
+			.createQueryBuilder('location')
+			.leftJoinAndSelect('location.spots', 'spots')
+			.select('location.id AS id')
+			.where((metroNames) => {
+				const subQuery = metroNames
+					.subQuery()
+					.select('location.metroName')
+					.where('location.localName is null')
+					.andWhere('location.id IN (:...ids)', { ids: locationIds })
+					.from(Location, 'location')
+					.getQuery();
+				return 'location.metroName IN' + subQuery;
+			})
+			.andWhere('spots.id is not null')
+			.distinctOn(['location.id'])
+			.getRawMany();
+	}
+
+	async getMainPost(searchRequest: MainPostsRequestDto) {
+		try {
+			let posts = this.postsRepository
+				.createQueryBuilder('post')
+				.leftJoinAndSelect('post.location', 'location')
+				.orderBy(`post.${searchRequest.sorter}`, 'ASC');
+
+			if (searchRequest.word) {
+				posts = posts.where('post.title Like :title', { title: `%${searchRequest.word}%` });
+			}
+			if (searchRequest.locationIds) {
+				let locationIds = searchRequest.locationIds;
+				const allMetros = await this.allSelection(locationIds);
+				const localsIds = Array.from(allMetros).flatMap(({ id }) => [id]);
+				locationIds = [...new Set(locationIds.concat(localsIds))];
+
+				posts = posts.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
+			}
+
+			if (searchRequest.themeIds) {
+				posts = posts
+					.leftJoinAndSelect('post.postThemes', 'postThemes')
+					.leftJoinAndSelect('postThemes.theme', 'theme')
+					.andWhere('theme.id IN (:...themeIds)', { themeIds: searchRequest.themeIds });
+			}
+
+			const totalPagePosts = await posts.getMany();
+			const responsePosts = await posts
+				.limit(searchRequest.take)
+				.offset((searchRequest.page - 1) * searchRequest.take)
+				.getMany();
+
+			const totalPage = Math.ceil(totalPagePosts.length / searchRequest.take);
+			const postsDto = Array.from(responsePosts).map(
+				(post) =>
+					new MainPostsResponseDto({
+						...post,
+						location: new LocationResponseDto({
+							id: post.location.id,
+							metroName: post.location.metroName,
+							localName: post.location.localName,
+						}),
+					}),
+			);
+			return new MainPostsPageResponseDto({ totalPage: totalPage, posts: postsDto });
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 }
