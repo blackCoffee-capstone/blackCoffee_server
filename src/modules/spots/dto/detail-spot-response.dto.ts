@@ -3,7 +3,7 @@ import { IsArray, IsNumber, IsString } from 'class-validator';
 
 import { LocationResponseDto } from 'src/modules/filters/dto/location-response.dto';
 
-export class DetailSpotResponseDto<T> {
+export class DetailSpotResponseDto<S, N> {
 	@IsNumber()
 	@ApiProperty({ example: 1, description: '여행지 id' })
 	readonly id: number;
@@ -29,9 +29,13 @@ export class DetailSpotResponseDto<T> {
 
 	@IsArray()
 	@ApiProperty({ isArray: true, example: '관련 sns 게시글 정보' })
-	readonly detailSnsPost: T[];
+	readonly detailSnsPost: S[];
 
-	constructor({ id, name, latitude, longitude, snsPostLikeNumber, location, detailSnsPost }) {
+	@IsArray()
+	@ApiProperty({ isArray: true, example: '여행지 주변 시설' })
+	readonly neaybyFacility: N[];
+
+	constructor({ id, name, latitude, longitude, snsPostLikeNumber, location, detailSnsPost, neaybyFacility }) {
 		this.id = id;
 		this.name = name;
 		this.latitude = latitude;
@@ -39,5 +43,6 @@ export class DetailSpotResponseDto<T> {
 		this.snsPostLikeNumber = snsPostLikeNumber;
 		this.location = new LocationResponseDto(location);
 		this.detailSnsPost = detailSnsPost;
+		this.neaybyFacility = neaybyFacility;
 	}
 }
