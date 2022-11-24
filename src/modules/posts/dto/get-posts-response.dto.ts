@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator';
 import { LocationResponseDto } from 'src/modules/filters/dto/location-response.dto';
 import { ThemeResponseDto } from 'src/modules/filters/dto/theme-response.dto';
 
@@ -21,6 +21,10 @@ export class GetPostsResponseDto {
 	@ApiProperty({ isArray: true, example: ['test'], description: '사진 url 리스트' })
 	readonly photoUrls: string[];
 
+	@IsBoolean()
+	@ApiProperty({ example: true, description: '작성자 유무' })
+	readonly writer: boolean;
+
 	@ApiProperty({ description: '위치 정보' })
 	readonly location: LocationResponseDto;
 
@@ -29,11 +33,12 @@ export class GetPostsResponseDto {
 	@ApiProperty({ description: '테마 정보' })
 	readonly themes: ThemeResponseDto[];
 
-	constructor({ id, title, content, photo_urls, location, themes }) {
+	constructor({ id, title, content, photo_urls, writer, location, themes }) {
 		this.id = id;
 		this.title = title;
 		this.content = content;
 		this.photoUrls = photo_urls;
+		this.writer = writer;
 		this.location = location;
 		this.themes = themes;
 	}

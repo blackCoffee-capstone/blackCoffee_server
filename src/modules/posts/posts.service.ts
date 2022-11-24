@@ -156,16 +156,21 @@ export class PostsService {
 	}
 
 	async getPost(userId: number, postId: number): Promise<GetPostsResponseDto> {
-		const foundUsersPost = await this.getUsersPost(userId, postId);
-		if (!foundUsersPost) {
+		const foundPost = await this.getPostUserId(postId);
+		let writer = false;
+		if (!foundPost) {
 			throw new NotFoundException('Post is not found');
 		}
+		if (foundPost.user_id === userId) {
+			writer = true;
+		}
 		return new GetPostsResponseDto({
-			...foundUsersPost,
+			...foundPost,
+			writer,
 			location: {
-				id: foundUsersPost.location_id,
-				metroName: foundUsersPost.metro_name,
-				localName: foundUsersPost.local_name,
+				id: foundPost.location_id,
+				metroName: foundPost.metro_name,
+				localName: foundPost.local_name,
 			},
 			themes: await this.getPostsThems(postId),
 		});
@@ -314,6 +319,18 @@ export class PostsService {
 
 		if (arr.length !== set.size) return true;
 		return false;
+	}
+
+	private async getPostUserId(postId: number) {
+		return await this.postsRepository
+			.createQueryBuilder('post')
+			.select(
+				'user.id AS user_id, post.id, post.title, post.content, post.photoUrls, location.id AS location_id, location.metroName, location.localName',
+			)
+			.leftJoin('post.user', 'user')
+			.leftJoin('post.location', 'location')
+			.where('post.id = :postId', { postId })
+			.getRawOne();
 	}
 
 	private async notFoundThemes(themes: number[]): Promise<boolean> {
