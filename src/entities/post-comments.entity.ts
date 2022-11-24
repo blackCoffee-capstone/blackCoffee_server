@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { CommonEntity } from './common.entity';
@@ -38,4 +38,9 @@ export class PostComment extends CommonEntity {
 	@IsNotEmpty()
 	@Column({ type: 'varchar', length: 400, nullable: false })
 	content: string;
+
+	@IsBoolean()
+	@IsNotEmpty()
+	@Column({ name: 'is_writer', type: 'boolean', nullable: false, default: false })
+	isWriter: boolean;
 }

@@ -3,6 +3,7 @@ export const mockPostComment = {
 	userId: 1,
 	postId: 1,
 	content: 'content',
+	isWriter: false,
 };
 
 export class MockPostCommentsRepository {

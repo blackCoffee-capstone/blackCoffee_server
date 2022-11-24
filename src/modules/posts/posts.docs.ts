@@ -2,6 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
+import { GetPostsCommentsResponseDto } from './dto/get-posts-comments-response.dto';
 import { GetPostsResponseDto } from './dto/get-posts-response.dto';
 import { PostCommentsRequestDto } from './dto/post-comments-request.dto';
 import { PostCommentsResponseDto } from './dto/post-comments-response.dto';
@@ -154,6 +155,24 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 				status: 201,
 				description: '',
 				type: PostCommentsResponseDto,
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
+	getPostsComments(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '커뮤니티 게시글 댓글 목록',
+			}),
+			ApiParam({
+				name: 'postId',
+				type: Number,
+			}),
+			ApiResponse({
+				status: 200,
+				description: '',
+				type: [GetPostsCommentsResponseDto],
 			}),
 			ApiBearerAuth('Authorization'),
 		);

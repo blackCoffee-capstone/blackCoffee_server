@@ -11,6 +11,8 @@ import { PostComment } from 'src/entities/post-comments.entity';
 import { PostTheme } from 'src/entities/post-themes.entity';
 import { Post } from 'src/entities/posts.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { CommentsUserResponseDto } from '../users/dto/comments-user-response.dto';
+import { GetPostsCommentsResponseDto } from './dto/get-posts-comments-response.dto';
 import { GetPostsResponseDto } from './dto/get-posts-response.dto';
 import { PostCommentsRequestDto } from './dto/post-comments-request.dto';
 import { PostCommentsResponseDto } from './dto/post-comments-response.dto';
@@ -161,17 +163,17 @@ export class PostsService {
 	}
 
 	async getPost(userId: number, postId: number): Promise<GetPostsResponseDto> {
+		let isWriter = false;
 		const foundPost = await this.getPostUserId(postId);
-		let writer = false;
 		if (!foundPost) {
 			throw new NotFoundException('Post is not found');
 		}
 		if (foundPost.user_id === userId) {
-			writer = true;
+			isWriter = true;
 		}
 		return new GetPostsResponseDto({
 			...foundPost,
-			writer,
+			isWriter,
 			location: {
 				id: foundPost.location_id,
 				metroName: foundPost.metro_name,
@@ -198,17 +200,41 @@ export class PostsService {
 		postId: number,
 		commentData: PostCommentsRequestDto,
 	): Promise<PostCommentsResponseDto> {
+		let isWriter = false;
 		const foundPost = await this.getPostUserId(postId);
 		if (!foundPost) {
 			throw new NotFoundException('Post is not found');
 		}
-
+		if (foundPost.user_id === userId) {
+			isWriter = true;
+		}
 		const comment = this.postCommentsRepository.create({
 			userId,
 			postId,
 			content: commentData.content,
+			isWriter,
 		});
-		return new PostCommentsResponseDto({ id: comment.id });
+		const result = await this.postCommentsRepository.save(comment);
+		return new PostCommentsResponseDto(result);
+	}
+
+	async getPostsComments(userId: number, postId: number): Promise<GetPostsCommentsResponseDto[]> {
+		const foundPost = await this.getPostUserId(postId);
+		if (!foundPost) {
+			throw new NotFoundException('Post is not found');
+		}
+		const foundComments = await this.getComments(postId);
+
+		return foundComments.map(
+			(comment) =>
+				new GetPostsCommentsResponseDto({
+					...comment,
+					user: new CommentsUserResponseDto({
+						id: comment.user_id,
+						nickname: comment.nickname,
+					}),
+				}),
+		);
 	}
 
 	private getMetroLocalName(location: string) {
@@ -348,12 +374,24 @@ export class PostsService {
 		return await this.postsRepository
 			.createQueryBuilder('post')
 			.select(
-				'user.id AS user_id, post.id, post.title, post.content, post.photoUrls, location.id AS location_id, location.metroName, location.localName',
+				'user.id AS user_id, post.id, post.title, post.content, post.photoUrls, post.created_at, location.id AS location_id, location.metroName, location.localName',
 			)
 			.leftJoin('post.user', 'user')
 			.leftJoin('post.location', 'location')
 			.where('post.id = :postId', { postId })
 			.getRawOne();
+	}
+
+	private async getComments(postId: number) {
+		return await this.postCommentsRepository
+			.createQueryBuilder('post_comment')
+			.select(
+				'post_comment.id, post_comment.content, post_comment.is_writer, post_comment.created_at, user.id AS user_id, user.nickname',
+			)
+			.leftJoin('post_comment.user', 'user')
+			.leftJoin('post_comment.post', 'post')
+			.where('post.id = :postId', { postId })
+			.getRawMany();
 	}
 
 	private async notFoundThemes(themes: number[]): Promise<boolean> {

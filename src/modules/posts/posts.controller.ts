@@ -110,4 +110,10 @@ export class PostsController {
 	) {
 		return await this.postsService.createPostsComments(userData.id, postId, commentData);
 	}
+
+	@Get(':postId/comments')
+	@ApiDocs.getPostsComments('커뮤니티 게시글 댓글 목록')
+	async getPostsComments(@AuthUser() userData, @Param('postId') postId: number) {
+		return await this.postsService.getPostsComments(userData.id, postId);
+	}
 }
