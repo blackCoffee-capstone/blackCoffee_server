@@ -24,6 +24,10 @@ export class DetailSpotResponseDto<S, N> {
 	@ApiProperty({ example: 1, description: '호감도' })
 	readonly snsPostLikeNumber: number;
 
+	@IsNumber()
+	@ApiProperty({ example: 10, description: '여행지 조회수' })
+	readonly views: number;
+
 	@ApiProperty({ description: '위치 정보' })
 	readonly location: LocationResponseDto;
 
@@ -35,12 +39,13 @@ export class DetailSpotResponseDto<S, N> {
 	@ApiProperty({ isArray: true, example: '여행지 주변 시설' })
 	readonly neaybyFacility: N[];
 
-	constructor({ id, name, latitude, longitude, snsPostLikeNumber, location, detailSnsPost, neaybyFacility }) {
+	constructor({ id, name, latitude, longitude, snsPostLikeNumber, views, location, detailSnsPost, neaybyFacility }) {
 		this.id = id;
 		this.name = name;
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.snsPostLikeNumber = snsPostLikeNumber;
+		this.views = views;
 		this.location = new LocationResponseDto(location);
 		this.detailSnsPost = detailSnsPost;
 		this.neaybyFacility = neaybyFacility;

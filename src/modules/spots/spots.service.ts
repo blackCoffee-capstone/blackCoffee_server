@@ -322,6 +322,7 @@ export class SpotsService {
 			let searchSpots = this.spotsRepository
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.location', 'location')
+				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
 				.orderBy(`spot.${searchRequest.sorter}`, 'ASC');
 			if (searchRequest.word) {
 				searchSpots = searchSpots.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
@@ -351,6 +352,7 @@ export class SpotsService {
 				(spot) =>
 					new SearchResponseDto({
 						...spot,
+						views: spot.clickSpots.length,
 						location: new LocationResponseDto({
 							id: spot.location.id,
 							metroName: spot.location.metroName,
@@ -358,6 +360,7 @@ export class SpotsService {
 						}),
 					}),
 			);
+
 			return new SearchPageResponseDto({ totalPage: totalPage, spots: spots });
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
@@ -365,7 +368,12 @@ export class SpotsService {
 	}
 
 	async getDetailSpot(header: string, detailRequest: DetailSpotRequestDto, spotId: number) {
-		const IsSpot = await this.spotsRepository.findOne({ where: { id: spotId } });
+		const IsSpot = await this.spotsRepository
+			.createQueryBuilder('spot')
+			.where('spot.id = :spotId', { spotId })
+			.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
+			.getOne();
+
 		if (!IsSpot) throw new NotFoundException('Spot is not found');
 		try {
 			if (header) {
@@ -392,6 +400,7 @@ export class SpotsService {
 
 			return new DetailSpotResponseDto({
 				...IsSpot,
+				views: IsSpot.clickSpots.length,
 				detailSnsPost: detailSnsPostsDto,
 				neaybyFacility: facilitiesDto,
 				location: new LocationResponseDto(location),

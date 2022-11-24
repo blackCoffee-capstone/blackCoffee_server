@@ -19,6 +19,10 @@ export class MainPostsResponseDto {
 	@ApiProperty({ example: '2022-11-11', description: '게시글 작성 날짜' })
 	readonly createdAt: Date;
 
+	@IsNumber()
+	@ApiProperty({ example: 10, description: '게시글 조회수' })
+	readonly views: number;
+
 	@ApiProperty({ description: '위치 정보' })
 	readonly location: LocationResponseDto;
 
@@ -26,11 +30,12 @@ export class MainPostsResponseDto {
 	@ApiProperty({ isArray: true, example: ['test'], description: '사진 url 리스트' })
 	readonly photoUrls: string[];
 
-	constructor({ id, title, user, createdAt, location, photoUrls }) {
+	constructor({ id, title, user, createdAt, views, location, photoUrls }) {
 		this.id = id;
 		this.title = title;
 		this.user = user;
 		this.createdAt = createdAt;
+		this.views = views;
 		this.location = new LocationResponseDto(location);
 		this.photoUrls = photoUrls;
 	}

@@ -6,6 +6,7 @@ import { SshConfig } from 'src/config/config.constant';
 import { Spot } from 'src/entities/spots.entity';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { Repository } from 'typeorm';
+import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { SearchResponseDto } from '../spots/dto/search-response.dto';
 import { UsersTasteThemesResponseDto } from '../taste-themes/dto/users-taste-themes-response.dto';
 import { RecommendationsMapResponseDto } from './dto/recommendations-map-response.dto';
@@ -74,7 +75,18 @@ export class RecommendationsService {
 		const resultJson = JSON.parse(resultFile.toString());
 		const listRecommendationSpotIds = resultJson.listRecommendation;
 		const listRecommendationSpots = await this.getSpotsUseId(listRecommendationSpotIds);
-		return listRecommendationSpots.map((listRecommendationSpot) => new SearchResponseDto(listRecommendationSpot));
+		return listRecommendationSpots.map(
+			(listRecommendationSpot) =>
+				new SearchResponseDto({
+					...listRecommendationSpot,
+					views: listRecommendationSpot.clickSpots.length,
+					location: new LocationResponseDto({
+						id: listRecommendationSpot.location.id,
+						metroName: listRecommendationSpot.location.metroName,
+						localName: listRecommendationSpot.location.localName,
+					}),
+				}),
+		);
 	}
 
 	async recommendationsSpotsMap(userId: number): Promise<RecommendationsMapResponseDto[]> {
@@ -189,6 +201,7 @@ export class RecommendationsService {
 			const spots = await this.spotsRepository
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.location', 'location')
+				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
 				.where('spot.id IN (:...spotIds)', { spotIds })
 				.getMany();
 

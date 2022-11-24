@@ -4,12 +4,12 @@ import { Repository } from 'typeorm';
 
 import { Rank } from 'src/entities/rank.entity';
 import { Spot } from 'src/entities/spots.entity';
+import { LocationResponseDto } from '../filters/dto/location-response.dto';
+import { RankingListResponseDto } from './dto/ranking-list-response.dto';
+import { RankingMapResponseDto } from './dto/ranking-map-response.dto';
 import { RankingRequestDto } from './dto/ranking-request.dto';
 import { RanksRecordRequestDto } from './dto/ranks-record-request.dto';
 import { RanksUpdateRequestDto } from './dto/ranks-update-request.dto';
-import { RankingListResponseDto } from './dto/ranking-list-response.dto';
-import { RankingMapResponseDto } from './dto/ranking-map-response.dto';
-import { LocationResponseDto } from '../filters/dto/location-response.dto';
 
 @Injectable()
 export class RanksService {
@@ -56,6 +56,7 @@ export class RanksService {
 				.createQueryBuilder('spot')
 				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
+				.innerJoinAndSelect('spot.clickSpots', 'clickSpots')
 				.where('rankings.date = :date', { date: rankingRequest.date })
 				.select('spot.id AS id, spot.name AS name')
 				.addSelect('location.id AS location_id, location.metroName AS metro, location.localName AS local')
@@ -85,6 +86,7 @@ export class RanksService {
 					...spot,
 					rank: spot.after_rank,
 					variance: variance,
+					views: spot.clickSpots.length,
 					location: new LocationResponseDto({
 						id: spot.location_id,
 						metroName: spot.metro,

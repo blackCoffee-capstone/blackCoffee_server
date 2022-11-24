@@ -30,6 +30,10 @@ export class GetPostsResponseDto {
 	@ApiProperty({ example: '2022-11-11', description: '작성 날짜' })
 	readonly createdAt: Date;
 
+	@IsNumber()
+	@ApiProperty({ example: 10, description: '게시글 조회수' })
+	readonly views: number;
+
 	@ApiProperty({ description: '작성자 정보' })
 	readonly user: CommentsUserResponseDto;
 
@@ -41,13 +45,14 @@ export class GetPostsResponseDto {
 	@ApiProperty({ description: '테마 정보' })
 	readonly themes: ThemeResponseDto[];
 
-	constructor({ id, title, content, photo_urls, isWriter, created_at, user, location, themes }) {
+	constructor({ id, title, content, photoUrls, isWriter, createdAt, views, user, location, themes }) {
 		this.id = id;
 		this.title = title;
 		this.content = content;
-		this.photoUrls = photo_urls;
+		this.photoUrls = photoUrls;
 		this.isWriter = isWriter;
-		this.createdAt = created_at;
+		this.createdAt = createdAt;
+		this.views = views;
 		this.user = user;
 		this.location = location;
 		this.themes = themes;

@@ -12,12 +12,17 @@ export class SearchResponseDto {
 	@ApiProperty({ example: '을왕리해수욕장', description: '여행지 이름' })
 	readonly name: string;
 
+	@IsNumber()
+	@ApiProperty({ example: 10, description: '여행지 조회수' })
+	readonly views: number;
+
 	@ApiProperty({ description: '위치 정보' })
 	readonly location: LocationResponseDto;
 
-	constructor({ id, name, location }) {
+	constructor({ id, name, views, location }) {
 		this.id = id;
 		this.name = name;
+		this.views = views;
 		this.location = new LocationResponseDto(location);
 	}
 }

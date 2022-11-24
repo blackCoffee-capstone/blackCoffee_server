@@ -12,18 +12,18 @@ import { PostComment } from 'src/entities/post-comments.entity';
 import { PostTheme } from 'src/entities/post-themes.entity';
 import { Post } from 'src/entities/posts.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { CommentsUserResponseDto } from '../users/dto/comments-user-response.dto';
 import { GetPostsCommentsResponseDto } from './dto/get-posts-comments-response.dto';
 import { GetPostsResponseDto } from './dto/get-posts-response.dto';
+import { MainPostsPageResponseDto } from './dto/main-posts-page-response.dto';
+import { MainPostsRequestDto } from './dto/main-posts-request.dto';
+import { MainPostsResponseDto } from './dto/main-posts-response.dto';
 import { PostCommentsRequestDto } from './dto/post-comments-request.dto';
 import { PostCommentsResponseDto } from './dto/post-comments-response.dto';
 import { PostsRequestDto } from './dto/posts-request.dto';
 import { PostsResponseDto } from './dto/posts-response.dto';
 import { UpdatePostsRequestDto } from './dto/update-posts-request.dto';
-import { MainPostsRequestDto } from './dto/main-posts-request.dto';
-import { MainPostsResponseDto } from './dto/main-posts-response.dto';
-import { MainPostsPageResponseDto } from './dto/main-posts-page-response.dto';
-import { LocationResponseDto } from '../filters/dto/location-response.dto';
 
 @Injectable()
 export class PostsService {
@@ -175,7 +175,7 @@ export class PostsService {
 		if (!foundPost) {
 			throw new NotFoundException('Post is not found');
 		}
-		if (foundPost.user_id === userId) {
+		if (foundPost.user.id === userId) {
 			isWriter = true;
 		}
 		try {
@@ -186,16 +186,10 @@ export class PostsService {
 			await this.clickPostsRepository.save(clickPostData);
 			return new GetPostsResponseDto({
 				...foundPost,
+				views: foundPost.clickPosts.length + 1,
 				isWriter,
-				location: {
-					id: foundPost.location_id,
-					metroName: foundPost.metro_name,
-					localName: foundPost.local_name,
-				},
-				user: new CommentsUserResponseDto({
-					id: foundPost.user_id,
-					nickname: foundPost.nickname,
-				}),
+				location: new LocationResponseDto(foundPost.location),
+				user: new CommentsUserResponseDto(foundPost.user),
 				themes: await this.getPostsThems(postId),
 			});
 		} catch (error) {
@@ -402,13 +396,11 @@ export class PostsService {
 	private async getPostUserId(postId: number) {
 		return await this.postsRepository
 			.createQueryBuilder('post')
-			.select(
-				'user.id AS user_id, user.nickname, post.id, post.title, post.content, post.photoUrls, post.created_at, location.id AS location_id, location.metroName, location.localName',
-			)
-			.leftJoin('post.user', 'user')
-			.leftJoin('post.location', 'location')
+			.leftJoinAndSelect('post.user', 'user')
+			.leftJoinAndSelect('post.location', 'location')
+			.leftJoinAndSelect('post.clickPosts', 'clickPosts')
 			.where('post.id = :postId', { postId })
-			.getRawOne();
+			.getOne();
 	}
 
 	private async getComments(postId: number) {
@@ -471,6 +463,7 @@ export class PostsService {
 			let posts = this.postsRepository
 				.createQueryBuilder('post')
 				.leftJoinAndSelect('post.location', 'location')
+				.leftJoinAndSelect('post.clickPosts', 'clickPosts')
 				.orderBy(`post.${searchRequest.sorter}`, 'ASC');
 
 			if (searchRequest.word) {
@@ -503,6 +496,7 @@ export class PostsService {
 				(post) =>
 					new MainPostsResponseDto({
 						...post,
+						views: post.clickPosts.length,
 						location: new LocationResponseDto({
 							id: post.location.id,
 							metroName: post.location.metroName,
@@ -510,6 +504,7 @@ export class PostsService {
 						}),
 					}),
 			);
+			console.log(responsePosts);
 			return new MainPostsPageResponseDto({ totalPage: totalPage, posts: postsDto });
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);

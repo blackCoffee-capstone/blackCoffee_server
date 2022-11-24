@@ -20,14 +20,19 @@ export class RankingListResponseDto {
 	@ApiProperty({ example: -1, description: '순위 변동' })
 	readonly variance: number;
 
+	@IsNumber()
+	@ApiProperty({ example: 10, description: '여행지 조회수' })
+	readonly views: number;
+
 	@ApiProperty({ description: '위치 정보' })
 	readonly location: LocationResponseDto;
 
-	constructor({ id, name, rank, variance, location }) {
+	constructor({ id, name, rank, variance, views, location }) {
 		this.id = id;
 		this.name = name;
 		this.rank = rank;
 		this.variance = variance;
+		this.views = views;
 		this.location = new LocationResponseDto(location);
 	}
 }
