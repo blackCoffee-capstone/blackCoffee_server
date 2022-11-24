@@ -363,14 +363,16 @@ export class SpotsService {
 		const IsSpot = await this.spotsRepository.findOne({ where: { id: spotId } });
 		if (!IsSpot) throw new NotFoundException('Spot is not found');
 		try {
-			const detailSnsPost = this.snsPostRepository
+			const detailSnsPosts = await this.snsPostRepository
 				.createQueryBuilder('snsPost')
 				.leftJoinAndSelect('snsPost.spot', 'spot')
 				.leftJoinAndSelect('snsPost.theme', 'theme')
-				.where('spot.id = :spotId', { spotId });
+				.where('spot.id = :spotId', { spotId })
+				.orderBy('snsPost.likeNumber', 'DESC')
+				.limit(detailRequest.take)
+				.getMany();
 
-			const filterSnsPosts = await detailSnsPost.limit(detailRequest.take).getMany();
-			const detailSnsPostsDto = Array.from(filterSnsPosts).map((post) => new DetailSnsPostResponseDto(post));
+			const detailSnsPostsDto = Array.from(detailSnsPosts).map((post) => new DetailSnsPostResponseDto(post));
 			const location = await this.locationsRepository.findOne({ where: { id: IsSpot.locationId } });
 			const facilitiesDto = await this.getNearbyFacility(IsSpot.latitude, IsSpot.longitude);
 
