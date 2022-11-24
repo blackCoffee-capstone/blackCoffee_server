@@ -7,10 +7,13 @@ import { uuid } from 'uuidv4';
 
 import { NcloudConfig } from 'src/config/config.constant';
 import { Location } from 'src/entities/locations.entity';
+import { PostComment } from 'src/entities/post-comments.entity';
 import { PostTheme } from 'src/entities/post-themes.entity';
 import { Post } from 'src/entities/posts.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { GetPostsResponseDto } from './dto/get-posts-response.dto';
+import { PostCommentsRequestDto } from './dto/post-comments-request.dto';
+import { PostCommentsResponseDto } from './dto/post-comments-response.dto';
 import { PostsRequestDto } from './dto/posts-request.dto';
 import { PostsResponseDto } from './dto/posts-response.dto';
 import { UpdatePostsRequestDto } from './dto/update-posts-request.dto';
@@ -26,6 +29,8 @@ export class PostsService {
 		private readonly themesRepository: Repository<Theme>,
 		@InjectRepository(PostTheme)
 		private readonly postThemesRepository: Repository<PostTheme>,
+		@InjectRepository(PostComment)
+		private readonly postCommentsRepository: Repository<PostComment>,
 		private readonly configService: ConfigService,
 	) {}
 	#ncloudConfig = this.configService.get<NcloudConfig>('ncloudConfig');
@@ -186,6 +191,24 @@ export class PostsService {
 		await this.deleteFilesToS3('posts', foundUsersPost.photo_urls);
 		await this.postsRepository.delete(postId);
 		return true;
+	}
+
+	async createPostsComments(
+		userId: number,
+		postId: number,
+		commentData: PostCommentsRequestDto,
+	): Promise<PostCommentsResponseDto> {
+		const foundPost = await this.getPostUserId(postId);
+		if (!foundPost) {
+			throw new NotFoundException('Post is not found');
+		}
+
+		const comment = this.postCommentsRepository.create({
+			userId,
+			postId,
+			content: commentData.content,
+		});
+		return new PostCommentsResponseDto({ id: comment.id });
 	}
 
 	private getMetroLocalName(location: string) {

@@ -15,7 +15,7 @@ export class GetPostsResponseDto {
 
 	@IsString()
 	@ApiProperty({ example: 'test', description: '내용' })
-	readonly content: string;
+	readonly content?: string | null;
 
 	@IsArray()
 	@ApiProperty({ isArray: true, example: ['test'], description: '사진 url 리스트' })

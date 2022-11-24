@@ -16,6 +16,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthUser } from 'src/decorators/auth.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PostCommentsRequestDto } from './dto/post-comments-request.dto';
 import { PostsRequestDto } from './dto/posts-request.dto';
 import { UpdatePostsRequestDto } from './dto/update-posts-request.dto';
 import { ApiDocs } from './posts.docs';
@@ -98,5 +99,15 @@ export class PostsController {
 	@ApiDocs.deletePost('커뮤니티 게시글 삭제')
 	async deletePost(@AuthUser() userData, @Param('postId') postId: number) {
 		return await this.postsService.deletePost(userData.id, postId);
+	}
+
+	@Post(':postId/comments')
+	@ApiDocs.createPostsComments('커뮤니티 게시글 댓글 작성')
+	async createPostsComments(
+		@AuthUser() userData,
+		@Param('postId') postId: number,
+		@Body() commentData: PostCommentsRequestDto,
+	) {
+		return await this.postsService.createPostsComments(userData.id, postId, commentData);
 	}
 }
