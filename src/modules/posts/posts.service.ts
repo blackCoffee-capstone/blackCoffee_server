@@ -179,6 +179,10 @@ export class PostsService {
 				metroName: foundPost.metro_name,
 				localName: foundPost.local_name,
 			},
+			user: new CommentsUserResponseDto({
+				id: foundPost.user_id,
+				nickname: foundPost.nickname,
+			}),
 			themes: await this.getPostsThems(postId),
 		});
 	}
@@ -200,19 +204,14 @@ export class PostsService {
 		postId: number,
 		commentData: PostCommentsRequestDto,
 	): Promise<PostCommentsResponseDto> {
-		let isWriter = false;
 		const foundPost = await this.getPostUserId(postId);
 		if (!foundPost) {
 			throw new NotFoundException('Post is not found');
-		}
-		if (foundPost.user_id === userId) {
-			isWriter = true;
 		}
 		const comment = this.postCommentsRepository.create({
 			userId,
 			postId,
 			content: commentData.content,
-			isWriter,
 		});
 		const result = await this.postCommentsRepository.save(comment);
 		return new PostCommentsResponseDto(result);
@@ -229,6 +228,7 @@ export class PostsService {
 			(comment) =>
 				new GetPostsCommentsResponseDto({
 					...comment,
+					isWriter: comment.user_id === userId ? true : false,
 					user: new CommentsUserResponseDto({
 						id: comment.user_id,
 						nickname: comment.nickname,
@@ -387,7 +387,7 @@ export class PostsService {
 		return await this.postsRepository
 			.createQueryBuilder('post')
 			.select(
-				'user.id AS user_id, post.id, post.title, post.content, post.photoUrls, post.created_at, location.id AS location_id, location.metroName, location.localName',
+				'user.id AS user_id, user.nickname, post.id, post.title, post.content, post.photoUrls, post.created_at, location.id AS location_id, location.metroName, location.localName',
 			)
 			.leftJoin('post.user', 'user')
 			.leftJoin('post.location', 'location')
@@ -398,9 +398,7 @@ export class PostsService {
 	private async getComments(postId: number) {
 		return await this.postCommentsRepository
 			.createQueryBuilder('post_comment')
-			.select(
-				'post_comment.id, post_comment.content, post_comment.is_writer, post_comment.created_at, user.id AS user_id, user.nickname',
-			)
+			.select('post_comment.id, post_comment.content, post_comment.created_at, user.id AS user_id, user.nickname')
 			.leftJoin('post_comment.user', 'user')
 			.leftJoin('post_comment.post', 'post')
 			.where('post.id = :postId', { postId })

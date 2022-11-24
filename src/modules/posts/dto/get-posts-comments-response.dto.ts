@@ -12,7 +12,7 @@ export class GetPostsCommentsResponseDto {
 	readonly content: string;
 
 	@IsBoolean()
-	@ApiProperty({ example: true, description: '게시글 작성자 유무' })
+	@ApiProperty({ example: true, description: '댓글 작성자 유무' })
 	readonly isWriter: boolean;
 
 	@IsDateString()
