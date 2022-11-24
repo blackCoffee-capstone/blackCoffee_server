@@ -22,10 +22,10 @@ export class GetPostsCommentsResponseDto {
 	@ApiProperty({ description: '작성자 정보' })
 	readonly user: CommentsUserResponseDto;
 
-	constructor({ id, content, is_writer, created_at, user }) {
+	constructor({ id, content, isWriter, created_at, user }) {
 		this.id = id;
 		this.content = content;
-		this.isWriter = is_writer;
+		this.isWriter = isWriter;
 		this.createdAt = created_at;
 		this.user = user;
 	}
