@@ -1,9 +1,10 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { GetPostsCommentsResponseDto } from './dto/get-posts-comments-response.dto';
 import { GetPostsResponseDto } from './dto/get-posts-response.dto';
+import { MainPostsPageResponseDto } from './dto/main-posts-page-response.dto';
 import { PostCommentsRequestDto } from './dto/post-comments-request.dto';
 import { PostCommentsResponseDto } from './dto/post-comments-response.dto';
 import { PostsResponseDto } from './dto/posts-response.dto';
@@ -195,6 +196,50 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 				status: 204,
 				description: '삭제 완료',
 				type: Boolean,
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
+	getMainPost(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '커뮤니티 메인 게시판(단어 검색, 정렬, 필터링, 페이지네이션)',
+			}),
+			ApiQuery({
+				name: 'word',
+				required: false,
+				description: '검색어',
+			}),
+			ApiQuery({
+				name: 'sorter',
+				required: false,
+				description: '정렬 기준 (최신순: CreatedAt)',
+			}),
+			ApiQuery({
+				name: 'page',
+				required: false,
+				description: '페이지 번호',
+			}),
+			ApiQuery({
+				name: 'take',
+				required: false,
+				description: '페이지 별 데이터 개수',
+			}),
+			ApiQuery({
+				name: 'locationIds',
+				required: false,
+				description: '위치 필터링 id list',
+			}),
+			ApiQuery({
+				name: 'themeIds',
+				required: false,
+				description: '테마 필터링 id list',
+			}),
+			ApiResponse({
+				status: 200,
+				description: '',
+				type: MainPostsPageResponseDto,
 			}),
 			ApiBearerAuth('Authorization'),
 		);
