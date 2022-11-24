@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { boolean } from 'joi';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
@@ -92,6 +92,28 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 				description: '',
 				type: DetailSpotResponseDto,
 			}),
+		);
+	},
+	wishSpot(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '여행지 찜하기',
+			}),
+			ApiParam({
+				name: 'spotId',
+				type: Number,
+			}),
+			ApiParam({
+				name: 'isWish',
+				type: Boolean,
+			}),
+			ApiResponse({
+				status: 200,
+				description: '',
+				type: Boolean,
+			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 };

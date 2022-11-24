@@ -57,6 +57,7 @@ export class RanksService {
 				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.innerJoinAndSelect('spot.clickSpots', 'clickSpots')
+				.innerJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.where('rankings.date = :date', { date: rankingRequest.date })
 				.select('spot.id AS id, spot.name AS name')
 				.addSelect('location.id AS location_id, location.metroName AS metro, location.localName AS local')
@@ -87,6 +88,7 @@ export class RanksService {
 					rank: spot.after_rank,
 					variance: variance,
 					views: spot.clickSpots.length,
+					wishes: spot.wishSpots.length,
 					location: new LocationResponseDto({
 						id: spot.location_id,
 						metroName: spot.metro,

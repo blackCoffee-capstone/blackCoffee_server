@@ -8,6 +8,7 @@ import { CommonEntity } from './common.entity';
 import { PostComment } from './post-comments.entity';
 import { Post } from './posts.entity';
 import { TasteTheme } from './taste-themes.entity';
+import { WishSpot } from './wish-spots.entity';
 
 @Entity()
 export class User extends CommonEntity {
@@ -64,8 +65,13 @@ export class User extends CommonEntity {
 	})
 	clickSpots: ClickSpot[];
 
-	@OneToMany(() => ClickPost, (clickPosts: ClickPost) => clickPosts.user, {
+	@OneToMany(() => ClickPost, (clickPost: ClickPost) => clickPost.user, {
 		cascade: true,
 	})
 	clickPosts: ClickPost[];
+
+	@OneToMany(() => WishSpot, (wishSpot: WishSpot) => wishSpot.user, {
+		cascade: true,
+	})
+	wishSpots: WishSpot[];
 }

@@ -9,6 +9,7 @@ import { Rank } from 'src/entities/rank.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { WishSpot } from 'src/entities/wish-spots.entity';
 import { RanksModule } from '../ranks/ranks.module';
 import { RanksService } from '../ranks/ranks.service';
 import { SpotsController } from './spots.controller';
@@ -18,7 +19,7 @@ import { SpotsService } from './spots.service';
 	imports: [
 		HttpModule,
 		RanksModule,
-		TypeOrmModule.forFeature([Spot, Location, Theme, SnsPost, Rank, ClickSpot]),
+		TypeOrmModule.forFeature([Spot, Location, Theme, SnsPost, Rank, ClickSpot, WishSpot]),
 		JwtModule.register({
 			secret: process.env.JWT_ACCESS_TOKEN_SECRET,
 			signOptions: { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME },

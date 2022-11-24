@@ -15,6 +15,7 @@ import { Location } from 'src/entities/locations.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { WishSpot } from 'src/entities/wish-spots.entity';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
 import { RanksService } from '../ranks/ranks.service';
@@ -45,6 +46,8 @@ export class SpotsService {
 		private readonly snsPostRepository: Repository<SnsPost>,
 		@InjectRepository(ClickSpot)
 		private readonly clickSpotsRepository: Repository<ClickSpot>,
+		@InjectRepository(WishSpot)
+		private readonly wishSpotsRepository: Repository<WishSpot>,
 		private readonly ranksService: RanksService,
 		private readonly configService: ConfigService,
 		private readonly httpService: HttpService,
@@ -323,6 +326,7 @@ export class SpotsService {
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.location', 'location')
 				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
+				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.orderBy(`spot.${searchRequest.sorter}`, 'ASC');
 			if (searchRequest.word) {
 				searchSpots = searchSpots.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
@@ -353,6 +357,7 @@ export class SpotsService {
 					new SearchResponseDto({
 						...spot,
 						views: spot.clickSpots.length,
+						wishes: spot.wishSpots.length,
 						location: new LocationResponseDto({
 							id: spot.location.id,
 							metroName: spot.location.metroName,
@@ -372,10 +377,12 @@ export class SpotsService {
 			.createQueryBuilder('spot')
 			.where('spot.id = :spotId', { spotId })
 			.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
+			.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 			.getOne();
 
 		if (!IsSpot) throw new NotFoundException('Spot is not found');
 		try {
+			let isWish = false;
 			if (header) {
 				const token = header.replace('Bearer ', '');
 				const user = this.jwtService.verify(token, { secret: this.#jwtConfig.jwtAccessTokenSecret });
@@ -384,6 +391,12 @@ export class SpotsService {
 					spotId,
 				});
 				await this.clickSpotsRepository.save(clickSpotData);
+				const usersWishData = await this.wishSpotsRepository
+					.createQueryBuilder('wishSpot')
+					.where('wishSpot.userId = :userId', { userId: user.id })
+					.andWhere('wishSpot.spotId = :spotId', { spotId })
+					.getOne();
+				if (usersWishData) isWish = true;
 			}
 			const detailSnsPosts = await this.snsPostRepository
 				.createQueryBuilder('snsPost')
@@ -400,11 +413,46 @@ export class SpotsService {
 
 			return new DetailSpotResponseDto({
 				...IsSpot,
+				isWish,
 				views: IsSpot.clickSpots.length,
+				wishes: IsSpot.wishSpots.length,
 				detailSnsPost: detailSnsPostsDto,
 				neaybyFacility: facilitiesDto,
 				location: new LocationResponseDto(location),
 			});
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
+	async wishSpot(userId: number, spotId: number, isWish: boolean): Promise<boolean> {
+		const IsSpot = await this.spotsRepository
+			.createQueryBuilder('spot')
+			.where('spot.id = :spotId', { spotId })
+			.getOne();
+		console.log(isWish);
+		if (!IsSpot) throw new NotFoundException('Spot is not found');
+		try {
+			if (isWish) {
+				const isWishSpot = await this.wishSpotsRepository
+					.createQueryBuilder('wishSpot')
+					.where('wishSpot.userId = :userId', { userId })
+					.andWhere('wishSpot.spotId = :spotId', { spotId })
+					.getOne();
+				if (!isWishSpot) {
+					const wishSpot = this.wishSpotsRepository.create({
+						userId,
+						spotId,
+					});
+					await this.wishSpotsRepository.save(wishSpot);
+				}
+			} else {
+				await this.wishSpotsRepository.delete({
+					userId,
+					spotId,
+				});
+			}
+			return true;
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}

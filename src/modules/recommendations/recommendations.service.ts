@@ -80,6 +80,7 @@ export class RecommendationsService {
 				new SearchResponseDto({
 					...listRecommendationSpot,
 					views: listRecommendationSpot.clickSpots.length,
+					wishes: listRecommendationSpot.wishSpots.length,
 					location: new LocationResponseDto({
 						id: listRecommendationSpot.location.id,
 						metroName: listRecommendationSpot.location.metroName,
@@ -202,6 +203,7 @@ export class RecommendationsService {
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.location', 'location')
 				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
+				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.where('spot.id IN (:...spotIds)', { spotIds })
 				.getMany();
 
