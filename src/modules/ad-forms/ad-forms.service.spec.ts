@@ -42,8 +42,8 @@ describe('AdFormsService', () => {
 			await expect(
 				adFormsService.registerAdForm(null, {
 					businessName: 'blackCoffee',
-					latitude: 37.253452,
-					longitude: 126.234523,
+					latitude: '37.253452',
+					longitude: '126.234523',
 					email: 'test@gmail.com',
 					phoneNumber: '010-1234-1234',
 					requirement: 'test',

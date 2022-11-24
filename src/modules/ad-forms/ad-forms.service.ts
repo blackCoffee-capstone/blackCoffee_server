@@ -29,7 +29,11 @@ export class AdFormsService {
 			const licenseUrl = await this.uploadFileToS3('licenses', licenseFile);
 
 			const adForm = await this.adFormsRepository.save({
-				...adFormData,
+				businessName: adFormData.businessName,
+				latitude: Number(adFormData.latitude),
+				longitude: Number(adFormData.longitude),
+				email: adFormData.email ? adFormData.email : null,
+				requirement: adFormData.requirement,
 				licenseUrl,
 				geom,
 			});
@@ -44,7 +48,7 @@ export class AdFormsService {
 		const imageName = uuid();
 		const fileUrl = `${this.#ncloudConfig.storageEndPoint}/${
 			this.#ncloudConfig.storageBucket
-		}/${folder}/${imageName}.PNG`;
+		}/${folder}/${imageName}${file.originalname}`;
 
 		const s3 = new AWS.S3({
 			endpoint: new AWS.Endpoint(this.#ncloudConfig.storageEndPoint),
@@ -58,10 +62,10 @@ export class AdFormsService {
 		await s3
 			.putObject({
 				Bucket: this.#ncloudConfig.storageBucket,
-				Key: `${folder}/${imageName}.PNG`,
+				Key: `${folder}/${imageName}${file.originalname}`,
 				ACL: 'public-read',
 				Body: file.buffer,
-				ContentType: 'image/png',
+				ContentType: file.mimetype,
 			})
 			.promise();
 

@@ -4,7 +4,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
 import { AdForm } from 'src/entities/ad-form.entity';
-import { AdFormType } from 'src/types/ad-form.types';
 import { MockAdFormsRepository } from 'test/mock/ad-forms.mock';
 import { AdFormsController } from './ad-forms.controller';
 import { AdFormsService } from './ad-forms.service';
@@ -46,12 +45,11 @@ describe('AdFormsController', () => {
 			await expect(
 				adFormsController.registerAdForm(null, {
 					businessName: 'blackCoffee',
-					latitude: 37.253452,
-					longitude: 126.234523,
+					latitude: '37.253452',
+					longitude: '126.234523',
 					email: 'test@gmail.com',
 					phoneNumber: '010-1234-1234',
 					requirement: 'test',
-					status: AdFormType.Todo,
 				}),
 			).rejects.toThrow(BadRequestException);
 		});
