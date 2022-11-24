@@ -2,6 +2,7 @@ import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsString, Length } from 'clas
 import { Column, Entity, OneToMany } from 'typeorm';
 
 import { UserType } from 'src/types/users.types';
+import { ClickSpot } from './click-spots.entity';
 import { CommonEntity } from './common.entity';
 import { PostComment } from './post-comments.entity';
 import { Post } from './posts.entity';
@@ -54,7 +55,11 @@ export class User extends CommonEntity {
 
 	@OneToMany(() => PostComment, (postComment: PostComment) => postComment.user, {
 		cascade: true,
-		eager: true,
 	})
 	postComments: PostComment[];
+
+	@OneToMany(() => ClickSpot, (clickSpot: ClickSpot) => clickSpot.user, {
+		cascade: true,
+	})
+	clickSpots: ClickSpot[];
 }

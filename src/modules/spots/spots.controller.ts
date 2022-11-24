@@ -1,6 +1,7 @@
 import {
 	Controller,
 	Get,
+	Headers,
 	HttpException,
 	HttpStatus,
 	Param,
@@ -73,7 +74,11 @@ export class SpotsController {
 
 	@Get(':spotId')
 	@ApiDocs.detailSpot('여행지 상세 페이지(여행지 기본 정보, 연관 sns posts')
-	async detailSpot(@Query() datailRequest: DetailSpotRequestDto, @Param('spotId') spotId: number) {
-		return await this.spotsService.getDetailSpot(datailRequest, spotId);
+	async detailSpot(
+		@Headers() headers,
+		@Query() datailRequest: DetailSpotRequestDto,
+		@Param('spotId') spotId: number,
+	) {
+		return await this.spotsService.getDetailSpot(headers.authorization, datailRequest, spotId);
 	}
 }
