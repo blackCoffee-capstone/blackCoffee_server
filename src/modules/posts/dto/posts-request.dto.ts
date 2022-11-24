@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsString } from 'class-validator';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsOptional, IsString } from 'class-validator';
 
 export class PostsRequestDto {
 	@IsString()
@@ -8,8 +8,9 @@ export class PostsRequestDto {
 	readonly title: string;
 
 	@IsString()
+	@IsOptional()
 	@ApiProperty({ example: 'test', description: '내용' })
-	readonly content: string;
+	readonly content?: string | null;
 
 	@IsString()
 	@ApiProperty({ example: '서울특별시 ~~', description: '주소' })

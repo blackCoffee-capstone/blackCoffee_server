@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 import { CommonEntity } from './common.entity';
 import { Location } from './locations.entity';
+import { PostComment } from './post-comments.entity';
 import { PostTheme } from './post-themes.entity';
 import { User } from './users.entity';
 
@@ -55,4 +56,10 @@ export class Post extends CommonEntity {
 		eager: true,
 	})
 	postThemes: PostTheme[];
+
+	@OneToMany(() => PostComment, (postComment: PostComment) => postComment.post, {
+		cascade: true,
+		eager: true,
+	})
+	postComments: PostComment[];
 }
