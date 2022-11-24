@@ -16,6 +16,7 @@ import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { ConfigService } from '@nestjs/config';
 import { RanksService } from '../ranks/ranks.service';
 import { SpotsService } from './spots.service';
+import { HttpService } from '@nestjs/axios';
 
 describe('SpotsService', () => {
 	let spotsService: SpotsService;
@@ -54,11 +55,19 @@ describe('SpotsService', () => {
 					provide: ConfigService,
 					useValue: {
 						get: jest.fn((key: string) => {
-							if (key === 'sshConfig') {
+							if (key === 'oauthConfig') {
 								return 1;
 							}
 							return null;
 						}),
+					},
+				},
+				{
+					provide: HttpService,
+					useValue: {
+						//TODO:
+						// eslint-disable-next-line @typescript-eslint/no-empty-function
+						post: jest.fn(() => {}),
 					},
 				},
 				RanksService,

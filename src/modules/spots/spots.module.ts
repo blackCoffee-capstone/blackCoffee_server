@@ -10,9 +10,10 @@ import { SpotsController } from './spots.controller';
 import { SpotsService } from './spots.service';
 import { RanksService } from '../ranks/ranks.service';
 import { RanksModule } from '../ranks/ranks.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-	imports: [RanksModule, TypeOrmModule.forFeature([Spot, Location, Theme, SnsPost, Rank])],
+	imports: [HttpModule, RanksModule, TypeOrmModule.forFeature([Spot, Location, Theme, SnsPost, Rank])],
 	controllers: [SpotsController],
 	providers: [SpotsService, RanksService],
 })
