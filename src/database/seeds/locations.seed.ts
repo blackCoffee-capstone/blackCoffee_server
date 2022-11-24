@@ -146,11 +146,11 @@ const seedLocationDatas = [
 	},
 	{
 		metroName: '인천',
-		localName: '강화구',
+		localName: '강화군',
 	},
 	{
 		metroName: '인천',
-		localName: '옹진구',
+		localName: '옹진군',
 	},
 	{
 		metroName: '부산',
@@ -170,7 +170,7 @@ const seedLocationDatas = [
 	},
 	{
 		metroName: '부산',
-		localName: '영동구',
+		localName: '영도구',
 	},
 	{
 		metroName: '부산',
@@ -217,6 +217,10 @@ const seedLocationDatas = [
 		localName: '사상구',
 	},
 	{
+		metroName: '부산',
+		localName: '기장군',
+	},
+	{
 		metroName: '대구',
 		localName: null,
 	},
@@ -247,6 +251,10 @@ const seedLocationDatas = [
 	{
 		metroName: '대구',
 		localName: '달서구',
+	},
+	{
+		metroName: '대구',
+		localName: '달성군',
 	},
 	{
 		metroName: '대전',
@@ -318,7 +326,7 @@ const seedLocationDatas = [
 	},
 	{
 		metroName: '울산',
-		localName: '울주구',
+		localName: '울주군',
 	},
 	{
 		metroName: '세종',
@@ -447,6 +455,10 @@ const seedLocationDatas = [
 	{
 		metroName: '경기',
 		localName: '화성시',
+	},
+	{
+		metroName: '경기',
+		localName: '여주시',
 	},
 	{
 		metroName: '경기',
