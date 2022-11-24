@@ -15,7 +15,8 @@ import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
 
 describe('PostsController', () => {
-	let controller: PostsController;
+	let postsController: PostsController;
+	let postsService: PostsService;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -56,10 +57,11 @@ describe('PostsController', () => {
 			],
 		}).compile();
 
-		controller = module.get<PostsController>(PostsController);
+		postsController = module.get<PostsController>(PostsController);
+		postsService = module.get<PostsService>(PostsService);
 	});
 
 	it('should be defined', () => {
-		expect(controller).toBeDefined();
+		expect(postsController).toBeDefined();
 	});
 });

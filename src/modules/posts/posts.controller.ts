@@ -8,6 +8,7 @@ import {
 	Param,
 	Patch,
 	Post,
+	Query,
 	UploadedFiles,
 	UseGuards,
 	UseInterceptors,
@@ -21,6 +22,7 @@ import { PostsRequestDto } from './dto/posts-request.dto';
 import { UpdatePostsRequestDto } from './dto/update-posts-request.dto';
 import { ApiDocs } from './posts.docs';
 import { PostsService } from './posts.service';
+import { MainPostsRequestDto } from './dto/main-posts-request.dto';
 
 @Controller('posts')
 @ApiTags('posts - 커뮤니티 게시글 정보')
@@ -125,5 +127,11 @@ export class PostsController {
 		@Param('commentId') commentId: number,
 	) {
 		return await this.postsService.deletePostsComment(userData.id, postId, commentId);
+	}
+
+	@Get()
+	@ApiDocs.getMainPost('커뮤니티 메인 게시판(단어 검색, 정렬, 필터링, 페이지네이션)')
+	async getMainPost(@Query() searchRequest: MainPostsRequestDto) {
+		return await this.postsService.getMainPost(searchRequest);
 	}
 }
