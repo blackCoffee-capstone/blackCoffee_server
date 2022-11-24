@@ -106,10 +106,10 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 			}),
 			ApiParam({
 				name: 'isWish',
-				type: Boolean,
+				type: Number,
 			}),
 			ApiResponse({
-				status: 200,
+				status: 201,
 				description: '',
 				type: Boolean,
 			}),

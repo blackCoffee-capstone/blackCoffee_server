@@ -432,30 +432,26 @@ export class SpotsService {
 			.getOne();
 		console.log(isWish);
 		if (!IsSpot) throw new NotFoundException('Spot is not found');
-		try {
-			if (isWish) {
-				const isWishSpot = await this.wishSpotsRepository
-					.createQueryBuilder('wishSpot')
-					.where('wishSpot.userId = :userId', { userId })
-					.andWhere('wishSpot.spotId = :spotId', { spotId })
-					.getOne();
-				if (!isWishSpot) {
-					const wishSpot = this.wishSpotsRepository.create({
-						userId,
-						spotId,
-					});
-					await this.wishSpotsRepository.save(wishSpot);
-				}
-			} else {
-				await this.wishSpotsRepository.delete({
+		if (isWish) {
+			const isWishSpot = await this.wishSpotsRepository
+				.createQueryBuilder('wishSpot')
+				.where('wishSpot.userId = :userId', { userId })
+				.andWhere('wishSpot.spotId = :spotId', { spotId })
+				.getOne();
+			if (!isWishSpot) {
+				const wishSpot = this.wishSpotsRepository.create({
 					userId,
 					spotId,
 				});
-			}
-			return true;
-		} catch (error) {
-			throw new InternalServerErrorException(error.message, error);
+				await this.wishSpotsRepository.save(wishSpot);
+			} else throw new BadRequestException('User already wishes spot');
+		} else {
+			await this.wishSpotsRepository.delete({
+				userId,
+				spotId,
+			});
 		}
+		return true;
 	}
 
 	private async getNearbyFacility(latitude, longitude) {

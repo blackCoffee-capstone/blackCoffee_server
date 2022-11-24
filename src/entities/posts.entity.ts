@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { ClickPost } from './click-posts.entity';
 
 import { CommonEntity } from './common.entity';
+import { LikePost } from './like-posts.entity';
 import { Location } from './locations.entity';
 import { PostComment } from './post-comments.entity';
 import { PostTheme } from './post-themes.entity';
@@ -68,4 +69,9 @@ export class Post extends CommonEntity {
 		cascade: true,
 	})
 	clickPosts: ClickPost[];
+
+	@OneToMany(() => LikePost, (likePost: LikePost) => likePost.post, {
+		cascade: true,
+	})
+	likePosts: LikePost[];
 }

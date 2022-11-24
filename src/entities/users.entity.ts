@@ -5,6 +5,7 @@ import { UserType } from 'src/types/users.types';
 import { ClickPost } from './click-posts.entity';
 import { ClickSpot } from './click-spots.entity';
 import { CommonEntity } from './common.entity';
+import { LikePost } from './like-posts.entity';
 import { PostComment } from './post-comments.entity';
 import { Post } from './posts.entity';
 import { TasteTheme } from './taste-themes.entity';
@@ -74,4 +75,9 @@ export class User extends CommonEntity {
 		cascade: true,
 	})
 	wishSpots: WishSpot[];
+
+	@OneToMany(() => LikePost, (likePost: LikePost) => likePost.user, {
+		cascade: true,
+	})
+	likePosts: LikePost[];
 }

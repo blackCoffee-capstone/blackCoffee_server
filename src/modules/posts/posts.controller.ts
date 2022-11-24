@@ -62,8 +62,8 @@ export class PostsController {
 
 	@Get()
 	@ApiDocs.getMainPost('커뮤니티 메인 게시판(단어 검색, 정렬, 필터링, 페이지네이션)')
-	async getMainPost(@Query() searchRequest: MainPostsRequestDto) {
-		return await this.postsService.getMainPost(searchRequest);
+	async getMainPost(@AuthUser() userData, @Query() searchRequest: MainPostsRequestDto) {
+		return await this.postsService.getMainPost(userData.id, searchRequest);
 	}
 
 	@Patch(':postId')
@@ -133,5 +133,12 @@ export class PostsController {
 		@Param('commentId') commentId: number,
 	) {
 		return await this.postsService.deletePostsComment(userData.id, postId, commentId);
+	}
+
+	@Post(':postId/likes/:isLike')
+	@ApiDocs.likePost('커뮤니티 게시글 좋아요')
+	async likePost(@AuthUser() userData, @Param('postId') postId: number, @Param('isLike') isLike: number) {
+		const isLikeBool = isLike === 1 ? true : false;
+		return await this.postsService.likePost(userData.id, postId, isLikeBool);
 	}
 }

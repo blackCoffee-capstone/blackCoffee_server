@@ -34,6 +34,14 @@ export class GetPostsResponseDto {
 	@ApiProperty({ example: 10, description: '게시글 조회수' })
 	readonly views: number;
 
+	@IsNumber()
+	@ApiProperty({ example: 10, description: '게시글 좋아요 개수' })
+	readonly likes: number;
+
+	@IsBoolean()
+	@ApiProperty({ example: false, description: '게시글 좋아요 여부' })
+	readonly isLike: boolean;
+
 	@ApiProperty({ description: '작성자 정보' })
 	readonly user: CommentsUserResponseDto;
 
@@ -45,7 +53,7 @@ export class GetPostsResponseDto {
 	@ApiProperty({ description: '테마 정보' })
 	readonly themes: ThemeResponseDto[];
 
-	constructor({ id, title, content, photoUrls, isWriter, createdAt, views, user, location, themes }) {
+	constructor({ id, title, content, photoUrls, isWriter, createdAt, views, likes, isLike, user, location, themes }) {
 		this.id = id;
 		this.title = title;
 		this.content = content;
@@ -53,6 +61,8 @@ export class GetPostsResponseDto {
 		this.isWriter = isWriter;
 		this.createdAt = createdAt;
 		this.views = views;
+		this.likes = likes;
+		this.isLike = isLike;
 		this.user = user;
 		this.location = location;
 		this.themes = themes;

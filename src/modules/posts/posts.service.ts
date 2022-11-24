@@ -7,6 +7,7 @@ import { uuid } from 'uuidv4';
 
 import { NcloudConfig } from 'src/config/config.constant';
 import { ClickPost } from 'src/entities/click-posts.entity';
+import { LikePost } from 'src/entities/like-posts.entity';
 import { Location } from 'src/entities/locations.entity';
 import { PostComment } from 'src/entities/post-comments.entity';
 import { PostTheme } from 'src/entities/post-themes.entity';
@@ -40,6 +41,8 @@ export class PostsService {
 		private readonly postCommentsRepository: Repository<PostComment>,
 		@InjectRepository(ClickPost)
 		private readonly clickPostsRepository: Repository<ClickPost>,
+		@InjectRepository(LikePost)
+		private readonly likePostsRepository: Repository<LikePost>,
 		private readonly configService: ConfigService,
 	) {}
 	#ncloudConfig = this.configService.get<NcloudConfig>('ncloudConfig');
@@ -187,6 +190,8 @@ export class PostsService {
 			return new GetPostsResponseDto({
 				...foundPost,
 				views: foundPost.clickPosts.length + 1,
+				likes: foundPost.likePosts.length,
+				isLike: this.isLikePost(userId, foundPost.likePosts) ? true : false,
 				isWriter,
 				location: new LocationResponseDto(foundPost.location),
 				user: new CommentsUserResponseDto(foundPost.user),
@@ -257,6 +262,33 @@ export class PostsService {
 			throw new NotFoundException('Comment is not found');
 		}
 		await this.postCommentsRepository.delete(commentId);
+		return true;
+	}
+
+	async likePost(userId: number, postId: number, isLike: boolean): Promise<boolean> {
+		const foundPost = await this.getPostUserId(postId);
+		if (!foundPost) {
+			throw new NotFoundException('Post is not found');
+		}
+		if (isLike) {
+			const isLikePost = await this.likePostsRepository
+				.createQueryBuilder('likePost')
+				.where('likePost.userId = :userId', { userId })
+				.andWhere('likePost.postId = :postId', { postId })
+				.getOne();
+			if (!isLikePost) {
+				const likePost = this.likePostsRepository.create({
+					userId,
+					postId,
+				});
+				await this.likePostsRepository.save(likePost);
+			} else throw new BadRequestException('User already likes post');
+		} else {
+			await this.likePostsRepository.delete({
+				userId,
+				postId,
+			});
+		}
 		return true;
 	}
 
@@ -399,6 +431,7 @@ export class PostsService {
 			.leftJoinAndSelect('post.user', 'user')
 			.leftJoinAndSelect('post.location', 'location')
 			.leftJoinAndSelect('post.clickPosts', 'clickPosts')
+			.leftJoinAndSelect('post.likePosts', 'likePosts')
 			.where('post.id = :postId', { postId })
 			.getOne();
 	}
@@ -458,12 +491,13 @@ export class PostsService {
 			.getRawMany();
 	}
 
-	async getMainPost(searchRequest: MainPostsRequestDto) {
+	async getMainPost(userId: number, searchRequest: MainPostsRequestDto) {
 		try {
 			let posts = this.postsRepository
 				.createQueryBuilder('post')
 				.leftJoinAndSelect('post.location', 'location')
 				.leftJoinAndSelect('post.clickPosts', 'clickPosts')
+				.leftJoinAndSelect('post.likePosts', 'likePosts')
 				.orderBy(`post.${searchRequest.sorter}`, 'ASC');
 
 			if (searchRequest.word) {
@@ -497,6 +531,8 @@ export class PostsService {
 					new MainPostsResponseDto({
 						...post,
 						views: post.clickPosts.length,
+						likes: post.likePosts.length,
+						isLike: this.isLikePost(userId, post.likePosts) ? true : false,
 						location: new LocationResponseDto({
 							id: post.location.id,
 							metroName: post.location.metroName,
@@ -504,10 +540,16 @@ export class PostsService {
 						}),
 					}),
 			);
-			console.log(responsePosts);
 			return new MainPostsPageResponseDto({ totalPage: totalPage, posts: postsDto });
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
+	}
+
+	private isLikePost(userId: number, likePosts: LikePost[]): boolean {
+		const isLike = likePosts.find((x) => x.userId === userId);
+
+		if (isLike) return true;
+		return false;
 	}
 }
