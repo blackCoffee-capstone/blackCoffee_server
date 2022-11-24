@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
 
 import { NcloudConfig } from 'src/config/config.constant';
+import { ClickPost } from 'src/entities/click-posts.entity';
 import { Location } from 'src/entities/locations.entity';
 import { PostComment } from 'src/entities/post-comments.entity';
 import { PostTheme } from 'src/entities/post-themes.entity';
@@ -33,6 +34,8 @@ export class PostsService {
 		private readonly postThemesRepository: Repository<PostTheme>,
 		@InjectRepository(PostComment)
 		private readonly postCommentsRepository: Repository<PostComment>,
+		@InjectRepository(ClickPost)
+		private readonly clickPostsRepository: Repository<ClickPost>,
 		private readonly configService: ConfigService,
 	) {}
 	#ncloudConfig = this.configService.get<NcloudConfig>('ncloudConfig');
@@ -171,20 +174,29 @@ export class PostsService {
 		if (foundPost.user_id === userId) {
 			isWriter = true;
 		}
-		return new GetPostsResponseDto({
-			...foundPost,
-			isWriter,
-			location: {
-				id: foundPost.location_id,
-				metroName: foundPost.metro_name,
-				localName: foundPost.local_name,
-			},
-			user: new CommentsUserResponseDto({
-				id: foundPost.user_id,
-				nickname: foundPost.nickname,
-			}),
-			themes: await this.getPostsThems(postId),
-		});
+		try {
+			const clickPostData = this.clickPostsRepository.create({
+				userId,
+				postId,
+			});
+			await this.clickPostsRepository.save(clickPostData);
+			return new GetPostsResponseDto({
+				...foundPost,
+				isWriter,
+				location: {
+					id: foundPost.location_id,
+					metroName: foundPost.metro_name,
+					localName: foundPost.local_name,
+				},
+				user: new CommentsUserResponseDto({
+					id: foundPost.user_id,
+					nickname: foundPost.nickname,
+				}),
+				themes: await this.getPostsThems(postId),
+			});
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async deletePost(userId: number, postId: number): Promise<boolean> {

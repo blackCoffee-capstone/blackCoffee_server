@@ -1,5 +1,6 @@
 import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { ClickPost } from './click-posts.entity';
 
 import { CommonEntity } from './common.entity';
 import { Location } from './locations.entity';
@@ -62,4 +63,9 @@ export class Post extends CommonEntity {
 		eager: true,
 	})
 	postComments: PostComment[];
+
+	@OneToMany(() => ClickPost, (clickPosts: ClickPost) => clickPosts.post, {
+		cascade: true,
+	})
+	clickPosts: ClickPost[];
 }
