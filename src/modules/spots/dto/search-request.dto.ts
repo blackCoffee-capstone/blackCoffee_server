@@ -39,5 +39,5 @@ export class SearchRequestDto {
 	@IsOptional()
 	@Transform((params) => params.value.split(',').map(Number))
 	@ApiProperty({ example: '1,2,3', description: '테마 필터링 id list' })
-	readonly themeIds?: string[];
+	readonly themeIds?: number[];
 }
