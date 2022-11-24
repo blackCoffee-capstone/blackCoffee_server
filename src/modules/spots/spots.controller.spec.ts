@@ -10,11 +10,13 @@ import { Rank } from 'src/entities/rank.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { WishSpot } from 'src/entities/wish-spots.entity';
 import { MockClickSpotsRepository } from 'test/mock/click-spots.mock';
 import { MockLocationsRepository } from 'test/mock/locations.mock';
 import { MockSnsPostsRepository } from 'test/mock/snsPosts.mock';
 import { MockSpotsRepository } from 'test/mock/spots.mock';
 import { MockThemeRepository } from 'test/mock/theme.mock';
+import { MockWishSpotsRepository } from 'test/mock/wish-spots.mock';
 import { KakaoAuthStrategy } from '../auth/strategies/kakao-auth.strategy';
 import { RanksService } from '../ranks/ranks.service';
 import { SpotsController } from './spots.controller';
@@ -59,6 +61,10 @@ describe('SpotsController', () => {
 				{
 					provide: getRepositoryToken(ClickSpot),
 					useClass: MockClickSpotsRepository,
+				},
+				{
+					provide: getRepositoryToken(WishSpot),
+					useClass: MockWishSpotsRepository,
 				},
 				KakaoAuthStrategy,
 				{

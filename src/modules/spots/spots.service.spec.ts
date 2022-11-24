@@ -17,7 +17,9 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ClickSpot } from 'src/entities/click-spots.entity';
+import { WishSpot } from 'src/entities/wish-spots.entity';
 import { MockClickSpotsRepository } from 'test/mock/click-spots.mock';
+import { MockWishSpotsRepository } from 'test/mock/wish-spots.mock';
 import { RanksService } from '../ranks/ranks.service';
 import { SpotsService } from './spots.service';
 
@@ -63,6 +65,10 @@ describe('SpotsService', () => {
 				{
 					provide: getRepositoryToken(ClickSpot),
 					useClass: MockClickSpotsRepository,
+				},
+				{
+					provide: getRepositoryToken(WishSpot),
+					useClass: MockWishSpotsRepository,
 				},
 				{
 					provide: ConfigService,
