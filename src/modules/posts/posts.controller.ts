@@ -116,4 +116,14 @@ export class PostsController {
 	async getPostsComments(@AuthUser() userData, @Param('postId') postId: number) {
 		return await this.postsService.getPostsComments(userData.id, postId);
 	}
+
+	@Delete(':postId/comments/:commentId')
+	@ApiDocs.deletePostsComment('커뮤니티 게시글 댓글 삭제')
+	async deletePostsComment(
+		@AuthUser() userData,
+		@Param('postId') postId: number,
+		@Param('commentId') commentId: number,
+	) {
+		return await this.postsService.deletePostsComment(userData.id, postId, commentId);
+	}
 }

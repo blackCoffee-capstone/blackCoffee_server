@@ -133,7 +133,7 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 			ApiResponse({
 				status: 204,
 				description: '삭제 완료',
-				type: PostsResponseDto,
+				type: Boolean,
 			}),
 			ApiBearerAuth('Authorization'),
 		);
@@ -173,6 +173,28 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 				status: 200,
 				description: '',
 				type: [GetPostsCommentsResponseDto],
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
+	deletePostsComment(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '커뮤니티 게시글 댓글 삭제',
+			}),
+			ApiParam({
+				name: 'postId',
+				type: Number,
+			}),
+			ApiParam({
+				name: 'commentId',
+				type: Number,
+			}),
+			ApiResponse({
+				status: 204,
+				description: '삭제 완료',
+				type: Boolean,
 			}),
 			ApiBearerAuth('Authorization'),
 		);
