@@ -22,12 +22,4 @@ export class AdFormsRequestDto {
 	@IsString()
 	@ApiProperty({ example: '~해주세요', description: '요구사항' })
 	readonly requirement: string;
-
-	constructor(adForm) {
-		this.businessName = adForm.businessName;
-		this.address = adForm.address;
-		this.email = adForm.email;
-		this.phoneNumber = adForm.phoneNumber;
-		this.requirement = adForm.requirement;
-	}
 }
