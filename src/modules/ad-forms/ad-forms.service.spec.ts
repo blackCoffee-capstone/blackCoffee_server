@@ -3,7 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AdForm } from 'src/entities/ad-form.entity';
+import { Location } from 'src/entities/locations.entity';
 import { MockAdFormsRepository } from 'test/mock/ad-forms.mock';
+import { MockLocationsRepository } from 'test/mock/locations.mock';
 import { AdFormsService } from './ad-forms.service';
 
 describe('AdFormsService', () => {
@@ -16,6 +18,10 @@ describe('AdFormsService', () => {
 				{
 					provide: getRepositoryToken(AdForm),
 					useClass: MockAdFormsRepository,
+				},
+				{
+					provide: getRepositoryToken(Location),
+					useClass: MockLocationsRepository,
 				},
 				{
 					provide: ConfigService,
@@ -42,8 +48,7 @@ describe('AdFormsService', () => {
 			await expect(
 				adFormsService.registerAdForm(null, {
 					businessName: 'blackCoffee',
-					latitude: '37.253452',
-					longitude: '126.234523',
+					address: '서울 중구',
 					email: 'test@gmail.com',
 					phoneNumber: '010-1234-1234',
 					requirement: 'test',

@@ -40,6 +40,10 @@ export class Post extends CommonEntity {
 	location: Location;
 
 	@IsString()
+	@Column({ type: 'varchar', length: 100, nullable: false })
+	address: string;
+
+	@IsString()
 	@IsNotEmpty()
 	@Column({ type: 'varchar', length: 30, nullable: false })
 	title: string;

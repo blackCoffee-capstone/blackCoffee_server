@@ -7,12 +7,8 @@ export class AdFormsRequestDto {
 	readonly businessName: string;
 
 	@IsString()
-	@ApiProperty({ example: '37.253452', description: '위도' })
-	readonly latitude: string;
-
-	@IsString()
-	@ApiProperty({ example: '126.234523', description: '경도' })
-	readonly longitude: string;
+	@ApiProperty({ example: '서울시 중구 ~', description: '주소' })
+	readonly address: string;
 
 	@IsEmail()
 	@ApiProperty({ example: 'test@gmail.com', description: '이메일' })
@@ -29,8 +25,7 @@ export class AdFormsRequestDto {
 
 	constructor(adForm) {
 		this.businessName = adForm.businessName;
-		this.latitude = adForm.latitude;
-		this.longitude = adForm.longitude;
+		this.address = adForm.address;
 		this.email = adForm.email;
 		this.phoneNumber = adForm.phoneNumber;
 		this.requirement = adForm.requirement;
