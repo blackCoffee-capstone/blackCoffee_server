@@ -2,10 +2,14 @@ import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsString, Length } from 'clas
 import { Column, Entity, OneToMany } from 'typeorm';
 
 import { UserType } from 'src/types/users.types';
+import { ClickPost } from './click-posts.entity';
+import { ClickSpot } from './click-spots.entity';
 import { CommonEntity } from './common.entity';
+import { LikePost } from './like-posts.entity';
 import { PostComment } from './post-comments.entity';
 import { Post } from './posts.entity';
 import { TasteTheme } from './taste-themes.entity';
+import { WishSpot } from './wish-spots.entity';
 
 @Entity()
 export class User extends CommonEntity {
@@ -54,7 +58,26 @@ export class User extends CommonEntity {
 
 	@OneToMany(() => PostComment, (postComment: PostComment) => postComment.user, {
 		cascade: true,
-		eager: true,
 	})
 	postComments: PostComment[];
+
+	@OneToMany(() => ClickSpot, (clickSpot: ClickSpot) => clickSpot.user, {
+		cascade: true,
+	})
+	clickSpots: ClickSpot[];
+
+	@OneToMany(() => ClickPost, (clickPost: ClickPost) => clickPost.user, {
+		cascade: true,
+	})
+	clickPosts: ClickPost[];
+
+	@OneToMany(() => WishSpot, (wishSpot: WishSpot) => wishSpot.user, {
+		cascade: true,
+	})
+	wishSpots: WishSpot[];
+
+	@OneToMany(() => LikePost, (likePost: LikePost) => likePost.user, {
+		cascade: true,
+	})
+	likePosts: LikePost[];
 }

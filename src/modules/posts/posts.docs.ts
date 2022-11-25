@@ -200,6 +200,28 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
+	likePost(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '커뮤니티 게시글 좋아요',
+			}),
+			ApiParam({
+				name: 'postId',
+				type: Number,
+			}),
+			ApiParam({
+				name: 'isLike',
+				type: Number,
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+				type: Boolean,
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
 	getMainPost(summary: string) {
 		return applyDecorators(
 			ApiOperation({

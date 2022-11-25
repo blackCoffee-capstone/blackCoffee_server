@@ -74,7 +74,14 @@ export class RecommendationsService {
 		const resultJson = JSON.parse(resultFile.toString());
 		const listRecommendationSpotIds = resultJson.listRecommendation;
 		const listRecommendationSpots = await this.getSpotsUseId(listRecommendationSpotIds);
-		return listRecommendationSpots.map((listRecommendationSpot) => new SearchResponseDto(listRecommendationSpot));
+		return listRecommendationSpots.map(
+			(listRecommendationSpot) =>
+				new SearchResponseDto({
+					...listRecommendationSpot,
+					views: listRecommendationSpot.clickSpots.length,
+					wishes: listRecommendationSpot.wishSpots.length,
+				}),
+		);
 	}
 
 	async recommendationsSpotsMap(userId: number): Promise<RecommendationsMapResponseDto[]> {
@@ -189,6 +196,8 @@ export class RecommendationsService {
 			const spots = await this.spotsRepository
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.location', 'location')
+				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
+				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.where('spot.id IN (:...spotIds)', { spotIds })
 				.getMany();
 

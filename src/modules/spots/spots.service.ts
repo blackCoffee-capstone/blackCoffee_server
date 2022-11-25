@@ -5,28 +5,30 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Repository } from 'typeorm';
 
-import { ConfigService } from '@nestjs/config';
-import { SshConfig } from 'src/config/config.constant';
-import { OauthConfig } from 'src/config/config.constant';
 import { HttpService } from '@nestjs/axios';
-import { RanksService } from '../ranks/ranks.service';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { firstValueFrom } from 'rxjs';
+import { JwtConfig, OauthConfig, SshConfig } from 'src/config/config.constant';
+import { ClickSpot } from 'src/entities/click-spots.entity';
 import { Location } from 'src/entities/locations.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { WishSpot } from 'src/entities/wish-spots.entity';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
-import { NeayByFacilityResponseDto } from './dto/neayby-facility-response.dto';
+import { RanksService } from '../ranks/ranks.service';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
+import { NeayByFacilityResponseDto } from './dto/neayby-facility-response.dto';
 import { SaveRequestDto } from './dto/save-request.dto';
+import { SearchPageResponseDto } from './dto/search-page-response.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
-import { SearchPageResponseDto } from './dto/search-page-response.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
-import { firstValueFrom } from 'rxjs';
 
 const { NodeSSH } = require('node-ssh');
 const ssh = new NodeSSH();
@@ -42,12 +44,18 @@ export class SpotsService {
 		private readonly themeRepository: Repository<Theme>,
 		@InjectRepository(SnsPost)
 		private readonly snsPostRepository: Repository<SnsPost>,
+		@InjectRepository(ClickSpot)
+		private readonly clickSpotsRepository: Repository<ClickSpot>,
+		@InjectRepository(WishSpot)
+		private readonly wishSpotsRepository: Repository<WishSpot>,
 		private readonly ranksService: RanksService,
 		private readonly configService: ConfigService,
 		private readonly httpService: HttpService,
+		private readonly jwtService: JwtService,
 	) {}
 	#sshConfig = this.configService.get<SshConfig>('sshConfig');
 	#oauthConfig = this.configService.get<OauthConfig>('oauthConfig').kakao;
+	#jwtConfig = this.configService.get<JwtConfig>('jwtConfig');
 
 	async createSpots(file: Express.Multer.File) {
 		if (!file) throw new BadRequestException('File is not exist');
@@ -318,6 +326,8 @@ export class SpotsService {
 		try {
 			let searchSpots = this.spotsRepository
 				.createQueryBuilder('spot')
+				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
+				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.orderBy(`spot.${searchRequest.sorter}`, 'ASC');
 			if (searchRequest.word) {
 				searchSpots = searchSpots.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
@@ -345,17 +355,42 @@ export class SpotsService {
 				.getMany();
 
 			const totalPage = Math.ceil(totalPageSpots.length / searchRequest.take);
-			const spots = Array.from(responseSpots).map((spot) => new SearchResponseDto(spot));
+			const spots = Array.from(responseSpots).map(
+				(spot) =>
+					new SearchResponseDto({ ...spot, views: spot.clickSpots.length, wishes: spot.wishSpots.length }),
+			);
 			return new SearchPageResponseDto({ totalPage: totalPage, spots: spots });
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
 	}
 
-	async getDetailSpot(detailRequest: DetailSpotRequestDto, spotId: number) {
-		const IsSpot = await this.spotsRepository.findOne({ where: { id: spotId } });
+	async getDetailSpot(header: string, detailRequest: DetailSpotRequestDto, spotId: number) {
+		const IsSpot = await this.spotsRepository
+			.createQueryBuilder('spot')
+			.where('spot.id = :spotId', { spotId })
+			.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
+			.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
+			.getOne();
+
 		if (!IsSpot) throw new NotFoundException('Spot is not found');
 		try {
+			let isWish = false;
+			if (header) {
+				const token = header.replace('Bearer ', '');
+				const user = this.jwtService.verify(token, { secret: this.#jwtConfig.jwtAccessTokenSecret });
+				const clickSpotData = this.clickSpotsRepository.create({
+					userId: user.id,
+					spotId,
+				});
+				await this.clickSpotsRepository.save(clickSpotData);
+				const usersWishData = await this.wishSpotsRepository
+					.createQueryBuilder('wishSpot')
+					.where('wishSpot.userId = :userId', { userId: user.id })
+					.andWhere('wishSpot.spotId = :spotId', { spotId })
+					.getOne();
+				if (usersWishData) isWish = true;
+			}
 			const detailSnsPosts = await this.snsPostRepository
 				.createQueryBuilder('snsPost')
 				.leftJoinAndSelect('snsPost.spot', 'spot')
@@ -371,6 +406,9 @@ export class SpotsService {
 
 			return new DetailSpotResponseDto({
 				...IsSpot,
+				isWish,
+				views: IsSpot.clickSpots.length,
+				wishes: IsSpot.wishSpots.length,
 				detailSnsPost: detailSnsPostsDto,
 				neaybyFacility: facilitiesDto,
 				location: new LocationResponseDto(location),
@@ -378,6 +416,35 @@ export class SpotsService {
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
+	}
+
+	async wishSpot(userId: number, spotId: number, isWish: boolean): Promise<boolean> {
+		const IsSpot = await this.spotsRepository
+			.createQueryBuilder('spot')
+			.where('spot.id = :spotId', { spotId })
+			.getOne();
+		console.log(isWish);
+		if (!IsSpot) throw new NotFoundException('Spot is not found');
+		if (isWish) {
+			const isWishSpot = await this.wishSpotsRepository
+				.createQueryBuilder('wishSpot')
+				.where('wishSpot.userId = :userId', { userId })
+				.andWhere('wishSpot.spotId = :spotId', { spotId })
+				.getOne();
+			if (!isWishSpot) {
+				const wishSpot = this.wishSpotsRepository.create({
+					userId,
+					spotId,
+				});
+				await this.wishSpotsRepository.save(wishSpot);
+			} else throw new BadRequestException('User already wishes spot');
+		} else {
+			await this.wishSpotsRepository.delete({
+				userId,
+				spotId,
+			});
+		}
+		return true;
 	}
 
 	private async getNearbyFacility(latitude, longitude) {

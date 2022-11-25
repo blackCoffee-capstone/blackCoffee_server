@@ -1,18 +1,22 @@
 import {
 	Controller,
 	Get,
+	Headers,
 	HttpException,
 	HttpStatus,
 	Param,
 	Post,
 	Query,
 	UploadedFile,
+	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
+import { AuthUser } from 'src/decorators/auth.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 
@@ -73,7 +77,19 @@ export class SpotsController {
 
 	@Get(':spotId')
 	@ApiDocs.detailSpot('여행지 상세 페이지(여행지 기본 정보, 연관 sns posts')
-	async detailSpot(@Query() datailRequest: DetailSpotRequestDto, @Param('spotId') spotId: number) {
-		return await this.spotsService.getDetailSpot(datailRequest, spotId);
+	async detailSpot(
+		@Headers() headers,
+		@Query() datailRequest: DetailSpotRequestDto,
+		@Param('spotId') spotId: number,
+	) {
+		return await this.spotsService.getDetailSpot(headers.authorization, datailRequest, spotId);
+	}
+
+	@Post(':spotId/wishes/:isWish')
+	@UseGuards(JwtAuthGuard)
+	@ApiDocs.wishSpot('여행지 찜하기')
+	async wishSpot(@AuthUser() userData, @Param('spotId') spotId: number, @Param('isWish') isWish: number) {
+		const isWishBool = isWish === 1 ? true : false;
+		return await this.spotsService.wishSpot(userData.id, spotId, isWishBool);
 	}
 }

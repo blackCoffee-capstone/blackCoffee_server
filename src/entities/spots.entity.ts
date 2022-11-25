@@ -1,11 +1,13 @@
 import { IsLatitude, IsLongitude, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Geometry } from 'geojson';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { ClickSpot } from './click-spots.entity';
 
 import { CommonEntity } from './common.entity';
 import { Location } from './locations.entity';
 import { Rank } from './rank.entity';
 import { SnsPost } from './sns-posts.entity';
+import { WishSpot } from './wish-spots.entity';
 
 @Entity()
 export class Spot extends CommonEntity {
@@ -69,4 +71,15 @@ export class Spot extends CommonEntity {
 		cascade: true,
 	})
 	rankings: Rank[];
+
+	@OneToMany(() => ClickSpot, (clickSpot: ClickSpot) => clickSpot.spot, {
+		cascade: true,
+		eager: true,
+	})
+	clickSpots: ClickSpot[];
+
+	@OneToMany(() => WishSpot, (wishSpot: WishSpot) => wishSpot.spot, {
+		cascade: true,
+	})
+	wishSpots: WishSpot[];
 }

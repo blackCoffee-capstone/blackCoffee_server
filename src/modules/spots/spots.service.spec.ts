@@ -13,10 +13,15 @@ import { MockSpotsRepository } from 'test/mock/spots.mock';
 import { MockThemeRepository } from 'test/mock/theme.mock';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 
+import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { ClickSpot } from 'src/entities/click-spots.entity';
+import { WishSpot } from 'src/entities/wish-spots.entity';
+import { MockClickSpotsRepository } from 'test/mock/click-spots.mock';
+import { MockWishSpotsRepository } from 'test/mock/wish-spots.mock';
 import { RanksService } from '../ranks/ranks.service';
 import { SpotsService } from './spots.service';
-import { HttpService } from '@nestjs/axios';
 
 describe('SpotsService', () => {
 	let spotsService: SpotsService;
@@ -31,6 +36,12 @@ describe('SpotsService', () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				SpotsService,
+				{
+					provide: JwtService,
+					useValue: {
+						sign: () => '',
+					},
+				},
 				{
 					provide: getRepositoryToken(Spot),
 					useClass: MockSpotsRepository,
@@ -52,10 +63,18 @@ describe('SpotsService', () => {
 					useClass: MockRankRepository,
 				},
 				{
+					provide: getRepositoryToken(ClickSpot),
+					useClass: MockClickSpotsRepository,
+				},
+				{
+					provide: getRepositoryToken(WishSpot),
+					useClass: MockWishSpotsRepository,
+				},
+				{
 					provide: ConfigService,
 					useValue: {
 						get: jest.fn((key: string) => {
-							if (key === 'oauthConfig') {
+							if (key === 'oauthConfig' || key === 'jwtConfig') {
 								return 1;
 							}
 							return null;

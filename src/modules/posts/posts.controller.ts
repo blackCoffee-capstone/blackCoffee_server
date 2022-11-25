@@ -17,12 +17,12 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthUser } from 'src/decorators/auth.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { MainPostsRequestDto } from './dto/main-posts-request.dto';
 import { PostCommentsRequestDto } from './dto/post-comments-request.dto';
 import { PostsRequestDto } from './dto/posts-request.dto';
 import { UpdatePostsRequestDto } from './dto/update-posts-request.dto';
 import { ApiDocs } from './posts.docs';
 import { PostsService } from './posts.service';
-import { MainPostsRequestDto } from './dto/main-posts-request.dto';
 
 @Controller('posts')
 @ApiTags('posts - 커뮤니티 게시글 정보')
@@ -58,6 +58,12 @@ export class PostsController {
 		@Body() postData: PostsRequestDto,
 	) {
 		return await this.postsService.createPost(userData.id, photos, postData);
+	}
+
+	@Get()
+	@ApiDocs.getMainPost('커뮤니티 메인 게시판(단어 검색, 정렬, 필터링, 페이지네이션)')
+	async getMainPost(@AuthUser() userData, @Query() searchRequest: MainPostsRequestDto) {
+		return await this.postsService.getMainPost(userData.id, searchRequest);
 	}
 
 	@Patch(':postId')
@@ -129,9 +135,10 @@ export class PostsController {
 		return await this.postsService.deletePostsComment(userData.id, postId, commentId);
 	}
 
-	@Get()
-	@ApiDocs.getMainPost('커뮤니티 메인 게시판(단어 검색, 정렬, 필터링, 페이지네이션)')
-	async getMainPost(@Query() searchRequest: MainPostsRequestDto) {
-		return await this.postsService.getMainPost(searchRequest);
+	@Post(':postId/likes/:isLike')
+	@ApiDocs.likePost('커뮤니티 게시글 좋아요')
+	async likePost(@AuthUser() userData, @Param('postId') postId: number, @Param('isLike') isLike: number) {
+		const isLikeBool = isLike === 1 ? true : false;
+		return await this.postsService.likePost(userData.id, postId, isLikeBool);
 	}
 }

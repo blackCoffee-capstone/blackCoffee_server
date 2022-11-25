@@ -6,9 +6,6 @@ import { CommonEntity } from './common.entity';
 
 @Entity()
 export class AuthCode extends CommonEntity {
-	// type = SignUp (회원가입을 위한 인증코드)
-	// type = FindPw (비밀번호 찾기를 위한 인증코드)
-
 	@IsEmail()
 	@IsNotEmpty()
 	@Column({ type: 'varchar', nullable: false, unique: true })
