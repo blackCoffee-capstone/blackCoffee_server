@@ -45,6 +45,10 @@ export class Spot extends CommonEntity {
 	})
 	geom: Geometry;
 
+	@IsString()
+	@Column({ type: 'varchar', length: 30, nullable: false })
+	address: string;
+
 	@IsNumber()
 	@Column({ type: 'smallint', nullable: true })
 	rank: number | null;

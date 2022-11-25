@@ -154,6 +154,7 @@ export class SpotsService {
 					arr.findIndex(
 						(item) =>
 							item.name === character.name &&
+							item.address === character.address &&
 							item.metroName === character.metroName &&
 							item.localName === character.localName &&
 							item.latitude === character.latitude &&
@@ -178,6 +179,7 @@ export class SpotsService {
 					new SpotRequestDto({
 						locationId: oneLocation.id,
 						name: spot.name,
+						address: spot.address,
 						latitude: spot.latitude,
 						longitude: spot.longitude,
 						rank: spot.rank,
@@ -324,7 +326,6 @@ export class SpotsService {
 		try {
 			let searchSpots = this.spotsRepository
 				.createQueryBuilder('spot')
-				.leftJoinAndSelect('spot.location', 'location')
 				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
 				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.orderBy(`spot.${searchRequest.sorter}`, 'ASC');
@@ -337,7 +338,9 @@ export class SpotsService {
 				const localsIds = Array.from(allMetros).flatMap(({ id }) => [id]);
 				locationIds = [...new Set(locationIds.concat(localsIds))];
 
-				searchSpots = searchSpots.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
+				searchSpots = searchSpots
+					.leftJoinAndSelect('spot.location', 'location')
+					.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
 			}
 			if (searchRequest.themeIds) {
 				searchSpots = searchSpots
@@ -354,18 +357,8 @@ export class SpotsService {
 			const totalPage = Math.ceil(totalPageSpots.length / searchRequest.take);
 			const spots = Array.from(responseSpots).map(
 				(spot) =>
-					new SearchResponseDto({
-						...spot,
-						views: spot.clickSpots.length,
-						wishes: spot.wishSpots.length,
-						location: new LocationResponseDto({
-							id: spot.location.id,
-							metroName: spot.location.metroName,
-							localName: spot.location.localName,
-						}),
-					}),
+					new SearchResponseDto({ ...spot, views: spot.clickSpots.length, wishes: spot.wishSpots.length }),
 			);
-
 			return new SearchPageResponseDto({ totalPage: totalPage, spots: spots });
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);

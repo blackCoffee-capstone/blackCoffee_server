@@ -11,6 +11,10 @@ export class SpotRequestDto {
 	@ApiProperty({ example: '을왕리해수욕장', description: '여행지 이름' })
 	readonly name: string;
 
+	@IsString()
+	@ApiProperty({ example: '경상북도 경주시 남산동', description: '여행지 상세주소' })
+	readonly address: string;
+
 	@IsNumber()
 	@ApiProperty({ example: 37.253452, description: '위도' })
 	readonly latitude: number;
@@ -35,9 +39,10 @@ export class SpotRequestDto {
 	@ApiProperty({ example: 100, description: 'sns 게시글 좋아요 수' })
 	readonly snsPostLikeNumber: number;
 
-	constructor({ locationId, name, latitude, longitude, rank }) {
+	constructor({ locationId, name, address, latitude, longitude, rank }) {
 		this.locationId = locationId;
 		this.name = name;
+		this.address = address;
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.geom = `(${latitude.toString()},${longitude.toString()})`;

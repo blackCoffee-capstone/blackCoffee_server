@@ -6,7 +6,6 @@ import { SshConfig } from 'src/config/config.constant';
 import { Spot } from 'src/entities/spots.entity';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { Repository } from 'typeorm';
-import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { SearchResponseDto } from '../spots/dto/search-response.dto';
 import { UsersTasteThemesResponseDto } from '../taste-themes/dto/users-taste-themes-response.dto';
 import { RecommendationsMapResponseDto } from './dto/recommendations-map-response.dto';
@@ -81,11 +80,6 @@ export class RecommendationsService {
 					...listRecommendationSpot,
 					views: listRecommendationSpot.clickSpots.length,
 					wishes: listRecommendationSpot.wishSpots.length,
-					location: new LocationResponseDto({
-						id: listRecommendationSpot.location.id,
-						metroName: listRecommendationSpot.location.metroName,
-						localName: listRecommendationSpot.location.localName,
-					}),
 				}),
 		);
 	}
