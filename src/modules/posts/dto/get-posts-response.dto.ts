@@ -18,6 +18,10 @@ export class GetPostsResponseDto {
 	@ApiProperty({ example: 'test', description: '내용' })
 	readonly content?: string | null;
 
+	@IsString()
+	@ApiProperty({ example: '서울시 중구 ~', description: '주소' })
+	readonly address: string;
+
 	@IsArray()
 	@ApiProperty({ isArray: true, example: ['test'], description: '사진 url 리스트' })
 	readonly photoUrls: string[];
@@ -53,10 +57,25 @@ export class GetPostsResponseDto {
 	@ApiProperty({ description: '테마 정보' })
 	readonly themes: ThemeResponseDto[];
 
-	constructor({ id, title, content, photoUrls, isWriter, createdAt, views, likes, isLike, user, location, themes }) {
+	constructor({
+		id,
+		title,
+		content,
+		address,
+		photoUrls,
+		isWriter,
+		createdAt,
+		views,
+		likes,
+		isLike,
+		user,
+		location,
+		themes,
+	}) {
 		this.id = id;
 		this.title = title;
 		this.content = content;
+		this.address = address;
 		this.photoUrls = photoUrls;
 		this.isWriter = isWriter;
 		this.createdAt = createdAt;

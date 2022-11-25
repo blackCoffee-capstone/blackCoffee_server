@@ -1,9 +1,9 @@
-import { IsEmail, IsLatitude, IsLongitude, IsNotEmpty, IsString } from 'class-validator';
-import { Geometry } from 'geojson';
-import { Column, Entity } from 'typeorm';
+import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { AdFormType } from 'src/types/ad-form.types';
 import { CommonEntity } from './common.entity';
+import { Location } from './locations.entity';
 
 @Entity()
 export class AdForm extends CommonEntity {
@@ -12,23 +12,21 @@ export class AdForm extends CommonEntity {
 	@Column({ name: 'business_name', type: 'varchar', length: 40, nullable: false })
 	businessName: string;
 
-	@IsLatitude()
-	@Column({ type: 'double precision', nullable: false })
-	latitude: number;
+	@IsString()
+	@Column({ type: 'varchar', length: 100, nullable: false })
+	address: string;
 
-	@IsLongitude()
-	@Column({ type: 'double precision', nullable: false })
-	longitude: number;
+	@IsNumber()
+	@IsNotEmpty()
+	@Column({ name: 'location_id', nullable: true })
+	locationId: number;
 
-	@Column({
-		name: 'geom',
-		type: 'point',
-		spatialFeatureType: 'Point',
-		srid: 5186,
-		nullable: false,
-		comment: 'geom',
+	@ManyToOne(() => Location, (location: Location) => location.adForms, {
+		onDelete: 'SET NULL',
+		nullable: true,
 	})
-	geom: Geometry;
+	@JoinColumn([{ name: 'location_id', referencedColumnName: 'id' }])
+	location: Location;
 
 	@IsEmail()
 	@IsNotEmpty()

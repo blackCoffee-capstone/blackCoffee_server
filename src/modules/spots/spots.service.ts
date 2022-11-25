@@ -1,8 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as fastcsv from 'fast-csv';
 import * as fs from 'fs';
-import * as path from 'path';
 import { Repository } from 'typeorm';
 
 import { HttpService } from '@nestjs/axios';
@@ -60,7 +58,6 @@ export class SpotsService {
 	async createSpots(file: Express.Multer.File) {
 		if (!file) throw new BadRequestException('File is not exist');
 		const fileName: string = file.filename;
-		const snsPosts = await this.readCsv(path.resolve('src/database/datas', fileName));
 		const localResultPath = './src/modules/spots/results/result.json';
 
 		await ssh
@@ -98,41 +95,6 @@ export class SpotsService {
 		const spots = JSON.parse(spotsFile.toString());
 		const metaData: SaveRequestDto[] = spots.map((spot) => new SaveRequestDto(spot));
 		return await this.saveSpot(metaData);
-	}
-
-	private async readCsv(filePath: string) {
-		return new Promise((resolve, reject) => {
-			const csvData = [];
-			const csvStream = fs.createReadStream(filePath);
-			const csvParser = fastcsv.parse({ headers: true });
-
-			csvStream
-				.pipe(csvParser)
-				.on('error', (err) => {
-					throw new InternalServerErrorException(err);
-				})
-				.on('data', (row) => {
-					const place = row.place;
-					const latitude = Number(row.latitude);
-					const longitude = Number(row.longitude);
-					const link = row.link;
-					const datetime = new Date(row.datetime);
-					const like = row.like;
-					const text = row.text;
-					csvData.push({
-						place,
-						latitude,
-						longitude,
-						link,
-						datetime,
-						like,
-						text,
-					});
-				})
-				.on('end', () => {
-					resolve(csvData);
-				});
-		});
 	}
 
 	private async saveSpot(metaData: SaveRequestDto[]) {

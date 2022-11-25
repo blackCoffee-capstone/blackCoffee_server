@@ -13,6 +13,7 @@ import { PostComment } from 'src/entities/post-comments.entity';
 import { PostTheme } from 'src/entities/post-themes.entity';
 import { Post } from 'src/entities/posts.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { AdFormsService } from '../ad-forms/ad-forms.service';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { CommentsUserResponseDto } from '../users/dto/comments-user-response.dto';
 import { GetPostsCommentsResponseDto } from './dto/get-posts-comments-response.dto';
@@ -43,6 +44,7 @@ export class PostsService {
 		private readonly clickPostsRepository: Repository<ClickPost>,
 		@InjectRepository(LikePost)
 		private readonly likePostsRepository: Repository<LikePost>,
+		private readonly adFormsService: AdFormsService,
 		private readonly configService: ConfigService,
 	) {}
 	#ncloudConfig = this.configService.get<NcloudConfig>('ncloudConfig');
@@ -65,8 +67,8 @@ export class PostsService {
 			throw new NotFoundException('Theme is not found');
 		}
 
-		const metroLocalName = this.getMetroLocalName(postData.location);
-		const locationId: number = await this.getLocationId(
+		const metroLocalName = this.adFormsService.getMetroLocalName(postData.address);
+		const locationId: number = await this.adFormsService.getAddressLocationId(
 			metroLocalName.isOneLevel,
 			metroLocalName.metroName,
 			metroLocalName.localName,
@@ -76,6 +78,7 @@ export class PostsService {
 			const post = await this.postsRepository.save({
 				title: postData.title,
 				content: postData.content,
+				address: postData.address,
 				photoUrls,
 				userId,
 				locationId,
@@ -127,15 +130,16 @@ export class PostsService {
 			title: postData.title ? postData.title : foundUsersPost.title,
 			content: postData.content ? postData.content : foundUsersPost.content,
 			photoUrls: photos ? [] : foundUsersPost.photo_urls,
-			locationId: postData.location ? 0 : foundUsersPost.location_id,
+			address: postData.address ? postData.address : foundUsersPost.address,
+			locationId: postData.address ? 0 : foundUsersPost.location_id,
 		};
 
 		if (!foundUsersPost) {
 			throw new NotFoundException('Post is not found');
 		}
-		if (postData.location) {
-			const metroLocalName = this.getMetroLocalName(postData.location);
-			updateData.locationId = await this.getLocationId(
+		if (postData.address) {
+			const metroLocalName = this.adFormsService.getMetroLocalName(postData.address);
+			updateData.locationId = await this.adFormsService.getAddressLocationId(
 				metroLocalName.isOneLevel,
 				metroLocalName.metroName,
 				metroLocalName.localName,
@@ -292,49 +296,6 @@ export class PostsService {
 		return true;
 	}
 
-	private getMetroLocalName(location: string) {
-		let isOneLevel = false;
-		const locationArr: string[] = location.split(' ');
-		let metroName = locationArr[0];
-		const localName = locationArr[1];
-
-		if (metroName.includes('특별자치도')) {
-			isOneLevel = true;
-			metroName = metroName.replace(/특별자치도/g, '');
-		} else if (metroName.includes('광역시')) {
-			isOneLevel = true;
-			metroName = metroName.replace(/광역시/g, '');
-		} else if (metroName.includes('특별시')) {
-			isOneLevel = true;
-			metroName = metroName.replace(/특별시/g, '');
-		}
-		return {
-			isOneLevel,
-			metroName,
-			localName,
-		};
-	}
-	private async getLocationId(isOneLevel: boolean, metroName: string, localName: string): Promise<number> {
-		let location = null;
-		if (isOneLevel) {
-			location = await this.locationsRepository
-				.createQueryBuilder('location')
-				.select('location.id')
-				.where('location.metroName like :metroName', { metroName: `%${metroName}%` })
-				.getOne();
-		} else {
-			location = await this.locationsRepository
-				.createQueryBuilder('location')
-				.select('location.id')
-				.where('location.localName like :localName', { localName: `%${localName}%` })
-				.getOne();
-		}
-		if (!location) {
-			throw new BadRequestException('Location is not found');
-		}
-		return location.id;
-	}
-
 	private async uploadFilesToS3(folder: string, files: Array<Express.Multer.File>): Promise<string[]> {
 		const photoUrls = [];
 		const s3 = new AWS.S3({
@@ -358,7 +319,10 @@ export class PostsService {
 					Body: file.buffer,
 					ContentType: file.mimetype,
 				})
-				.promise();
+				.promise()
+				.catch((error) => {
+					throw new InternalServerErrorException(error.message, error);
+				});
 			photoUrls.push(fileUrl);
 		}
 		return photoUrls;
@@ -399,7 +363,7 @@ export class PostsService {
 		return await this.postsRepository
 			.createQueryBuilder('post')
 			.select(
-				'post.id, post.title, post.content, post.photoUrls, location.id AS location_id, location.metroName, location.localName',
+				'post.id, post.address, post.title, post.content, post.photoUrls, location.id AS location_id, location.metroName, location.localName',
 			)
 			.leftJoin('post.user', 'user')
 			.leftJoin('post.location', 'location')

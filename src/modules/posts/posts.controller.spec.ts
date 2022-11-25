@@ -1,6 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { AdForm } from 'src/entities/ad-form.entity';
 import { ClickPost } from 'src/entities/click-posts.entity';
 import { LikePost } from 'src/entities/like-posts.entity';
 import { Location } from 'src/entities/locations.entity';
@@ -8,6 +9,7 @@ import { PostComment } from 'src/entities/post-comments.entity';
 import { PostTheme } from 'src/entities/post-themes.entity';
 import { Post } from 'src/entities/posts.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { MockAdFormsRepository } from 'test/mock/ad-forms.mock';
 import { MockClickPostsRepository } from 'test/mock/click-posts.mock';
 import { MockLikePostsRepository } from 'test/mock/like-posts.mock';
 import { MockLocationsRepository } from 'test/mock/locations.mock';
@@ -15,6 +17,7 @@ import { MockPostCommentsRepository } from 'test/mock/post-comments.mock';
 import { MockPostsRepository } from 'test/mock/posts.mock';
 import { MockPostThemesRepository } from 'test/mock/postThemes.mock';
 import { MockThemeRepository } from 'test/mock/theme.mock';
+import { AdFormsService } from '../ad-forms/ad-forms.service';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
 
@@ -27,6 +30,7 @@ describe('PostsController', () => {
 			controllers: [PostsController],
 			providers: [
 				PostsService,
+				AdFormsService,
 				{
 					provide: getRepositoryToken(Location),
 					useClass: MockLocationsRepository,
@@ -54,6 +58,10 @@ describe('PostsController', () => {
 				{
 					provide: getRepositoryToken(LikePost),
 					useClass: MockLikePostsRepository,
+				},
+				{
+					provide: getRepositoryToken(AdForm),
+					useClass: MockAdFormsRepository,
 				},
 				{
 					provide: ConfigService,

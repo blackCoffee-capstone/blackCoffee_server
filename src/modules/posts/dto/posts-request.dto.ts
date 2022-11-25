@@ -13,8 +13,8 @@ export class PostsRequestDto {
 	readonly content?: string | null;
 
 	@IsString()
-	@ApiProperty({ example: '서울특별시 ~~', description: '주소' })
-	readonly location: string;
+	@ApiProperty({ example: '서울특별시 종로구 ~', description: '주소' })
+	readonly address: string;
 
 	@IsArray()
 	@ArrayMinSize(1)
