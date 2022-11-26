@@ -40,6 +40,7 @@ export class AdFormsService {
 				address: adFormData.address,
 				email: adFormData.email ? adFormData.email : null,
 				requirement: adFormData.requirement,
+				phoneNumber: adFormData.phoneNumber ? adFormData.phoneNumber : null,
 				licenseUrl,
 				locationId,
 			});
