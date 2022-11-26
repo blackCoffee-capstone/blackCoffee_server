@@ -52,6 +52,7 @@ $(document).ready(function () {
 		if (event.target.className == 'close' || event.target.className == 'backon') {
 			$('#popup').hide();
 			$('.backon').hide();
+			location.reload();
 		}
 	});
 
