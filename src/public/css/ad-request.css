@@ -187,6 +187,12 @@ td {
 	font-weight: 600;
 }
 
+.radio {
+	float: bottom;
+	font-size: 12px;
+	font-weight: 600;
+}
+
 #popup {
 	display: none;
 	width: 800px;
