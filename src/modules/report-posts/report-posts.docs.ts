@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { ReportsResponseDto } from './dto/reports-response.dto';
@@ -12,6 +12,16 @@ export const ApiDocs: SwaggerMethodDoc<ReportPostsController> = {
 			ApiOperation({
 				summary,
 				description: '신고 목록 반환',
+			}),
+			ApiQuery({
+				name: 'status',
+				required: false,
+				description: '신고 상태',
+			}),
+			ApiQuery({
+				name: 'postId',
+				required: false,
+				description: '커뮤니티 게시글 id',
 			}),
 			ApiResponse({
 				status: 200,

@@ -17,14 +17,19 @@ export class ReportPostsService {
 	) {}
 
 	async getAllReports(filter: AllReportsRequestDto): Promise<ReportsResponseDto[]> {
-		let foundAllReports;
-		if (filter && filter.status) {
-			foundAllReports = await this.foundFilterReportDatas(filter.status);
-		} else {
-			foundAllReports = await this.foundAllReportDatas();
-		}
+		let foundAllReports = this.reportPostsRepository
+			.createQueryBuilder('reportPost')
+			.leftJoinAndSelect('reportPost.user', 'user')
+			.leftJoinAndSelect('reportPost.post', 'post');
 
-		return foundAllReports.map(
+		if (filter && filter.status) {
+			foundAllReports = foundAllReports.where('reportPost.status = :status', { status: filter.status });
+		}
+		if (filter && filter.postId) {
+			foundAllReports = foundAllReports.andWhere('post.id = :postId', { postId: filter.postId });
+		}
+		const foundReportsQuery = await foundAllReports.orderBy('reportPost.created_at', 'DESC').getMany();
+		return foundReportsQuery.map(
 			(report) =>
 				new ReportsResponseDto({
 					...report,
