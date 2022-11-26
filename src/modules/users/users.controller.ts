@@ -51,8 +51,14 @@ export class UsersController {
 	}
 
 	@Get('/wishes')
-	@ApiDocs.getUserswishes('사용자의 찜 목록 반환')
-	async getUserswishes(@AuthUser() userData, @Query() usersWishes: UserMyPageRequestDto) {
-		return await this.usersService.getUserswishes(userData.id, usersWishes);
+	@ApiDocs.getUsersWishes('사용자의 찜 목록 반환')
+	async getUsersWishes(@AuthUser() userData, @Query() usersWishes: UserMyPageRequestDto) {
+		return await this.usersService.getUsersWishes(userData.id, usersWishes);
+	}
+
+	@Get('/likes')
+	@ApiDocs.getUsersLikes('사용자의 좋아요 목록 반환')
+	async getUsersLikes(@AuthUser() userData, @Query() usersLikes: UserMyPageRequestDto) {
+		return await this.usersService.getUsersLikes(userData.id, usersLikes);
 	}
 }

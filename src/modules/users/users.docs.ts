@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@ne
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
+import { UserLikesResponseDto } from './dto/user-likes-response.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserTasteThemesRequestDto } from './dto/user-taste-themes-request.dto';
 import { UserWishesResponseDto } from './dto/user-wishes-response.dto';
@@ -84,7 +85,7 @@ export const ApiDocs: SwaggerMethodDoc<UsersController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
-	getUserswishes(summary: string) {
+	getUsersWishes(summary: string) {
 		return applyDecorators(
 			ApiOperation({
 				summary,
@@ -104,6 +105,30 @@ export const ApiDocs: SwaggerMethodDoc<UsersController> = {
 				status: 200,
 				description: '',
 				type: UserWishesResponseDto,
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
+	getUsersLikes(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '사용자의 좋아요 목록 반환',
+			}),
+			ApiQuery({
+				name: 'page',
+				required: false,
+				description: '페이지 번호 (default=1)',
+			}),
+			ApiQuery({
+				name: 'take',
+				required: false,
+				description: '페이지 별 데이터 개수 (default=10)',
+			}),
+			ApiResponse({
+				status: 200,
+				description: '',
+				type: UserLikesResponseDto,
 			}),
 			ApiBearerAuth('Authorization'),
 		);

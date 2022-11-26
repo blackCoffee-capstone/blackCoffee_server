@@ -8,14 +8,19 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { LikePost } from 'src/entities/like-posts.entity';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { User } from 'src/entities/users.entity';
 import { WishSpot } from 'src/entities/wish-spots.entity';
 import { UserType } from 'src/types/users.types';
 import { HashPassword } from '../auth/hash-password';
+import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { UsersTasteThemesResponseDto } from '../taste-themes/dto/users-taste-themes-response.dto';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
+import { CommentsUserResponseDto } from './dto/comments-user-response.dto';
+import { UserLikesResponseDto } from './dto/user-likes-response.dto';
+import { UserLikesDto } from './dto/user-likes.dto';
 import { UserMyPageRequestDto } from './dto/user-mypage-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserWishesResponseDto } from './dto/user-wishes-response.dto';
@@ -32,6 +37,8 @@ export class UsersService {
 		private readonly themesRepository: Repository<Theme>,
 		@InjectRepository(WishSpot)
 		private readonly wishSpotsRepository: Repository<WishSpot>,
+		@InjectRepository(LikePost)
+		private readonly likePostsRepository: Repository<LikePost>,
 		private hashPassword: HashPassword,
 	) {}
 
@@ -117,7 +124,7 @@ export class UsersService {
 		return true;
 	}
 
-	async getUserswishes(userId: number, wishPageData: UserMyPageRequestDto): Promise<UserWishesResponseDto> {
+	async getUsersWishes(userId: number, wishPageData: UserMyPageRequestDto): Promise<UserWishesResponseDto> {
 		try {
 			const wishes = this.wishSpotsRepository
 				.createQueryBuilder('wishSpot')
@@ -136,13 +143,13 @@ export class UsersService {
 
 			const totalPage = Math.ceil(totalPageWishes.length / wishPageData.take);
 			const wishesDto = Array.from(responseWishes).map(
-				(post) =>
+				(wish) =>
 					new UserWishesDto({
-						id: post.spot.id,
-						name: post.spot.name,
-						address: post.spot.address,
-						views: post.spot.clickSpots.length,
-						wishes: post.spot.wishSpots.length,
+						id: wish.spot.id,
+						name: wish.spot.name,
+						address: wish.spot.address,
+						views: wish.spot.clickSpots.length,
+						wishes: wish.spot.wishSpots.length,
 						isWish: true,
 					}),
 			);
@@ -150,6 +157,58 @@ export class UsersService {
 				totalPage: totalPage,
 				totalWishSpots: totalPageWishes.length,
 				wishSpots: wishesDto,
+			});
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
+	async getUsersLikes(userId: number, likePageData: UserMyPageRequestDto): Promise<UserLikesResponseDto> {
+		try {
+			const likes = this.likePostsRepository
+				.createQueryBuilder('likePost')
+				.leftJoinAndSelect('likePost.user', 'user')
+				.leftJoinAndSelect('likePost.post', 'post')
+				.leftJoinAndSelect('post.clickPosts', 'clickPosts')
+				.leftJoinAndSelect('post.likePosts', 'likePosts')
+				.leftJoinAndSelect('post.location', 'location')
+				.where('likePost.user.id = :userId', { userId })
+				.orderBy('likePost.created_at', 'DESC');
+
+			const totalPageLikes = await likes.getMany();
+			const responseLikes = await likes
+				.limit(likePageData.take)
+				.offset((likePageData.page - 1) * likePageData.take)
+				.getMany();
+
+			const totalPage = Math.ceil(totalPageLikes.length / likePageData.take);
+			const likesDto = [];
+			for (const like of responseLikes) {
+				const postsUser = await this.usersRepository
+					.createQueryBuilder('user')
+					.where('user.id = :postUserId', { postUserId: like.post.userId })
+					.getOne();
+
+				likesDto.push(
+					new UserLikesDto({
+						id: like.post.id,
+						title: like.post.title,
+						address: like.post.address,
+						createdAt: like.post.createdAt,
+						views: like.post.clickPosts.length,
+						likes: like.post.likePosts.length,
+						photoUrls: like.post.photoUrls,
+						isLike: true,
+						user: new CommentsUserResponseDto(postsUser),
+						location: new LocationResponseDto(like.post.location),
+					}),
+				);
+			}
+
+			return new UserLikesResponseDto({
+				totalPage: totalPage,
+				totalLikePosts: totalPageLikes.length,
+				likePosts: likesDto,
 			});
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);

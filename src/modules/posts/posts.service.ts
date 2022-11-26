@@ -489,6 +489,7 @@ export class PostsService {
 			let posts = this.postsRepository
 				.createQueryBuilder('post')
 				.leftJoinAndSelect('post.location', 'location')
+				.leftJoinAndSelect('post.user', 'user')
 				.leftJoinAndSelect('post.clickPosts', 'clickPosts')
 				.leftJoinAndSelect('post.likePosts', 'likePosts')
 				.orderBy(`post.${searchRequest.sorter}`, 'ASC');
@@ -526,11 +527,8 @@ export class PostsService {
 						views: post.clickPosts.length,
 						likes: post.likePosts.length,
 						isLike: this.isLikePost(userId, post.likePosts) ? true : false,
-						location: new LocationResponseDto({
-							id: post.location.id,
-							metroName: post.location.metroName,
-							localName: post.location.localName,
-						}),
+						user: new CommentsUserResponseDto(post.user),
+						location: new LocationResponseDto(post.location),
 					}),
 			);
 			return new MainPostsPageResponseDto({ totalPage: totalPage, posts: postsDto });
