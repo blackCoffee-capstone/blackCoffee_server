@@ -11,18 +11,20 @@ import { ReportPostsService } from './report-posts.service';
 @Controller('report-posts')
 @ApiTags('report-posts - 신고글 정보')
 @UseGuards(JwtAuthGuard)
-@UseGuards(RolesGuard)
-@Roles(UserType.Admin)
 export class ReportPostsController {
 	constructor(private readonly reportPostsService: ReportPostsService) {}
 
 	@Get()
+	@UseGuards(RolesGuard)
+	@Roles(UserType.Admin)
 	@ApiDocs.getAllReports('신고 목록 반환')
 	async getAllReports() {
 		return await this.reportPostsService.getAllReports();
 	}
 
 	@Patch(':reportId')
+	@UseGuards(RolesGuard)
+	@Roles(UserType.Admin)
 	@ApiDocs.updateReportsStatus('신고 상태 수정하기')
 	async updateReportsStatus(@Param('reportId') reportId: number, @Body() updateReportData: UpdateReportsRequestDto) {
 		return await this.reportPostsService.updateReportsStatus(reportId, updateReportData);
@@ -30,6 +32,8 @@ export class ReportPostsController {
 
 	@HttpCode(204)
 	@Delete(':reportId')
+	@UseGuards(RolesGuard)
+	@Roles(UserType.Admin)
 	@ApiDocs.deleteReports('신고 삭제하기')
 	async deleteReports(@Param('reportId') reportId: number) {
 		return await this.reportPostsService.deleteReports(reportId);
