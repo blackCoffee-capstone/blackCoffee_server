@@ -7,6 +7,7 @@ import { LikePost } from './like-posts.entity';
 import { Location } from './locations.entity';
 import { PostComment } from './post-comments.entity';
 import { PostTheme } from './post-themes.entity';
+import { ReportPost } from './report-posts.entity';
 import { User } from './users.entity';
 
 @Entity()
@@ -78,4 +79,9 @@ export class Post extends CommonEntity {
 		cascade: true,
 	})
 	likePosts: LikePost[];
+
+	@OneToMany(() => ReportPost, (reportPost: ReportPost) => reportPost.post, {
+		cascade: true,
+	})
+	reportPosts: ReportPost[];
 }
