@@ -118,11 +118,7 @@ export class PostsService {
 		postData?: UpdatePostsRequestDto,
 	): Promise<PostsResponseDto> {
 		const foundUsersPost = await this.getUsersPost(userId, postId);
-
-		if (photos && photos.length === 0) {
-			throw new BadRequestException('File is not exist');
-		}
-		if (photos.length > 5) {
+		if (photos && photos.length > 5) {
 			throw new BadRequestException('Files length exeeds 5');
 		}
 		if (postData.themes && this.isDuplicateArr(postData.themes)) {
@@ -364,6 +360,7 @@ export class PostsService {
 	}
 
 	private async deleteFilesToS3(folder: string, fileUrls: Array<string>): Promise<boolean> {
+		if (fileUrls.length === 0) return true;
 		const s3 = new AWS.S3({
 			endpoint: new AWS.Endpoint(this.#ncloudConfig.storageEndPoint),
 			region: 'kr-standard',
@@ -399,7 +396,7 @@ export class PostsService {
 			.createQueryBuilder('post')
 			.leftJoinAndSelect('post.user', 'user')
 			.leftJoinAndSelect('post.location', 'location')
-			.where('user.id = :user', { userId })
+			.where('user.id = :userId', { userId })
 			.andWhere('post.id = :postId', { postId })
 			.getOne();
 	}
