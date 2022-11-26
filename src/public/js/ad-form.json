@@ -9,7 +9,7 @@
 			"geom": "(37.1255, 126.35642)",
 			"email": "test1@gmail.com",
 			"phone_number": "010-1234-5678",
-			"license_url": "url",
+			"license_url": "https://i.ibb.co/jwRycrP/image.png",
 			"requirement": "전주 지역에 보이게 해주세요.",
 			"status": "TODO",
 			"created_at": "2022-10-11"
@@ -23,7 +23,7 @@
 			"geom": "(37.1255, 126.35642)",
 			"email": "test2@gmail.com",
 			"phone_number": "010-1234-5678",
-			"license_url": "url",
+			"license_url": "https://i.ibb.co/jwRycrP/image.png",
 			"requirement": "전주 지역에 보이게 해주세요.",
 			"status": "TODO",
 			"created_at": "2022-11-11"
@@ -37,7 +37,7 @@
 			"geom": "(37.1255, 126.35642)",
 			"email": "test3@gmail.com",
 			"phone_number": "010-1234-5678",
-			"license_url": "url",
+			"license_url": "https://i.ibb.co/jwRycrP/image.png",
 			"requirement": "전주 지역에 보이게 해주세요.",
 			"status": "TODO",
 			"created_at": "2022-10-20"
@@ -51,7 +51,7 @@
 			"geom": "(37.1255, 126.35642)",
 			"email": "test4@gmail.com",
 			"phone_number": "010-1234-5678",
-			"license_url": "url",
+			"license_url": "https://i.ibb.co/jwRycrP/image.png",
 			"requirement": "전주 지역에 보이게 해주세요.",
 			"status": "TODO",
 			"created_at": "2022-10-13"
@@ -65,7 +65,7 @@
 			"geom": "(37.1255, 126.35642)",
 			"email": "test5@gmail.com",
 			"phone_number": "010-1234-5678",
-			"license_url": "url",
+			"license_url": "https://i.ibb.co/jwRycrP/image.png",
 			"requirement": "전주 지역에 보이게 해주세요.",
 			"status": "TODO",
 			"created_at": "2022-10-14"
@@ -79,7 +79,7 @@
 			"geom": "(37.1255, 126.35642)",
 			"email": "test6@gmail.com",
 			"phone_number": "010-1234-5678",
-			"license_url": "url",
+			"license_url": "https://i.ibb.co/jwRycrP/image.png",
 			"requirement": "전주 지역에 보이게 해주세요.",
 			"status": "TODO",
 			"created_at": "2022-10-11"
@@ -93,7 +93,7 @@
 			"geom": "(37.1255, 126.35642)",
 			"email": "test7@gmail.com",
 			"phone_number": "010-1234-5678",
-			"license_url": "url",
+			"license_url": "https://i.ibb.co/jwRycrP/image.png",
 			"requirement": "전주 지역에 보이게 해주세요.",
 			"status": "APPROVE",
 			"created_at": "2022-10-18"
@@ -107,7 +107,7 @@
 			"geom": "(37.1255, 126.35642)",
 			"email": "test8@gmail.com",
 			"phone_number": "010-1234-5678",
-			"license_url": "url",
+			"license_url": "https://i.ibb.co/jwRycrP/image.png",
 			"requirement": "전주 지역에 보이게 해주세요.",
 			"status": "APPROVE",
 			"created_at": "2022-10-30"
@@ -121,7 +121,7 @@
 			"geom": "(37.1255, 126.35642)",
 			"email": "test9@gmail.com",
 			"phone_number": "010-1234-5678",
-			"license_url": "url",
+			"license_url": "https://i.ibb.co/jwRycrP/image.png",
 			"requirement": "전주 지역에 보이게 해주세요.",
 			"status": "TODO",
 			"created_at": "2022-10-26"
@@ -135,7 +135,7 @@
 			"geom": "(37.1255, 126.35642)",
 			"email": "test10@gmail.com",
 			"phone_number": "010-1234-5678",
-			"license_url": "url",
+			"license_url": "https://i.ibb.co/jwRycrP/image.png",
 			"requirement": "전주 지역에 보이게 해주세요.",
 			"status": "TODO",
 			"created_at": "2022-10-25"

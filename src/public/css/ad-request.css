@@ -168,7 +168,6 @@ td {
 }
 
 .dataTables_wrapper .dataTables_paginate .paginate_button {
-	display: inline;
 	margin-top: 10px;
 	padding-right: 10px;
 	float: left;
@@ -190,15 +189,55 @@ td {
 
 #popup {
 	display: none;
-	width: 500px;
+	width: 800px;
 	height: 500px;
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	margin: -250px 0 0 -250px;
+	margin: -250px 0 0 -350px;
 	background-color: #fff;
 	z-index: 2;
 	border-radius: 10px;
+	text-align: center;
+	overflow-y: auto;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.modal-title {
+	font-size: 18px;
+	color: #fff;
+	font-weight: 800;
+	background-color: #4d377b;
+	padding-top: 15px;
+	padding-bottom: 15px;
+	margin-bottom: 20px;
+}
+
+.modal-body div {
+	padding: 10px;
+}
+
+.modal-footer {
+	margin: 20px;
+}
+
+.btn {
+	cursor: pointer;
+	border: none;
+	display: inline-block;
+	border-radius: 3px;
+	border: 1px solid #4d377b;
+	box-shadow: 0 5px 10px -5px rgba(35, 0, 77, 0.2);
+	font-size: 12px;
+	font-weight: 600;
+	padding: 6px 12px;
+}
+
+.btn:hover {
+	border: none;
+	background-color: #4d377b;
+	color: white;
 }
 
 .backon {
