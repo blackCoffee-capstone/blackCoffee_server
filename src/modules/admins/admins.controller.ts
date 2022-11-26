@@ -11,12 +11,17 @@ import {
 	HttpException,
 	HttpStatus,
 	UploadedFile,
+	UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 
+import { UserType } from 'src/types/users.types';
+import { Roles } from 'src/decorators/roles.decorator';
 import { ApiDocs } from './admins.docs';
 import { AdminsService } from './admins.service';
+import { RolesGuard } from '../auth/guards/role.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetAdFilterRequestDto } from './dto/get-ad-filter-request.dto';
 import { AdsRegisterRequestDto } from './dto/ads-register-request.dto';
 import { UpdateAdsRequestDto } from './dto/update-ads-request.dto';
@@ -28,25 +33,33 @@ import { AdFormsStatusRequestDto } from './dto/ad-forms-status-request.dto';
 export class AdminsController {
 	constructor(private readonly adminsService: AdminsService) {}
 
-	@Get('/ads-forms')
+	@Get('/ad-forms')
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	@Roles(UserType.Admin)
 	@ApiDocs.getAllAdForms('광고 요청 목록 반환')
 	async getAllAdForms(@Query() AdFormsFilterRequest?: AdFormsFilterRequestDto) {
 		return await this.adminsService.getAllAdForms(AdFormsFilterRequest);
 	}
 
-	@Get('/ads-forms/:adFormId')
+	@Get('/ad-forms/:adFormId')
+	@UseGuards(RolesGuard, RolesGuard)
+	@Roles(UserType.Admin)
 	@ApiDocs.getAdForm('광고 요청 상세 페이지')
 	async getAdForm(@Param('adFormId') adFormId: number) {
 		return await this.adminsService.getAdForm(adFormId);
 	}
 
-	@Patch('/ads-forms/:adFormId')
+	@Patch('/ad-forms/:adFormId')
+	@UseGuards(RolesGuard, RolesGuard)
+	@Roles(UserType.Admin)
 	@ApiDocs.changeAdsStatus('광고 요청 상태 변경')
 	async changeAdsStatus(@Param('adFormId') adFormId: number, @Body() AdFormsStatusRequest: AdFormsStatusRequestDto) {
 		return await this.adminsService.changeAdsStatus(adFormId, AdFormsStatusRequest);
 	}
 
-	@Delete('ads-forms/:adFormId')
+	@Delete('ad-forms/:adFormId')
+	@UseGuards(RolesGuard, RolesGuard)
+	@Roles(UserType.Admin)
 	@ApiDocs.deleteAdForm('광고 요청 삭제')
 	async deleteAdForm(@Param('adFormId') adFormId: number) {
 		return await this.adminsService.deleteAdForm(adFormId);
@@ -59,18 +72,24 @@ export class AdminsController {
 	}
 
 	@Get('/adsAll')
+	@UseGuards(RolesGuard, RolesGuard)
+	@Roles(UserType.Admin)
 	@ApiDocs.getAllAds('광고 목록 반환')
 	async getAllAds() {
 		return await this.adminsService.getAllAds();
 	}
 
 	@Get('/ads/:adId')
+	@UseGuards(RolesGuard, RolesGuard)
+	@Roles(UserType.Admin)
 	@ApiDocs.getAds('광고 상세 페이지')
 	async getAds(@Param('adId') adId: number) {
 		return await this.adminsService.getAds(adId);
 	}
 
 	@Post('/ads')
+	@UseGuards(RolesGuard, RolesGuard)
+	@Roles(UserType.Admin)
 	@UseInterceptors(
 		FileInterceptor('file', {
 			fileFilter: (request, file, callback) => {
@@ -97,6 +116,8 @@ export class AdminsController {
 	}
 
 	@Patch('ads/:adId')
+	@UseGuards(RolesGuard, RolesGuard)
+	@Roles(UserType.Admin)
 	@UseInterceptors(
 		FileInterceptor('file', {
 			fileFilter: (request, file, callback) => {
@@ -118,6 +139,8 @@ export class AdminsController {
 		}),
 	)
 	@ApiDocs.updateAds('광고 수정')
+	@UseGuards(RolesGuard, RolesGuard)
+	@Roles(UserType.Admin)
 	async updateAds(
 		@Param('adId') adId: number,
 		@UploadedFile() adFile?: Express.Multer.File,
@@ -127,6 +150,8 @@ export class AdminsController {
 	}
 
 	@Delete('ads/:adId')
+	@UseGuards(RolesGuard, RolesGuard)
+	@Roles(UserType.Admin)
 	@ApiDocs.deleteAds('광고 삭제')
 	async deleteAds(@Param('adId') adId: number) {
 		return await this.adminsService.deleteAds(adId);

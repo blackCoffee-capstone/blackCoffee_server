@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { AdsResponseDto } from './dto/ads-response.dto';
@@ -26,6 +26,7 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 				description: '',
 				type: [AdFormsResponseDto],
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	getAdForm(summary: string) {
@@ -39,6 +40,7 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 				description: '',
 				type: GetAdFormResponseDto,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	changeAdsStatus(summary: string) {
@@ -62,6 +64,7 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 				description: '',
 				type: Boolean,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	deleteAdForm(summary: string) {
@@ -75,6 +78,7 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 				description: '',
 				type: Boolean,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	getAdsFilter(summary: string) {
@@ -106,6 +110,7 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 				description: '',
 				type: [AdsResponseDto],
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	getAds(summary: string) {
@@ -119,6 +124,7 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 				description: '',
 				type: GetAdResponseDto,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	registerAds(summary: string) {
@@ -156,6 +162,7 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 				description: '',
 				type: Boolean,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	updateAds(summary: string) {
@@ -193,6 +200,7 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 				description: '',
 				type: Boolean,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	deleteAds(summary: string) {
@@ -206,6 +214,7 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 				description: '',
 				type: Boolean,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 };
