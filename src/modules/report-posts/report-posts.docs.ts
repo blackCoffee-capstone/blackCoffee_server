@@ -31,6 +31,28 @@ export const ApiDocs: SwaggerMethodDoc<ReportPostsController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
+	updateMultiReportsStatus(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '여러 신고 상태 수정하기',
+			}),
+			ApiQuery({
+				name: 'reportIds',
+				required: true,
+				description: '신고 id 배열 (reportIds=1,2,3)',
+			}),
+			ApiBody({
+				type: UpdateReportsRequestDto,
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+				type: Boolean,
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
 	updateReportsStatus(summary: string) {
 		return applyDecorators(
 			ApiOperation({

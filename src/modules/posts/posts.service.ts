@@ -135,9 +135,9 @@ export class PostsService {
 		const updateData = {
 			title: postData.title ? postData.title : foundUsersPost.title,
 			content: postData.content ? postData.content : foundUsersPost.content,
-			photoUrls: photos ? [] : foundUsersPost.photo_urls,
+			photoUrls: photos ? [] : foundUsersPost.photoUrls,
 			address: postData.address ? postData.address : foundUsersPost.address,
-			locationId: postData.address ? 0 : foundUsersPost.location_id,
+			locationId: postData.address ? 0 : foundUsersPost.location.id,
 		};
 
 		if (!foundUsersPost) {
@@ -153,7 +153,7 @@ export class PostsService {
 		}
 
 		if (photos) {
-			await this.deleteFilesToS3('posts', foundUsersPost.photo_urls);
+			await this.deleteFilesToS3('posts', foundUsersPost.photoUrls);
 			updateData.photoUrls = await this.uploadFilesToS3('posts', photos);
 		}
 		try {
@@ -213,13 +213,17 @@ export class PostsService {
 	}
 
 	async deletePost(userId: number, role: UserType, postId: number): Promise<boolean> {
-		const foundUsersPost = await this.getUsersPost(userId, postId);
+		let foundUsersPost;
 
-		if (!foundUsersPost && role !== UserType.Admin) {
-			throw new NotFoundException('Post is not found');
+		if (role === UserType.Admin) {
+			foundUsersPost = await this.getPostUserId(postId);
+		} else {
+			foundUsersPost = await this.getUsersPost(userId, postId);
+			if (!foundUsersPost) {
+				throw new NotFoundException('Post is not found');
+			}
 		}
-
-		await this.deleteFilesToS3('posts', foundUsersPost.photo_urls);
+		await this.deleteFilesToS3('posts', foundUsersPost.photoUrls);
 		await this.postsRepository.delete(postId);
 		return true;
 	}
@@ -393,14 +397,11 @@ export class PostsService {
 	private async getUsersPost(userId: number, postId: number) {
 		return await this.postsRepository
 			.createQueryBuilder('post')
-			.select(
-				'post.id, post.address, post.title, post.content, post.photoUrls, location.id AS location_id, location.metroName, location.localName',
-			)
-			.leftJoin('post.user', 'user')
-			.leftJoin('post.location', 'location')
-			.where('user.id = :userId', { userId })
+			.leftJoinAndSelect('post.user', 'user')
+			.leftJoinAndSelect('post.location', 'location')
+			.where('user.id = :user', { userId })
 			.andWhere('post.id = :postId', { postId })
-			.getRawOne();
+			.getOne();
 	}
 
 	private async getPostsThems(postId: number) {

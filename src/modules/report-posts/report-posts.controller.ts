@@ -5,6 +5,7 @@ import { UserType } from 'src/types/users.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/role.guard';
 import { AllReportsRequestDto } from './dto/all-reports-request.dto';
+import { UpdateMultiReportsRequestDto } from './dto/update-multi-reports-request.dto';
 import { UpdateReportsRequestDto } from './dto/update-reports-request.dto';
 import { ApiDocs } from './report-posts.docs';
 import { ReportPostsService } from './report-posts.service';
@@ -21,6 +22,14 @@ export class ReportPostsController {
 	@ApiDocs.getAllReports('신고 목록 반환')
 	async getAllReports(@Query() filter?: AllReportsRequestDto) {
 		return await this.reportPostsService.getAllReports(filter);
+	}
+
+	@Patch()
+	@UseGuards(RolesGuard)
+	@Roles(UserType.Admin)
+	@ApiDocs.updateMultiReportsStatus('어러 신고 상태 수정하기')
+	async updateMultiReportsStatus(@Body() reportIdsData: UpdateMultiReportsRequestDto) {
+		return await this.reportPostsService.updateMultiReportsStatus(reportIdsData);
 	}
 
 	@Patch(':reportId')
