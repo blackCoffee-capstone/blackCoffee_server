@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse }
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { ReportsResponseDto } from './dto/reports-response.dto';
+import { UpdateMultiReportsRequestDto } from './dto/update-multi-reports-request.dto';
 import { UpdateReportsRequestDto } from './dto/update-reports-request.dto';
 import { ReportPostsController } from './report-posts.controller';
 
@@ -37,13 +38,8 @@ export const ApiDocs: SwaggerMethodDoc<ReportPostsController> = {
 				summary,
 				description: '여러 신고 상태 수정하기',
 			}),
-			ApiQuery({
-				name: 'reportIds',
-				required: true,
-				description: '신고 id 배열 (reportIds=1,2,3)',
-			}),
 			ApiBody({
-				type: UpdateReportsRequestDto,
+				type: UpdateMultiReportsRequestDto,
 			}),
 			ApiResponse({
 				status: 201,
