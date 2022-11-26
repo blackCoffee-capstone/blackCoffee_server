@@ -136,7 +136,6 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 			ApiResponse({
 				status: 204,
 				description: '삭제 완료',
-				type: Boolean,
 			}),
 			ApiBearerAuth('Authorization'),
 		);
@@ -197,7 +196,6 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 			ApiResponse({
 				status: 204,
 				description: '삭제 완료',
-				type: Boolean,
 			}),
 			ApiBearerAuth('Authorization'),
 		);

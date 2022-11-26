@@ -20,6 +20,15 @@ export class ReportPostsService {
 		return true;
 	}
 
+	async deleteReports(reportId: number): Promise<boolean> {
+		const foundReport = await this.foundReportData(reportId);
+		if (!foundReport) {
+			throw new NotFoundException('Report is not found');
+		}
+		await this.reportPostsRepository.delete(reportId);
+		return true;
+	}
+
 	private async foundReportData(reportId: number) {
 		return await this.reportPostsRepository
 			.createQueryBuilder('reportPost')

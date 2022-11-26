@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, HttpCode, Param, Patch, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserType } from 'src/types/users.types';
@@ -20,5 +20,12 @@ export class ReportPostsController {
 	@ApiDocs.updateReportsStatus('신고 상태 수정하기')
 	async updateReportsStatus(@Param('reportId') reportId: number, @Body() updateReportData: UpdateReportsRequestDto) {
 		return await this.reportPostsService.updateReportsStatus(reportId, updateReportData);
+	}
+
+	@HttpCode(204)
+	@Delete(':reportId')
+	@ApiDocs.deleteReports('신고 삭제하기')
+	async deleteReports(@Param('reportId') reportId: number) {
+		return await this.reportPostsService.deleteReports(reportId);
 	}
 }

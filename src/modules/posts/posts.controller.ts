@@ -3,6 +3,7 @@ import {
 	Controller,
 	Delete,
 	Get,
+	HttpCode,
 	HttpException,
 	HttpStatus,
 	Param,
@@ -104,6 +105,7 @@ export class PostsController {
 		return await this.postsService.getPost(userData.id, postId);
 	}
 
+	@HttpCode(204)
 	@Delete(':postId')
 	@ApiDocs.deletePost('커뮤니티 게시글 삭제')
 	async deletePost(@AuthUser() userData, @Param('postId') postId: number) {
@@ -126,6 +128,7 @@ export class PostsController {
 		return await this.postsService.getPostsComments(userData.id, postId);
 	}
 
+	@HttpCode(204)
 	@Delete(':postId/comments/:commentId')
 	@ApiDocs.deletePostsComment('커뮤니티 게시글 댓글 삭제')
 	async deletePostsComment(

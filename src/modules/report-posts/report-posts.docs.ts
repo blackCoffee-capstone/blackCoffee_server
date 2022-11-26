@@ -27,4 +27,21 @@ export const ApiDocs: SwaggerMethodDoc<ReportPostsController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
+	deleteReports(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '신고 삭제하기',
+			}),
+			ApiParam({
+				name: 'reportId',
+				type: Number,
+			}),
+			ApiResponse({
+				status: 204,
+				description: '',
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
 };
