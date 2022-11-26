@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@ne
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
+import { UpdateUserRequestDto } from './dto/update-user-request.dto';
 import { UserLikesResponseDto } from './dto/user-likes-response.dto';
 import { UserPostsResponseDto } from './dto/user-posts-response.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -21,6 +22,23 @@ export const ApiDocs: SwaggerMethodDoc<UsersController> = {
 				status: 200,
 				description: '',
 				type: UserResponseDto,
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
+	updateUser(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '사용자 정보 변경 (이름,닉네임)',
+			}),
+			ApiBody({
+				type: UpdateUserRequestDto,
+			}),
+			ApiResponse({
+				status: 200,
+				description: '',
+				type: Boolean,
 			}),
 			ApiBearerAuth('Authorization'),
 		);

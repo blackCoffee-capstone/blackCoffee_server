@@ -20,6 +20,7 @@ import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { UsersTasteThemesResponseDto } from '../taste-themes/dto/users-taste-themes-response.dto';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
 import { CommentsUserResponseDto } from './dto/comments-user-response.dto';
+import { UpdateUserRequestDto } from './dto/update-user-request.dto';
 import { UserLikesResponseDto } from './dto/user-likes-response.dto';
 import { UserLikesDto } from './dto/user-likes.dto';
 import { UserMyPageRequestDto } from './dto/user-mypage-request.dto';
@@ -52,6 +53,21 @@ export class UsersService {
 				where: { id: userId },
 			});
 			return new UserResponseDto(user);
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
+	async updateUser(userId: number, updateUserData: UpdateUserRequestDto): Promise<boolean> {
+		try {
+			if (!updateUserData.name && !updateUserData.nickname) {
+				throw new BadRequestException(`Name and nickname is null`);
+			}
+			if (updateUserData.nickname) {
+				await this.errIfDuplicateNickname(updateUserData.nickname);
+			}
+			await this.usersRepository.update(userId, updateUserData);
+			return true;
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
@@ -305,5 +321,16 @@ export class UsersService {
 
 		if (isLike) return true;
 		return false;
+	}
+
+	private async errIfDuplicateNickname(nickname: string) {
+		const foundNicknameUser = await this.usersRepository
+			.createQueryBuilder('user')
+			.where('user.nickname = :nickname', { nickname })
+			.getOne();
+
+		if (foundNicknameUser) {
+			throw new BadRequestException('Nickname is already exist');
+		} else return true;
 	}
 }

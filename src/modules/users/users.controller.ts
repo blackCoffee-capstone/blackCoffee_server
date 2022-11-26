@@ -7,6 +7,7 @@ import { UserType } from 'src/types/users.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/role.guard';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
+import { UpdateUserRequestDto } from './dto/update-user-request.dto';
 import { UserMyPageRequestDto } from './dto/user-mypage-request.dto';
 import { UserTasteThemesRequestDto } from './dto/user-taste-themes-request.dto';
 import { ApiDocs } from './users.docs';
@@ -22,6 +23,12 @@ export class UsersController {
 	@ApiDocs.getUser('사용자 정보 반환')
 	async getUser(@AuthUser() userData) {
 		return await this.usersService.getUser(userData.id);
+	}
+
+	@Patch()
+	@ApiDocs.updateUser('사용자 정보 변경 (이름, 닉네임)')
+	async updateUser(@AuthUser() userData, @Body() updateUserDto: UpdateUserRequestDto) {
+		return await this.usersService.updateUser(userData.id, updateUserDto);
 	}
 
 	@Get('/admin-test')
