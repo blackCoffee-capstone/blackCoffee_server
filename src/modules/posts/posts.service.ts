@@ -131,7 +131,7 @@ export class PostsService {
 		const updateData = {
 			title: postData.title ? postData.title : foundUsersPost.title,
 			content: postData.content ? postData.content : foundUsersPost.content,
-			photoUrls: photos ? [] : foundUsersPost.photoUrls,
+			photoUrls: photos && photos.length > 0 ? [] : foundUsersPost.photoUrls,
 			address: postData.address ? postData.address : foundUsersPost.address,
 			locationId: postData.address ? 0 : foundUsersPost.location.id,
 		};
@@ -148,7 +148,7 @@ export class PostsService {
 			);
 		}
 
-		if (photos) {
+		if (photos && photos.length > 0) {
 			await this.deleteFilesToS3('posts', foundUsersPost.photoUrls);
 			updateData.photoUrls = await this.uploadFilesToS3('posts', photos);
 		}
