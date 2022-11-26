@@ -6,6 +6,7 @@ import { ConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
 import { MailerModule } from './mailer/mailer.module';
 import { AdFormsModule } from './modules/ad-forms/ad-forms.module';
+import { AdminsModule } from './modules/admins/admins.module';
 import { AuthCodesModule } from './modules/auth-codes/auth-codes.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FiltersModule } from './modules/filters/filters.module';
@@ -32,6 +33,7 @@ import { ViewController } from './views/view.controller';
 		RanksModule,
 		RecommendationsModule,
 		PostsModule,
+		AdminsModule,
 	],
 	controllers: [AppController, ViewController],
 	providers: [AppService],
