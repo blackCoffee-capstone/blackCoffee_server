@@ -109,7 +109,7 @@ export class PostsController {
 	@Delete(':postId')
 	@ApiDocs.deletePost('커뮤니티 게시글 삭제')
 	async deletePost(@AuthUser() userData, @Param('postId') postId: number) {
-		return await this.postsService.deletePost(userData.id, postId);
+		return await this.postsService.deletePost(userData.id, userData.role, postId);
 	}
 
 	@Post(':postId/comments')

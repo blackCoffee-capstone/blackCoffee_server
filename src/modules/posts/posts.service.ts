@@ -14,6 +14,7 @@ import { PostTheme } from 'src/entities/post-themes.entity';
 import { Post } from 'src/entities/posts.entity';
 import { ReportPost } from 'src/entities/report-posts.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { UserType } from 'src/types/users.types';
 import { AdFormsService } from '../ad-forms/ad-forms.service';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { CommentsUserResponseDto } from '../users/dto/comments-user-response.dto';
@@ -211,10 +212,10 @@ export class PostsService {
 		}
 	}
 
-	async deletePost(userId: number, postId: number): Promise<boolean> {
+	async deletePost(userId: number, role: UserType, postId: number): Promise<boolean> {
 		const foundUsersPost = await this.getUsersPost(userId, postId);
 
-		if (!foundUsersPost) {
+		if (!foundUsersPost && role !== UserType.Admin) {
 			throw new NotFoundException('Post is not found');
 		}
 
