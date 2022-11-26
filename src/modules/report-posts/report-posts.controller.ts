@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpCode, Param, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserType } from 'src/types/users.types';
@@ -15,6 +15,12 @@ import { ReportPostsService } from './report-posts.service';
 @Roles(UserType.Admin)
 export class ReportPostsController {
 	constructor(private readonly reportPostsService: ReportPostsService) {}
+
+	@Get()
+	@ApiDocs.getAllReports('신고 목록 반환')
+	async getAllReports() {
+		return await this.reportPostsService.getAllReports();
+	}
 
 	@Patch(':reportId')
 	@ApiDocs.updateReportsStatus('신고 상태 수정하기')
