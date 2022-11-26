@@ -97,7 +97,7 @@ export const ApiDocs: SwaggerMethodDoc<UsersController> = {
 				type: ChangePwRequestDto,
 			}),
 			ApiResponse({
-				status: 201,
+				status: 200,
 				description: '',
 				type: Boolean,
 			}),
