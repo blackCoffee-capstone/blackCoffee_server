@@ -43,6 +43,6 @@ export class ReportPost extends CommonEntity {
 
 	@IsString()
 	@IsNotEmpty()
-	@Column({ type: 'enum', enum: AdFormType, length: 10, nullable: false, default: AdFormType.Todo })
+	@Column({ type: 'enum', enum: AdFormType, nullable: false, default: AdFormType.Todo })
 	status: AdFormType;
 }
