@@ -13,6 +13,7 @@ import { FiltersModule } from './modules/filters/filters.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { RanksModule } from './modules/ranks/ranks.module';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
+import { ReportPostsModule } from './modules/report-posts/report-posts.module';
 import { SpotsModule } from './modules/spots/spots.module';
 import { TasteThemesModule } from './modules/taste-themes/taste-themes.module';
 import { UsersModule } from './modules/users/users.module';
@@ -34,6 +35,7 @@ import { ViewController } from './views/view.controller';
 		RecommendationsModule,
 		PostsModule,
 		AdminsModule,
+		ReportPostsModule,
 	],
 	controllers: [AppController, ViewController],
 	providers: [AppService],

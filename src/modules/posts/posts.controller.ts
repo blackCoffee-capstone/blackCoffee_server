@@ -3,6 +3,7 @@ import {
 	Controller,
 	Delete,
 	Get,
+	HttpCode,
 	HttpException,
 	HttpStatus,
 	Param,
@@ -20,6 +21,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MainPostsRequestDto } from './dto/main-posts-request.dto';
 import { PostCommentsRequestDto } from './dto/post-comments-request.dto';
 import { PostsRequestDto } from './dto/posts-request.dto';
+import { ReportPostsRequestDto } from './dto/report-posts-request.dto';
 import { UpdatePostsRequestDto } from './dto/update-posts-request.dto';
 import { ApiDocs } from './posts.docs';
 import { PostsService } from './posts.service';
@@ -103,10 +105,11 @@ export class PostsController {
 		return await this.postsService.getPost(userData.id, postId);
 	}
 
+	@HttpCode(204)
 	@Delete(':postId')
 	@ApiDocs.deletePost('커뮤니티 게시글 삭제')
 	async deletePost(@AuthUser() userData, @Param('postId') postId: number) {
-		return await this.postsService.deletePost(userData.id, postId);
+		return await this.postsService.deletePost(userData.id, userData.role, postId);
 	}
 
 	@Post(':postId/comments')
@@ -125,6 +128,7 @@ export class PostsController {
 		return await this.postsService.getPostsComments(userData.id, postId);
 	}
 
+	@HttpCode(204)
 	@Delete(':postId/comments/:commentId')
 	@ApiDocs.deletePostsComment('커뮤니티 게시글 댓글 삭제')
 	async deletePostsComment(
@@ -140,5 +144,11 @@ export class PostsController {
 	async likePost(@AuthUser() userData, @Param('postId') postId: number, @Param('isLike') isLike: number) {
 		const isLikeBool = isLike === 1 ? true : false;
 		return await this.postsService.likePost(userData.id, postId, isLikeBool);
+	}
+
+	@Post(':postId/reports')
+	@ApiDocs.reportPost('커뮤니티 게시글 신고하기')
+	async reportPost(@AuthUser() userData, @Param('postId') postId: number, @Body() reportData: ReportPostsRequestDto) {
+		return await this.postsService.reportPost(userData.id, postId, reportData);
 	}
 }

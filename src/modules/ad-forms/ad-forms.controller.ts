@@ -34,7 +34,6 @@ export class AdFormsController {
 		}),
 	)
 	async registerAdForm(@UploadedFile() licenseFile: Express.Multer.File, @Body() adFormData: AdFormsRequestDto) {
-		console.log(adFormData);
 		return await this.adformsService.registerAdForm(licenseFile, adFormData);
 	}
 }
