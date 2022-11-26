@@ -20,6 +20,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MainPostsRequestDto } from './dto/main-posts-request.dto';
 import { PostCommentsRequestDto } from './dto/post-comments-request.dto';
 import { PostsRequestDto } from './dto/posts-request.dto';
+import { ReportPostsRequestDto } from './dto/report-posts-request.dto';
 import { UpdatePostsRequestDto } from './dto/update-posts-request.dto';
 import { ApiDocs } from './posts.docs';
 import { PostsService } from './posts.service';
@@ -140,5 +141,11 @@ export class PostsController {
 	async likePost(@AuthUser() userData, @Param('postId') postId: number, @Param('isLike') isLike: number) {
 		const isLikeBool = isLike === 1 ? true : false;
 		return await this.postsService.likePost(userData.id, postId, isLikeBool);
+	}
+
+	@Post(':postId/reports')
+	@ApiDocs.reportPost('커뮤니티 게시글 신고하기')
+	async reportPost(@AuthUser() userData, @Param('postId') postId: number, @Body() reportData: ReportPostsRequestDto) {
+		return await this.postsService.reportPost(userData.id, postId, reportData);
 	}
 }

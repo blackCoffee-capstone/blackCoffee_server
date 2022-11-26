@@ -8,6 +8,8 @@ import { MainPostsPageResponseDto } from './dto/main-posts-page-response.dto';
 import { PostCommentsRequestDto } from './dto/post-comments-request.dto';
 import { PostCommentsResponseDto } from './dto/post-comments-response.dto';
 import { PostsResponseDto } from './dto/posts-response.dto';
+import { ReportPostsRequestDto } from './dto/report-posts-request.dto';
+import { ReportPostsResponseDto } from './dto/report-posts-response.dto';
 import { PostsController } from './posts.controller';
 
 export const ApiDocs: SwaggerMethodDoc<PostsController> = {
@@ -262,6 +264,27 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 				status: 200,
 				description: '',
 				type: MainPostsPageResponseDto,
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
+	reportPost(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '커뮤니티 게시글 신고하기',
+			}),
+			ApiParam({
+				name: 'postId',
+				type: Number,
+			}),
+			ApiBody({
+				type: ReportPostsRequestDto,
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+				type: ReportPostsResponseDto,
 			}),
 			ApiBearerAuth('Authorization'),
 		);

@@ -12,6 +12,7 @@ import { Location } from 'src/entities/locations.entity';
 import { PostComment } from 'src/entities/post-comments.entity';
 import { PostTheme } from 'src/entities/post-themes.entity';
 import { Post } from 'src/entities/posts.entity';
+import { ReportPost } from 'src/entities/report-posts.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { AdFormsService } from '../ad-forms/ad-forms.service';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
@@ -25,6 +26,8 @@ import { PostCommentsRequestDto } from './dto/post-comments-request.dto';
 import { PostCommentsResponseDto } from './dto/post-comments-response.dto';
 import { PostsRequestDto } from './dto/posts-request.dto';
 import { PostsResponseDto } from './dto/posts-response.dto';
+import { ReportPostsRequestDto } from './dto/report-posts-request.dto';
+import { ReportPostsResponseDto } from './dto/report-posts-response.dto';
 import { UpdatePostsRequestDto } from './dto/update-posts-request.dto';
 
 @Injectable()
@@ -44,6 +47,8 @@ export class PostsService {
 		private readonly clickPostsRepository: Repository<ClickPost>,
 		@InjectRepository(LikePost)
 		private readonly likePostsRepository: Repository<LikePost>,
+		@InjectRepository(ReportPost)
+		private readonly reportPostsRepository: Repository<ReportPost>,
 		private readonly adFormsService: AdFormsService,
 		private readonly configService: ConfigService,
 	) {}
@@ -296,6 +301,28 @@ export class PostsService {
 		return true;
 	}
 
+	async reportPost(
+		userId: number,
+		postId: number,
+		reportData: ReportPostsRequestDto,
+	): Promise<ReportPostsResponseDto> {
+		const foundPost = await this.getPostUserId(postId);
+		if (!foundPost) {
+			throw new NotFoundException('Post is not found');
+		}
+		if (await this.getUsersReportPost(userId, postId)) {
+			throw new BadRequestException('User already reports post');
+		}
+		const reportPost = this.reportPostsRepository.create({
+			userId,
+			postId,
+			reason: reportData.reason,
+		});
+		const result = await this.reportPostsRepository.save(reportPost);
+
+		return new ReportPostsResponseDto({ id: result.id });
+	}
+
 	private async uploadFilesToS3(folder: string, files: Array<Express.Multer.File>): Promise<string[]> {
 		const photoUrls = [];
 		const s3 = new AWS.S3({
@@ -515,5 +542,15 @@ export class PostsService {
 
 		if (isLike) return true;
 		return false;
+	}
+
+	private async getUsersReportPost(userId: number, postId: number) {
+		return await this.reportPostsRepository
+			.createQueryBuilder('reportPost')
+			.leftJoinAndSelect('reportPost.user', 'user')
+			.leftJoinAndSelect('reportPost.post', 'post')
+			.where('user.id = :userId', { userId })
+			.andWhere('post.id = :postId', { postId })
+			.getOne();
 	}
 }
