@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { LikePost } from 'src/entities/like-posts.entity';
+import { Post } from 'src/entities/posts.entity';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { User } from 'src/entities/users.entity';
@@ -22,6 +23,7 @@ import { CommentsUserResponseDto } from './dto/comments-user-response.dto';
 import { UserLikesResponseDto } from './dto/user-likes-response.dto';
 import { UserLikesDto } from './dto/user-likes.dto';
 import { UserMyPageRequestDto } from './dto/user-mypage-request.dto';
+import { UserPostsResponseDto } from './dto/user-posts-response.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserWishesResponseDto } from './dto/user-wishes-response.dto';
 import { UserWishesDto } from './dto/user-wishes.dto';
@@ -39,6 +41,8 @@ export class UsersService {
 		private readonly wishSpotsRepository: Repository<WishSpot>,
 		@InjectRepository(LikePost)
 		private readonly likePostsRepository: Repository<LikePost>,
+		@InjectRepository(Post)
+		private readonly postsRepository: Repository<Post>,
 		private hashPassword: HashPassword,
 	) {}
 
@@ -172,7 +176,7 @@ export class UsersService {
 				.leftJoinAndSelect('post.clickPosts', 'clickPosts')
 				.leftJoinAndSelect('post.likePosts', 'likePosts')
 				.leftJoinAndSelect('post.location', 'location')
-				.where('likePost.user.id = :userId', { userId })
+				.where('user.id = :userId', { userId })
 				.orderBy('likePost.created_at', 'DESC');
 
 			const totalPageLikes = await likes.getMany();
@@ -215,6 +219,50 @@ export class UsersService {
 		}
 	}
 
+	async getUsersPosts(userId: number, usersPostPageData: UserMyPageRequestDto): Promise<UserPostsResponseDto> {
+		try {
+			const posts = this.postsRepository
+				.createQueryBuilder('post')
+				.leftJoinAndSelect('post.user', 'user')
+				.leftJoinAndSelect('post.location', 'location')
+				.leftJoinAndSelect('post.clickPosts', 'clickPosts')
+				.leftJoinAndSelect('post.likePosts', 'likePosts')
+				.where('user.id = :userId', { userId })
+				.orderBy('post.created_at', 'DESC');
+
+			const totalPagePosts = await posts.getMany();
+			const responsePosts = await posts
+				.limit(usersPostPageData.take)
+				.offset((usersPostPageData.page - 1) * usersPostPageData.take)
+				.getMany();
+
+			const totalPage = Math.ceil(totalPagePosts.length / usersPostPageData.take);
+			const postsDto = Array.from(responsePosts).map(
+				(post) =>
+					new UserLikesDto({
+						id: post.id,
+						title: post.title,
+						address: post.address,
+						createdAt: post.createdAt,
+						views: post.clickPosts.length,
+						likes: post.likePosts.length,
+						photoUrls: post.photoUrls,
+						isLike: this.isLikePost(userId, post.likePosts) ? true : false,
+						user: new CommentsUserResponseDto(post.user),
+						location: new LocationResponseDto(post.location),
+					}),
+			);
+
+			return new UserPostsResponseDto({
+				totalPage: totalPage,
+				totalPosts: totalPagePosts.length,
+				posts: postsDto,
+			});
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
 	private isDuplicateArr(arr: any): boolean {
 		const set = new Set(arr);
 
@@ -250,5 +298,12 @@ export class UsersService {
 			isNewUser: false,
 		});
 		return true;
+	}
+
+	private isLikePost(userId: number, likePosts: LikePost[]): boolean {
+		const isLike = likePosts.find((x) => x.userId === userId);
+
+		if (isLike) return true;
+		return false;
 	}
 }

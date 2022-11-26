@@ -61,4 +61,10 @@ export class UsersController {
 	async getUsersLikes(@AuthUser() userData, @Query() usersLikes: UserMyPageRequestDto) {
 		return await this.usersService.getUsersLikes(userData.id, usersLikes);
 	}
+
+	@Get('/posts')
+	@ApiDocs.getUsersPosts('사용자의 게시글 목록 반환')
+	async getUsersPosts(@AuthUser() userData, @Query() usersPosts: UserMyPageRequestDto) {
+		return await this.usersService.getUsersPosts(userData.id, usersPosts);
+	}
 }

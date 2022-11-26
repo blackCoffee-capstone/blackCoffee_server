@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LikePost } from 'src/entities/like-posts.entity';
+import { Post } from 'src/entities/posts.entity';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { Theme } from 'src/entities/theme.entity';
 
@@ -11,7 +12,7 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([User, TasteTheme, Theme, WishSpot, LikePost])],
+	imports: [TypeOrmModule.forFeature([User, TasteTheme, Theme, WishSpot, LikePost, Post])],
 	controllers: [UsersController],
 	providers: [UsersService, HashPassword],
 })
