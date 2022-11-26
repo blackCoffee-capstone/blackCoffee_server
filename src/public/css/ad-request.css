@@ -230,7 +230,6 @@ td {
 
 .btn {
 	cursor: pointer;
-	border: none;
 	display: inline-block;
 	border-radius: 3px;
 	border: 1px solid #4d377b;
@@ -244,6 +243,27 @@ td {
 	border: none;
 	background-color: #4d377b;
 	color: white;
+	font-size: 13px;
+}
+
+.btn-delete {
+	cursor: pointer;
+	border: 1px solid red;
+	border-radius: 3px;
+	color: red;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 6px 12px;
+	box-shadow: 0 5px 10px -5px rgba(35, 0, 77, 0.2);
+	float: right;
+	background-color: white;
+}
+
+.btn-delete:hover {
+	border: none;
+	background-color: red;
+	color: white;
+	font-size: 13px;
 }
 
 .backon {
