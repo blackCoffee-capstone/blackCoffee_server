@@ -311,6 +311,9 @@ export class PostsService {
 		if (!foundPost) {
 			throw new NotFoundException('Post is not found');
 		}
+		if (foundPost.user.id === userId) {
+			throw new BadRequestException('User is writer');
+		}
 		if (await this.getUsersReportPost(userId, postId)) {
 			throw new BadRequestException('User already reports post');
 		}
