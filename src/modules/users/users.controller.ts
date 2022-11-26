@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { AuthUser } from 'src/decorators/auth.decorator';
@@ -7,6 +7,7 @@ import { UserType } from 'src/types/users.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/role.guard';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
+import { UserMyPageRequestDto } from './dto/user-mypage-request.dto';
 import { UserTasteThemesRequestDto } from './dto/user-taste-themes-request.dto';
 import { ApiDocs } from './users.docs';
 import { UsersService } from './users.service';
@@ -47,5 +48,11 @@ export class UsersController {
 	@ApiDocs.updateUsersPw('사용자 비밀번호 변경')
 	async updateUsersPw(@AuthUser() userData, @Body() changePwDto: ChangePwRequestDto) {
 		return await this.usersService.updateUsersPw(userData, changePwDto);
+	}
+
+	@Get('/wishes')
+	@ApiDocs.getUserswishes('사용자의 찜 목록 반환')
+	async getUserswishes(@AuthUser() userData, @Query() usersWishes: UserMyPageRequestDto) {
+		return await this.usersService.getUserswishes(userData.id, usersWishes);
 	}
 }

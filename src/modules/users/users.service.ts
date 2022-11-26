@@ -11,11 +11,15 @@ import { Repository } from 'typeorm';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { User } from 'src/entities/users.entity';
+import { WishSpot } from 'src/entities/wish-spots.entity';
 import { UserType } from 'src/types/users.types';
 import { HashPassword } from '../auth/hash-password';
 import { UsersTasteThemesResponseDto } from '../taste-themes/dto/users-taste-themes-response.dto';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
+import { UserMyPageRequestDto } from './dto/user-mypage-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { UserWishesResponseDto } from './dto/user-wishes-response.dto';
+import { UserWishesDto } from './dto/user-wishes.dto';
 
 @Injectable()
 export class UsersService {
@@ -26,6 +30,8 @@ export class UsersService {
 		private readonly tasteThemesRepository: Repository<TasteTheme>,
 		@InjectRepository(Theme)
 		private readonly themesRepository: Repository<Theme>,
+		@InjectRepository(WishSpot)
+		private readonly wishSpotsRepository: Repository<WishSpot>,
 		private hashPassword: HashPassword,
 	) {}
 
@@ -109,6 +115,45 @@ export class UsersService {
 		await this.usersRepository.update(user.id, foundUser);
 
 		return true;
+	}
+
+	async getUserswishes(userId: number, wishPageData: UserMyPageRequestDto): Promise<UserWishesResponseDto> {
+		try {
+			const wishes = this.wishSpotsRepository
+				.createQueryBuilder('wishSpot')
+				.leftJoinAndSelect('wishSpot.user', 'user')
+				.leftJoinAndSelect('wishSpot.spot', 'spot')
+				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
+				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
+				.where('user.id = :userId', { userId })
+				.orderBy('wishSpot.created_at', 'DESC');
+
+			const totalPageWishes = await wishes.getMany();
+			const responseWishes = await wishes
+				.limit(wishPageData.take)
+				.offset((wishPageData.page - 1) * wishPageData.take)
+				.getMany();
+
+			const totalPage = Math.ceil(totalPageWishes.length / wishPageData.take);
+			const wishesDto = Array.from(responseWishes).map(
+				(post) =>
+					new UserWishesDto({
+						id: post.spot.id,
+						name: post.spot.name,
+						address: post.spot.address,
+						views: post.spot.clickSpots.length,
+						wishes: post.spot.wishSpots.length,
+						isWish: true,
+					}),
+			);
+			return new UserWishesResponseDto({
+				totalPage: totalPage,
+				totalWishSpots: totalPageWishes.length,
+				wishSpots: wishesDto,
+			});
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	private isDuplicateArr(arr: any): boolean {
