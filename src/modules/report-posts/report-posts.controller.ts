@@ -27,7 +27,7 @@ export class ReportPostsController {
 	@Patch()
 	@UseGuards(RolesGuard)
 	@Roles(UserType.Admin)
-	@ApiDocs.updateMultiReportsStatus('어러 신고 상태 수정하기')
+	@ApiDocs.updateMultiReportsStatus('여러 신고 상태 수정하기')
 	async updateMultiReportsStatus(@Body() reportIdsData: UpdateMultiReportsRequestDto) {
 		return await this.reportPostsService.updateMultiReportsStatus(reportIdsData);
 	}
