@@ -66,11 +66,44 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 			}),
 		);
 	},
+	facebookLogin2(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '페이스북 서버에서 사용자 정보를 가져와, 회원가입&로그인 후 사용자 정보와 토큰 반환',
+			}),
+			ApiBody({
+				schema: {
+					type: 'object',
+					properties: {
+						code: {
+							description: '페이스북 로그인 code',
+						},
+					},
+				},
+			}),
+			ApiResponse({
+				status: 200,
+				description: '',
+				type: LoginResponseDto,
+			}),
+		);
+	},
 	facebookLogin(summary: string) {
 		return applyDecorators(
 			ApiOperation({
 				summary,
 				description: '페이스북 서버에서 사용자 정보를 가져와, 회원가입&로그인 후 사용자 정보와 토큰 반환',
+			}),
+			ApiBody({
+				schema: {
+					type: 'object',
+					properties: {
+						code: {
+							description: '페이스북 로그인 code',
+						},
+					},
+				},
 			}),
 			ApiResponse({
 				status: 200,

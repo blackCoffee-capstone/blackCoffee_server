@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Header, HttpCode, Post, Query, Redirect, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { AuthUser, FacebookUser } from 'src/decorators/auth.decorator';
@@ -11,6 +10,7 @@ import { AuthService } from './auth.service';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { OauthUserDto } from './dto/oauth-user.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
+import { FacebookAuthGuard } from './guards/facebook-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -49,16 +49,32 @@ export class AuthController {
 
 	//Test - facebook
 	@Get('/facebook-login')
-	@UseGuards(AuthGuard('facebook'))
+	@Header('Content-Type', 'text/html')
+	@Redirect()
 	@ApiDocs.getFacebookLoginPage('페이스북 로그인 페이지로 리디렉트')
 	getFacebookLoginPage() {
-		return true;
+		const facebookeCallbackUrl: string = this.authService.getFacebookLoginPage();
+		return {
+			url: facebookeCallbackUrl,
+		};
 	}
 
+	//Test - facebook
 	@Get('/facebook-callback')
-	@UseGuards(AuthGuard('facebook'))
+	@ApiDocs.facebookLogin2('페이스북 로그인 회원가입&로그인 후 유저 정보, 토큰 반환')
+	async facebookLogin2(@FacebookUser() facebookUser) {
+		// const user: UserResponseDto = await this.authService.createOauthUser(
+		// 	facebookUser as OauthUserDto,
+		// 	UserType.Facebook,
+		// );
+		// return this.authService.login(user);
+	}
+
+	@UseGuards(FacebookAuthGuard)
+	@Post('/facebook-login')
 	@ApiDocs.facebookLogin('페이스북 로그인 회원가입&로그인 후 유저 정보, 토큰 반환')
-	async facebookLogin(@FacebookUser() facebookUser) {
+	async facebookLogin(@Body('facebookUser') facebookUser) {
+		console.log(facebookUser as OauthUserDto);
 		const user: UserResponseDto = await this.authService.createOauthUser(
 			facebookUser as OauthUserDto,
 			UserType.Facebook,

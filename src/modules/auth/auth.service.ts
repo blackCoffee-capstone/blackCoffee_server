@@ -39,6 +39,7 @@ export class AuthService {
 		private readonly mailerService: MailerService,
 	) {}
 	#oauthConfig = this.configService.get<OauthConfig>('oauthConfig').kakao;
+	#facebookConfig = this.configService.get<OauthConfig>('oauthConfig').facebook;
 	#jwtConfig = this.configService.get<JwtConfig>('jwtConfig');
 
 	//Test
@@ -46,6 +47,13 @@ export class AuthService {
 		return `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${
 			this.#oauthConfig.clientId
 		}&redirect_uri=${this.#oauthConfig.callbackUrl}`;
+	}
+
+	//Test
+	getFacebookLoginPage(): string {
+		return `https://www.facebook.com/v2.11/dialog/oauth?client_id=${this.#facebookConfig.clientId}&redirect_uri=${
+			this.#facebookConfig.callbackUrl
+		}`;
 	}
 
 	//Test
