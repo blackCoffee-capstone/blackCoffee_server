@@ -18,13 +18,17 @@ export class Ad extends CommonEntity {
 
 	@IsString()
 	@IsNotEmpty()
-	@Column({ name: 'page_url', type: 'varchar', nullable: false, unique: true })
+	@Column({ name: 'page_url', type: 'text', nullable: false, unique: true })
 	pageUrl: string;
 
 	@IsString()
 	@IsNotEmpty()
-	@Column({ name: 'photo_url', type: 'varchar', nullable: false })
+	@Column({ name: 'photo_url', type: 'text', nullable: false })
 	photoUrl: string;
+
+	@IsString()
+	@Column({ type: 'varchar', length: 100, nullable: false })
+	address: string;
 
 	@IsNumber()
 	@IsNotEmpty()
