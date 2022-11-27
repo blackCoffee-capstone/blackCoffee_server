@@ -150,7 +150,7 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 						locationId: {
 							type: 'number',
 						},
-						files: {
+						file: {
 							type: 'string',
 							format: 'binary',
 						},
@@ -188,7 +188,7 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 						locationId: {
 							type: 'number',
 						},
-						files: {
+						file: {
 							type: 'string',
 							format: 'binary',
 						},
