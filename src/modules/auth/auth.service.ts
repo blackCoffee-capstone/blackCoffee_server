@@ -19,6 +19,7 @@ import { User } from 'src/entities/users.entity';
 import { AuthCodeType } from 'src/types/auth-code.types';
 import { UserType } from 'src/types/users.types';
 import { UserResponseDto } from '../users/dto/user-response.dto';
+import { DeleteUserRequestDto } from './dto/delete-user-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { OauthUserDto } from './dto/oauth-user.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
@@ -214,6 +215,17 @@ export class AuthService {
 		`,
 		});
 		return true;
+	}
+
+	async deleteUser(id: number, passwordData: DeleteUserRequestDto) {
+		const user = await this.usersRepository.findOne({
+			where: { id },
+		});
+
+		if (user.password === passwordData.password) {
+			await this.usersRepository.delete({ id });
+			return true;
+		} else throw new UnauthorizedException('Password is incorrect');
 	}
 
 	async getUserIdIfExist(id: number, role: UserType) {

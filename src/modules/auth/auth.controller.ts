@@ -7,10 +7,12 @@ import { AuthCodeRequestDto } from '../auth-codes/dto/auth-code-request.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { ApiDocs } from './auth.docs';
 import { AuthService } from './auth.service';
+import { DeleteUserRequestDto } from './dto/delete-user-request.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { OauthUserDto } from './dto/oauth-user.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { FacebookAuthGuard } from './guards/facebook-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -107,5 +109,19 @@ export class AuthController {
 	@ApiDocs.generateTempPw('임시 비밀번호 메일로 발송')
 	async generateTempPw(@Body() authCodeReq: AuthCodeRequestDto) {
 		return await this.authService.generateTempPw(authCodeReq.email);
+	}
+
+	@Post('logout')
+	@UseGuards(JwtAuthGuard)
+	@ApiDocs.logout('로그아웃')
+	async logout(@AuthUser() userData) {
+		return true;
+	}
+
+	@Post('resign')
+	@UseGuards(JwtAuthGuard)
+	@ApiDocs.deleteUser('회원탈퇴')
+	async deleteUser(@AuthUser() userData, @Body() passwordReq: DeleteUserRequestDto) {
+		return await this.authService.deleteUser(userData.id, passwordReq);
 	}
 }
