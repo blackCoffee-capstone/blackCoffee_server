@@ -1,6 +1,5 @@
 import { IsString } from 'class-validator';
 import { Column, Entity, Index, OneToMany } from 'typeorm';
-import { AdForm } from './ad-form.entity';
 
 import { CommonEntity } from './common.entity';
 import { Post } from './posts.entity';
@@ -28,10 +27,4 @@ export class Location extends CommonEntity {
 		eager: true,
 	})
 	posts: Post[];
-
-	@OneToMany(() => AdForm, (adForm: AdForm) => adForm.location, {
-		cascade: true,
-		eager: true,
-	})
-	adForms: AdForm[];
 }

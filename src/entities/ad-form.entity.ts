@@ -1,9 +1,8 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { Column, Entity } from 'typeorm';
 
 import { AdFormType } from 'src/types/ad-form.types';
 import { CommonEntity } from './common.entity';
-import { Location } from './locations.entity';
 
 @Entity()
 export class AdForm extends CommonEntity {
@@ -15,18 +14,6 @@ export class AdForm extends CommonEntity {
 	@IsString()
 	@Column({ type: 'varchar', length: 100, nullable: false })
 	address: string;
-
-	@IsNumber()
-	@IsNotEmpty()
-	@Column({ name: 'location_id', nullable: true })
-	locationId: number;
-
-	@ManyToOne(() => Location, (location: Location) => location.adForms, {
-		onDelete: 'SET NULL',
-		nullable: true,
-	})
-	@JoinColumn([{ name: 'location_id', referencedColumnName: 'id' }])
-	location: Location;
 
 	@IsEmail()
 	@IsNotEmpty()

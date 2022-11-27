@@ -27,12 +27,6 @@ export class AdFormsService {
 			throw new BadRequestException('File is not exist');
 		}
 
-		const metroLocalName = this.getMetroLocalName(adFormData.address);
-		const locationId = await this.getAddressLocationId(
-			metroLocalName.isOneLevel,
-			metroLocalName.metroName,
-			metroLocalName.localName,
-		);
 		const licenseUrl = await this.uploadFileToS3('licenses', licenseFile);
 		try {
 			await this.adFormsRepository.save({
@@ -41,7 +35,6 @@ export class AdFormsService {
 				email: adFormData.email ? adFormData.email : null,
 				requirement: adFormData.requirement,
 				licenseUrl,
-				locationId,
 			});
 
 			return true;
