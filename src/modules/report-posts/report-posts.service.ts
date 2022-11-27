@@ -1,7 +1,6 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ReportPost } from 'src/entities/report-posts.entity';
-import { AdFormType } from 'src/types/ad-form.types';
 import { In, Repository } from 'typeorm';
 import { PostsResponseDto } from '../posts/dto/posts-response.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
@@ -18,26 +17,30 @@ export class ReportPostsService {
 	) {}
 
 	async getAllReports(filter: AllReportsRequestDto): Promise<ReportsResponseDto[]> {
-		let foundAllReports = this.reportPostsRepository
-			.createQueryBuilder('reportPost')
-			.leftJoinAndSelect('reportPost.user', 'user')
-			.leftJoinAndSelect('reportPost.post', 'post');
+		try {
+			let foundAllReports = this.reportPostsRepository
+				.createQueryBuilder('reportPost')
+				.leftJoinAndSelect('reportPost.user', 'user')
+				.leftJoinAndSelect('reportPost.post', 'post');
 
-		if (filter && filter.status) {
-			foundAllReports = foundAllReports.where('reportPost.status = :status', { status: filter.status });
+			if (filter && filter.status) {
+				foundAllReports = foundAllReports.where('reportPost.status = :status', { status: filter.status });
+			}
+			if (filter && filter.postId) {
+				foundAllReports = foundAllReports.andWhere('post.id = :postId', { postId: filter.postId });
+			}
+			const foundReportsQuery = await foundAllReports.orderBy('reportPost.created_at', 'DESC').getMany();
+			return foundReportsQuery.map(
+				(report) =>
+					new ReportsResponseDto({
+						...report,
+						user: new UserResponseDto(report.user),
+						post: new PostsResponseDto(report.post),
+					}),
+			);
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
 		}
-		if (filter && filter.postId) {
-			foundAllReports = foundAllReports.andWhere('post.id = :postId', { postId: filter.postId });
-		}
-		const foundReportsQuery = await foundAllReports.orderBy('reportPost.created_at', 'DESC').getMany();
-		return foundReportsQuery.map(
-			(report) =>
-				new ReportsResponseDto({
-					...report,
-					user: new UserResponseDto(report.user),
-					post: new PostsResponseDto(report.post),
-				}),
-		);
 	}
 
 	async updateMultiReportsStatus(multiReportData: UpdateMultiReportsRequestDto): Promise<boolean> {
@@ -47,13 +50,17 @@ export class ReportPostsService {
 		if (await this.notFoundThemes(multiReportData.reportIds)) {
 			throw new NotFoundException('Report is not found');
 		}
-		await this.reportPostsRepository.update(
-			{
-				id: In(multiReportData.reportIds),
-			},
-			{ status: multiReportData.status },
-		);
-		return true;
+		try {
+			await this.reportPostsRepository.update(
+				{
+					id: In(multiReportData.reportIds),
+				},
+				{ status: multiReportData.status },
+			);
+			return true;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async updateReportsStatus(reportId: number, updateReportData: UpdateReportsRequestDto): Promise<boolean> {
@@ -61,8 +68,12 @@ export class ReportPostsService {
 		if (!foundReport) {
 			throw new NotFoundException('Report is not found');
 		}
-		await this.reportPostsRepository.update(reportId, updateReportData);
-		return true;
+		try {
+			await this.reportPostsRepository.update(reportId, updateReportData);
+			return true;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async deleteReports(reportId: number): Promise<boolean> {
@@ -70,27 +81,25 @@ export class ReportPostsService {
 		if (!foundReport) {
 			throw new NotFoundException('Report is not found');
 		}
-		await this.reportPostsRepository.delete(reportId);
-		return true;
+		try {
+			await this.reportPostsRepository.delete(reportId);
+			return true;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	private async foundReportData(reportId: number) {
-		return await this.reportPostsRepository
-			.createQueryBuilder('reportPost')
-			.leftJoinAndSelect('reportPost.user', 'user')
-			.leftJoinAndSelect('reportPost.post', 'post')
-			.where('reportPost.id = :reportId', { reportId })
-			.getOne();
-	}
-
-	private async foundFilterReportDatas(status: AdFormType) {
-		return await this.reportPostsRepository
-			.createQueryBuilder('reportPost')
-			.leftJoinAndSelect('reportPost.user', 'user')
-			.leftJoinAndSelect('reportPost.post', 'post')
-			.where('reportPost.status = :status', { status })
-			.orderBy('reportPost.created_at', 'DESC')
-			.getMany();
+		try {
+			return await this.reportPostsRepository
+				.createQueryBuilder('reportPost')
+				.leftJoinAndSelect('reportPost.user', 'user')
+				.leftJoinAndSelect('reportPost.post', 'post')
+				.where('reportPost.id = :reportId', { reportId })
+				.getOne();
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	private isDuplicateArr(arr: any): boolean {
@@ -101,12 +110,16 @@ export class ReportPostsService {
 	}
 
 	private async notFoundThemes(reportIds: number[]): Promise<boolean> {
-		const foundThemes = await this.reportPostsRepository
-			.createQueryBuilder('reportPost')
-			.where('reportPost.id IN (:...reportIds)', { reportIds })
-			.getMany();
+		try {
+			const foundThemes = await this.reportPostsRepository
+				.createQueryBuilder('reportPost')
+				.where('reportPost.id IN (:...reportIds)', { reportIds })
+				.getMany();
 
-		if (foundThemes.length !== reportIds.length) return true;
-		return false;
+			if (foundThemes.length !== reportIds.length) return true;
+			return false;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 }

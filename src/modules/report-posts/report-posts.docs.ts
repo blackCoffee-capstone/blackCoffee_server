@@ -42,7 +42,7 @@ export const ApiDocs: SwaggerMethodDoc<ReportPostsController> = {
 				type: UpdateMultiReportsRequestDto,
 			}),
 			ApiResponse({
-				status: 201,
+				status: 200,
 				description: '',
 				type: Boolean,
 			}),
@@ -63,7 +63,7 @@ export const ApiDocs: SwaggerMethodDoc<ReportPostsController> = {
 				type: UpdateReportsRequestDto,
 			}),
 			ApiResponse({
-				status: 201,
+				status: 200,
 				description: '',
 				type: Boolean,
 			}),

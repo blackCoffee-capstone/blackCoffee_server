@@ -98,7 +98,7 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 				type: Number,
 			}),
 			ApiResponse({
-				status: 201,
+				status: 200,
 				description: '',
 				type: PostsResponseDto,
 			}),
