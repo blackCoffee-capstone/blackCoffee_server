@@ -10,6 +10,7 @@ import { MockLocationsRepository } from 'test/mock/locations.mock';
 import { AdminsController } from './admins.controller';
 import { AdminsService } from './admins.service';
 import { ConfigService } from '@nestjs/config';
+import { AdFormsService } from '../ad-forms/ad-forms.service';
 
 describe('AdminsController', () => {
 	let adminsController: AdminsController;
@@ -20,6 +21,7 @@ describe('AdminsController', () => {
 			controllers: [AdminsController],
 			providers: [
 				AdminsService,
+				AdFormsService,
 				{
 					provide: getRepositoryToken(Ad),
 					useClass: MockAdsRepository,

@@ -6,9 +6,10 @@ import { AdForm } from 'src/entities/ad-form.entity';
 import { Location } from 'src/entities/locations.entity';
 import { AdminsController } from './admins.controller';
 import { AdminsService } from './admins.service';
+import { AdFormsModule } from '../ad-forms/ad-forms.module';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([Ad, AdForm, Location])],
+	imports: [AdFormsModule, TypeOrmModule.forFeature([Ad, AdForm, Location])],
 	controllers: [AdminsController],
 	providers: [AdminsService],
 })

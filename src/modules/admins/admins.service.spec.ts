@@ -9,6 +9,7 @@ import { MockAdFormsRepository } from 'test/mock/ad-forms.mock';
 import { MockLocationsRepository } from 'test/mock/locations.mock';
 import { AdminsService } from './admins.service';
 import { ConfigService } from '@nestjs/config';
+import { AdFormsService } from '../ad-forms/ad-forms.service';
 
 describe('AdminsService', () => {
 	let adminsService: AdminsService;
@@ -17,6 +18,7 @@ describe('AdminsService', () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				AdminsService,
+				AdFormsService,
 				{
 					provide: getRepositoryToken(Ad),
 					useClass: MockAdsRepository,

@@ -9,6 +9,7 @@ import { Ad } from 'src/entities/ad.entity';
 import { AdForm } from 'src/entities/ad-form.entity';
 import { Location } from 'src/entities/locations.entity';
 import { NcloudConfig } from 'src/config/config.constant';
+import { AdFormsService } from '../ad-forms/ad-forms.service';
 import { AdsResponseDto } from './dto/ads-response.dto';
 import { GetAdResponseDto } from './dto/get-ad-response.dto';
 import { AdsRegisterRequestDto } from './dto/ads-register-request.dto';
@@ -30,6 +31,7 @@ export class AdminsService {
 		private readonly adsRepository: Repository<Ad>,
 		@InjectRepository(Location)
 		private readonly locationsRepository: Repository<Location>,
+		private readonly adFormsService: AdFormsService,
 		private readonly configService: ConfigService,
 	) {}
 	#ncloudConfig = this.configService.get<NcloudConfig>('ncloudConfig');
@@ -168,11 +170,19 @@ export class AdminsService {
 				email: updateAd.email ? updateAd.email : ad.email,
 				pageUrl: updateAd.pageUrl ? updateAd.pageUrl : ad.pageUrl,
 				photoUrl: photo ? null : ad.photoUrl,
-				locationId: updateAd.locationId ? updateAd.locationId : ad.locationId,
+				locationId: updateAd.address ? 0 : ad.locationId,
 			};
 			if (photo) {
 				await this.deleteFileToS3('ads', ad.photoUrl);
 				updateData.photoUrl = await this.uploadFileToS3('ads', photo);
+			}
+			if (updateAd.address) {
+				const metroLocalName = this.adFormsService.getMetroLocalName(updateAd.address);
+				updateData.locationId = await this.adFormsService.getAddressLocationId(
+					metroLocalName.isOneLevel,
+					metroLocalName.metroName,
+					metroLocalName.localName,
+				);
 			}
 			await this.adsRepository.update(ad.id, updateData);
 			return true;
