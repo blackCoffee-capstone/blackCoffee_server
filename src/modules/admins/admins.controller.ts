@@ -42,7 +42,7 @@ export class AdminsController {
 	}
 
 	@Get('/ad-forms/:adFormId')
-	@UseGuards(RolesGuard, RolesGuard)
+	@UseGuards(JwtAuthGuard, RolesGuard)
 	@Roles(UserType.Admin)
 	@ApiDocs.getAdForm('광고 요청 상세 페이지')
 	async getAdForm(@Param('adFormId') adFormId: number) {
@@ -50,7 +50,7 @@ export class AdminsController {
 	}
 
 	@Patch('/ad-forms/:adFormId')
-	@UseGuards(RolesGuard, RolesGuard)
+	@UseGuards(JwtAuthGuard, RolesGuard)
 	@Roles(UserType.Admin)
 	@ApiDocs.changeAdsStatus('광고 요청 상태 변경')
 	async changeAdsStatus(@Param('adFormId') adFormId: number, @Body() AdFormsStatusRequest: AdFormsStatusRequestDto) {
@@ -58,7 +58,7 @@ export class AdminsController {
 	}
 
 	@Delete('ad-forms/:adFormId')
-	@UseGuards(RolesGuard, RolesGuard)
+	@UseGuards(JwtAuthGuard, RolesGuard)
 	@Roles(UserType.Admin)
 	@ApiDocs.deleteAdForm('광고 요청 삭제')
 	async deleteAdForm(@Param('adFormId') adFormId: number) {
@@ -72,7 +72,7 @@ export class AdminsController {
 	}
 
 	@Get('/adsAll')
-	@UseGuards(RolesGuard, RolesGuard)
+	@UseGuards(JwtAuthGuard, RolesGuard)
 	@Roles(UserType.Admin)
 	@ApiDocs.getAllAds('광고 목록 반환')
 	async getAllAds() {
@@ -80,7 +80,7 @@ export class AdminsController {
 	}
 
 	@Get('/ads/:adId')
-	@UseGuards(RolesGuard, RolesGuard)
+	@UseGuards(JwtAuthGuard, RolesGuard)
 	@Roles(UserType.Admin)
 	@ApiDocs.getAds('광고 상세 페이지')
 	async getAds(@Param('adId') adId: number) {
@@ -88,7 +88,7 @@ export class AdminsController {
 	}
 
 	@Post('/ads')
-	@UseGuards(RolesGuard, RolesGuard)
+	@UseGuards(JwtAuthGuard, RolesGuard)
 	@Roles(UserType.Admin)
 	@UseInterceptors(
 		FileInterceptor('file', {
@@ -116,7 +116,7 @@ export class AdminsController {
 	}
 
 	@Patch('ads/:adId')
-	@UseGuards(RolesGuard, RolesGuard)
+	@UseGuards(JwtAuthGuard, RolesGuard)
 	@Roles(UserType.Admin)
 	@UseInterceptors(
 		FileInterceptor('file', {
@@ -139,7 +139,7 @@ export class AdminsController {
 		}),
 	)
 	@ApiDocs.updateAds('광고 수정')
-	@UseGuards(RolesGuard, RolesGuard)
+	@UseGuards(JwtAuthGuard, RolesGuard)
 	@Roles(UserType.Admin)
 	async updateAds(
 		@Param('adId') adId: number,
@@ -150,7 +150,7 @@ export class AdminsController {
 	}
 
 	@Delete('ads/:adId')
-	@UseGuards(RolesGuard, RolesGuard)
+	@UseGuards(JwtAuthGuard, RolesGuard)
 	@Roles(UserType.Admin)
 	@ApiDocs.deleteAds('광고 삭제')
 	async deleteAds(@Param('adId') adId: number) {
