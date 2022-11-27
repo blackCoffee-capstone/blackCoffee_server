@@ -44,6 +44,7 @@ a {
 	height: 100%;
 	overflow: auto;
 	box-shadow: 0 5px 10px rgba(35, 0, 77, 0.2);
+	z-index: 1;
 }
 #menu li a {
 	position: relative;
@@ -84,6 +85,7 @@ a {
 	height: 70px;
 	box-shadow: 0 5px 10px -5px rgba(35, 0, 77, 0.2);
 	padding-top: 20px;
+	z-index: 1;
 }
 
 .material-symbols-outlined {

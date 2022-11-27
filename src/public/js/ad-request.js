@@ -12,7 +12,6 @@ $(document).ready(function () {
 		ajax: { url: '/js/ad-form.json', dataType: 'json' },
 		columns: [
 			{ data: 'id' },
-			{ data: 'user' },
 			{ data: 'business_name' },
 			{ orderable: false, data: 'email' },
 			{ data: 'created_at', width: 100 },
@@ -64,7 +63,6 @@ $(document).ready(function () {
 		var img_data = '<img src="' + row_data.license_url + '" alt="license">';
 		console.log(row_data);
 
-		$('.modal-body').append('<div> 회원명 : ' + row_data.user + '</div>');
 		$('.modal-body').append('<div> 회사명 : ' + row_data.business_name + '</div>');
 		$('.modal-body').append('<div> 위치 : ' + row_data.geom + '</div>');
 		$('.modal-body').append('<div> 이메일 : ' + row_data.email + '</div>');
