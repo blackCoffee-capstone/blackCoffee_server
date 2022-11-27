@@ -12,7 +12,9 @@ import { Location } from 'src/entities/locations.entity';
 import { PostComment } from 'src/entities/post-comments.entity';
 import { PostTheme } from 'src/entities/post-themes.entity';
 import { Post } from 'src/entities/posts.entity';
+import { ReportPost } from 'src/entities/report-posts.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { UserType } from 'src/types/users.types';
 import { AdFormsService } from '../ad-forms/ad-forms.service';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { CommentsUserResponseDto } from '../users/dto/comments-user-response.dto';
@@ -25,6 +27,8 @@ import { PostCommentsRequestDto } from './dto/post-comments-request.dto';
 import { PostCommentsResponseDto } from './dto/post-comments-response.dto';
 import { PostsRequestDto } from './dto/posts-request.dto';
 import { PostsResponseDto } from './dto/posts-response.dto';
+import { ReportPostsRequestDto } from './dto/report-posts-request.dto';
+import { ReportPostsResponseDto } from './dto/report-posts-response.dto';
 import { UpdatePostsRequestDto } from './dto/update-posts-request.dto';
 
 @Injectable()
@@ -44,6 +48,8 @@ export class PostsService {
 		private readonly clickPostsRepository: Repository<ClickPost>,
 		@InjectRepository(LikePost)
 		private readonly likePostsRepository: Repository<LikePost>,
+		@InjectRepository(ReportPost)
+		private readonly reportPostsRepository: Repository<ReportPost>,
 		private readonly adFormsService: AdFormsService,
 		private readonly configService: ConfigService,
 	) {}
@@ -112,11 +118,7 @@ export class PostsService {
 		postData?: UpdatePostsRequestDto,
 	): Promise<PostsResponseDto> {
 		const foundUsersPost = await this.getUsersPost(userId, postId);
-
-		if (photos && photos.length === 0) {
-			throw new BadRequestException('File is not exist');
-		}
-		if (photos.length > 5) {
+		if (photos && photos.length > 5) {
 			throw new BadRequestException('Files length exeeds 5');
 		}
 		if (postData.themes && this.isDuplicateArr(postData.themes)) {
@@ -129,9 +131,9 @@ export class PostsService {
 		const updateData = {
 			title: postData.title ? postData.title : foundUsersPost.title,
 			content: postData.content ? postData.content : foundUsersPost.content,
-			photoUrls: photos ? [] : foundUsersPost.photo_urls,
+			photoUrls: photos ? [] : foundUsersPost.photoUrls,
 			address: postData.address ? postData.address : foundUsersPost.address,
-			locationId: postData.address ? 0 : foundUsersPost.location_id,
+			locationId: postData.address ? 0 : foundUsersPost.location.id,
 		};
 
 		if (!foundUsersPost) {
@@ -147,7 +149,7 @@ export class PostsService {
 		}
 
 		if (photos) {
-			await this.deleteFilesToS3('posts', foundUsersPost.photo_urls);
+			await this.deleteFilesToS3('posts', foundUsersPost.photoUrls);
 			updateData.photoUrls = await this.uploadFilesToS3('posts', photos);
 		}
 		try {
@@ -206,14 +208,18 @@ export class PostsService {
 		}
 	}
 
-	async deletePost(userId: number, postId: number): Promise<boolean> {
-		const foundUsersPost = await this.getUsersPost(userId, postId);
+	async deletePost(userId: number, role: UserType, postId: number): Promise<boolean> {
+		let foundUsersPost;
 
-		if (!foundUsersPost) {
-			throw new NotFoundException('Post is not found');
+		if (role === UserType.Admin) {
+			foundUsersPost = await this.getPostUserId(postId);
+		} else {
+			foundUsersPost = await this.getUsersPost(userId, postId);
+			if (!foundUsersPost) {
+				throw new NotFoundException('Post is not found');
+			}
 		}
-
-		await this.deleteFilesToS3('posts', foundUsersPost.photo_urls);
+		await this.deleteFilesToS3('posts', foundUsersPost.photoUrls);
 		await this.postsRepository.delete(postId);
 		return true;
 	}
@@ -296,6 +302,31 @@ export class PostsService {
 		return true;
 	}
 
+	async reportPost(
+		userId: number,
+		postId: number,
+		reportData: ReportPostsRequestDto,
+	): Promise<ReportPostsResponseDto> {
+		const foundPost = await this.getPostUserId(postId);
+		if (!foundPost) {
+			throw new NotFoundException('Post is not found');
+		}
+		if (foundPost.user.id === userId) {
+			throw new BadRequestException('User is writer');
+		}
+		if (await this.getUsersReportPost(userId, postId)) {
+			throw new BadRequestException('User already reports post');
+		}
+		const reportPost = this.reportPostsRepository.create({
+			userId,
+			postId,
+			reason: reportData.reason,
+		});
+		const result = await this.reportPostsRepository.save(reportPost);
+
+		return new ReportPostsResponseDto({ id: result.id });
+	}
+
 	private async uploadFilesToS3(folder: string, files: Array<Express.Multer.File>): Promise<string[]> {
 		const photoUrls = [];
 		const s3 = new AWS.S3({
@@ -329,6 +360,7 @@ export class PostsService {
 	}
 
 	private async deleteFilesToS3(folder: string, fileUrls: Array<string>): Promise<boolean> {
+		if (fileUrls.length === 0) return true;
 		const s3 = new AWS.S3({
 			endpoint: new AWS.Endpoint(this.#ncloudConfig.storageEndPoint),
 			region: 'kr-standard',
@@ -362,14 +394,11 @@ export class PostsService {
 	private async getUsersPost(userId: number, postId: number) {
 		return await this.postsRepository
 			.createQueryBuilder('post')
-			.select(
-				'post.id, post.address, post.title, post.content, post.photoUrls, location.id AS location_id, location.metroName, location.localName',
-			)
-			.leftJoin('post.user', 'user')
-			.leftJoin('post.location', 'location')
+			.leftJoinAndSelect('post.user', 'user')
+			.leftJoinAndSelect('post.location', 'location')
 			.where('user.id = :userId', { userId })
 			.andWhere('post.id = :postId', { postId })
-			.getRawOne();
+			.getOne();
 	}
 
 	private async getPostsThems(postId: number) {
@@ -515,5 +544,15 @@ export class PostsService {
 
 		if (isLike) return true;
 		return false;
+	}
+
+	private async getUsersReportPost(userId: number, postId: number) {
+		return await this.reportPostsRepository
+			.createQueryBuilder('reportPost')
+			.leftJoinAndSelect('reportPost.user', 'user')
+			.leftJoinAndSelect('reportPost.post', 'post')
+			.where('user.id = :userId', { userId })
+			.andWhere('post.id = :postId', { postId })
+			.getOne();
 	}
 }

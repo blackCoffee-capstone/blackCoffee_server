@@ -7,6 +7,7 @@ import { Location } from 'src/entities/locations.entity';
 import { PostComment } from 'src/entities/post-comments.entity';
 import { PostTheme } from 'src/entities/post-themes.entity';
 import { Post } from 'src/entities/posts.entity';
+import { ReportPost } from 'src/entities/report-posts.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { AdFormsModule } from '../ad-forms/ad-forms.module';
 import { AdFormsService } from '../ad-forms/ad-forms.service';
@@ -16,7 +17,17 @@ import { PostsService } from './posts.service';
 @Module({
 	imports: [
 		AdFormsModule,
-		TypeOrmModule.forFeature([Location, Post, Theme, PostTheme, PostComment, ClickPost, LikePost, AdForm]),
+		TypeOrmModule.forFeature([
+			Location,
+			Post,
+			Theme,
+			PostTheme,
+			PostComment,
+			ClickPost,
+			LikePost,
+			AdForm,
+			ReportPost,
+		]),
 	],
 	controllers: [PostsController],
 	providers: [AdFormsService, PostsService],
