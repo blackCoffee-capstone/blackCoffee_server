@@ -98,6 +98,14 @@ export class AuthController {
 		return await this.authService.login(user);
 	}
 
+	@Post('/admin-login')
+	@ApiDocs.adminLogin('관리자 로그인')
+	@UseGuards(LocalAuthGuard)
+	@ApiBody({ type: LoginRequestDto })
+	async adminLogin(@AuthUser() user: UserResponseDto) {
+		return await this.authService.adminLogin(user);
+	}
+
 	@UseGuards(JwtRefreshGuard)
 	@Post('token-refresh')
 	@ApiDocs.refreshToken('access token 재발급')

@@ -145,6 +145,22 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 			}),
 		);
 	},
+	adminLogin(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '관리자 로그인',
+			}),
+			ApiBody({
+				type: LoginRequestDto,
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+				type: LoginResponseDto,
+			}),
+		);
+	},
 	refreshToken(summary: string) {
 		return applyDecorators(
 			ApiOperation({

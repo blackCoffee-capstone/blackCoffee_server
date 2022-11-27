@@ -159,6 +159,33 @@ export class AuthService {
 		}
 	}
 
+	async adminLogin(user: UserResponseDto): Promise<LoginResponseDto> {
+		try {
+			if (user.type !== UserType.Admin) {
+				throw new UnauthorizedException('User is not admin');
+			}
+			const payload = { id: user.id, role: user.type };
+			const jwtAccessTokenExpire: string = this.jwtAccessTokenExpireByType(user.type);
+
+			const accessToken = this.jwtService.sign(payload, {
+				secret: this.#jwtConfig.jwtAccessTokenSecret,
+				expiresIn: jwtAccessTokenExpire,
+			});
+			const refreshToken = this.jwtService.sign(payload, {
+				secret: this.#jwtConfig.jwtRefreshTokenSecret,
+				expiresIn: this.#jwtConfig.jwtRefreshTokenExpire,
+			});
+
+			return new LoginResponseDto({
+				accessToken,
+				refreshToken,
+				user,
+			});
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
 	async validateEmailPassword(email: string, password: string): Promise<UserResponseDto> {
 		const types = [UserType.Admin, UserType.Normal];
 		const foundUser = await this.usersRepository
