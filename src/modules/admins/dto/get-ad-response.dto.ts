@@ -16,6 +16,10 @@ export class GetAdResponseDto {
 	readonly email: string;
 
 	@IsString()
+	@ApiProperty({ example: '경기 수원시 ~', description: '주소' })
+	readonly address: string;
+
+	@IsString()
 	@ApiProperty({ example: 'https://www.naver.com/', description: '사업 페이지 URL' })
 	readonly pageUrl: string;
 
@@ -30,12 +34,13 @@ export class GetAdResponseDto {
 	@ApiProperty({ example: '2022-11-11', description: '광고 등록 날짜' })
 	readonly createdAt: Date;
 
-	constructor({ id, businessName, email, pageUrl, photoUrl, location, createdAt }) {
+	constructor({ id, businessName, email, pageUrl, photoUrl, address, location, createdAt }) {
 		this.id = id;
 		this.businessName = businessName;
 		this.email = email;
 		this.pageUrl = pageUrl;
 		this.photoUrl = photoUrl;
+		this.address = address;
 		this.location = location;
 		this.createdAt = createdAt;
 	}

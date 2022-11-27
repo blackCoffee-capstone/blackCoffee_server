@@ -147,8 +147,8 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 						pageUrl: {
 							type: 'string',
 						},
-						locationId: {
-							type: 'number',
+						address: {
+							type: 'string',
 						},
 						file: {
 							type: 'string',

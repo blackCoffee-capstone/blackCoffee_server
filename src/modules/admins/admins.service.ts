@@ -154,7 +154,14 @@ export class AdminsService {
 
 		try {
 			const adBackgroundUrl = await this.uploadFileToS3('ads', adFile);
-			await this.adsRepository.save({ ...AdsRegisterRequest, photoUrl: adBackgroundUrl });
+
+			const metroLocalName = this.adFormsService.getMetroLocalName(AdsRegisterRequest.address);
+			const locationId = await this.adFormsService.getAddressLocationId(
+				metroLocalName.isOneLevel,
+				metroLocalName.metroName,
+				metroLocalName.localName,
+			);
+			await this.adsRepository.save({ ...AdsRegisterRequest, photoUrl: adBackgroundUrl, locationId: locationId });
 			return true;
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);

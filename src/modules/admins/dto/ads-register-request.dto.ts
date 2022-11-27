@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsEmail, IsNumber, IsString } from 'class-validator';
+import { IsEmail, IsString } from 'class-validator';
 
 export class AdsRegisterRequestDto {
 	@IsString()
@@ -15,8 +14,7 @@ export class AdsRegisterRequestDto {
 	@ApiProperty({ example: 'https://www.naver.com/', description: '사업 페이지 URL' })
 	readonly pageUrl: string;
 
-	@IsNumber()
-	@Type(() => Number)
-	@ApiProperty({ example: 1, description: '위치 id' })
-	readonly locationId: number;
+	@IsString()
+	@ApiProperty({ example: '경기 수원시 ~', description: '사업지 주소' })
+	readonly address: string;
 }
