@@ -266,7 +266,7 @@ export class SpotsService {
 			.distinctOn(['location.id'])
 			.getRawMany();
 	}
-	async getSearchSpot(searchRequest: SearchRequestDto) {
+	async getSearchSpot(header: string, searchRequest: SearchRequestDto) {
 		try {
 			let searchSpots = this.spotsRepository
 				.createQueryBuilder('spot')
@@ -297,10 +297,25 @@ export class SpotsService {
 				.offset((searchRequest.page - 1) * searchRequest.take)
 				.getMany();
 			const totalPage = Math.ceil(totalPageSpots.length / searchRequest.take);
-			const spots = Array.from(responseSpots).map(
-				(spot) =>
-					new SearchResponseDto({ ...spot, views: spot.clickSpots.length, wishes: spot.wishSpots.length }),
-			);
+			const spots = [];
+			for (const spot of responseSpots) {
+				let isWish = false;
+				if (header) {
+					const token = header.replace('Bearer ', '');
+					const user = this.jwtService.verify(token, { secret: this.#jwtConfig.jwtAccessTokenSecret });
+
+					if (await this.isUsersWishSpot(user.id, spot.id)) isWish = true;
+				}
+				spots.push(
+					new SearchResponseDto({
+						...spot,
+						views: spot.clickSpots.length,
+						wishes: spot.wishSpots.length,
+						isWish,
+					}),
+				);
+			}
+
 			return new SearchPageResponseDto({ totalPage: totalPage, spots: spots });
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
@@ -345,7 +360,7 @@ export class SpotsService {
 			return new DetailSpotResponseDto({
 				...IsSpot,
 				isWish,
-				views: IsSpot.clickSpots.length,
+				views: IsSpot.clickSpots.length + 1,
 				wishes: IsSpot.wishSpots.length,
 				detailSnsPost: detailSnsPostsDto,
 				neaybyFacility: facilitiesDto,
@@ -408,5 +423,16 @@ export class SpotsService {
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
+	}
+
+	private async isUsersWishSpot(userId: number, spotId: number): Promise<boolean> {
+		const usersWishData = await this.wishSpotsRepository
+			.createQueryBuilder('wishSpot')
+			.where('wishSpot.userId = :userId', { userId })
+			.andWhere('wishSpot.spotId = :spotId', { spotId })
+			.getOne();
+
+		if (usersWishData) return true;
+		return false;
 	}
 }
