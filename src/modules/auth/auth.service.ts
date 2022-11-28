@@ -69,7 +69,7 @@ export class AuthService {
 
 	async createOauthUser(oauthUserData: OauthUserDto, userType: UserType): Promise<UserResponseDto> {
 		const userNickname: string = userType + oauthUserData.socialId.toString();
-		oauthUserData.socialId;
+
 		if (oauthUserData.email) {
 			let compareUser = await this.usersRepository.findOne({
 				where: { email: oauthUserData.email },
@@ -101,7 +101,7 @@ export class AuthService {
 				try {
 					const newOauthUser = await this.usersRepository.save({
 						name: oauthUserData.name,
-						nickname: oauthUserData.name,
+						nickname: userNickname,
 						socialId: oauthUserData.socialId,
 						type: userType,
 					});

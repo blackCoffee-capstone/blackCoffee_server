@@ -22,7 +22,7 @@ export class FacebookAuthStrategy {
 		}|${this.#oauthConfig.secretKey}`;
 		const accessTokenRes = await firstValueFrom(this.httpService.get(validateApiUrl));
 		console.log(accessTokenRes.data);
-		const isValid: boolean = accessTokenRes.data.is_valid;
+		const isValid: boolean = accessTokenRes.data.data.is_valid;
 
 		if (!isValid) {
 			throw new UnauthorizedException();

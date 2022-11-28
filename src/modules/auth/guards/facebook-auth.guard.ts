@@ -16,7 +16,7 @@ export class FacebookAuthGuard implements CanActivate {
 		if (!validateCodeResult.id) throw new UnauthorizedException();
 
 		const facebookUser = new OauthUserDto({
-			name: validateCodeResult.last_name + validateCodeResult.first_name,
+			name: validateCodeResult.name,
 			socialId: validateCodeResult.id,
 			email: validateCodeResult.email ? validateCodeResult.email : null,
 		});
