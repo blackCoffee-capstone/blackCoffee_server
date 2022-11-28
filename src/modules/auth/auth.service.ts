@@ -249,7 +249,7 @@ export class AuthService {
 			where: { id },
 		});
 
-		if (user.password === passwordData.password) {
+		if (await this.isValidPassword(user.password, passwordData.password)) {
 			await this.usersRepository.delete({ id });
 			return true;
 		} else throw new UnauthorizedException('Password is incorrect');
