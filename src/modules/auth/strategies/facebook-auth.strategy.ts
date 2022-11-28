@@ -14,14 +14,12 @@ export class FacebookAuthStrategy {
 			this.#oauthConfig.clientId
 		}&redirect_uri=${this.#oauthConfig.callbackUrl}&client_secret=${this.#oauthConfig.secretKey}&code=${code}`;
 		const codeRes = await firstValueFrom(this.httpService.get(accessTokenApiUrl));
-		console.log(codeRes.data);
 		const accessToken: string = codeRes.data.access_token;
 
 		const validateApiUrl = `https://graph.facebook.com/debug_token?input_token=${accessToken}&access_token=${
 			this.#oauthConfig.clientId
 		}|${this.#oauthConfig.secretKey}`;
 		const accessTokenRes = await firstValueFrom(this.httpService.get(validateApiUrl));
-		console.log(accessTokenRes.data);
 		const isValid: boolean = accessTokenRes.data.data.is_valid;
 
 		if (!isValid) {
@@ -30,7 +28,6 @@ export class FacebookAuthStrategy {
 
 		const userDataApiUrl = `https://graph.facebook.com/me?fields=id,name,email&access_token=${accessToken}`;
 		const userDataRes = await firstValueFrom(this.httpService.get(userDataApiUrl));
-		console.log(userDataRes.data);
 		const userData = userDataRes.data;
 
 		return userData;

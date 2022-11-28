@@ -375,7 +375,7 @@ export class SpotsService {
 			.createQueryBuilder('spot')
 			.where('spot.id = :spotId', { spotId })
 			.getOne();
-		console.log(isWish);
+
 		if (!IsSpot) throw new NotFoundException('Spot is not found');
 		if (isWish) {
 			const isWishSpot = await this.wishSpotsRepository
