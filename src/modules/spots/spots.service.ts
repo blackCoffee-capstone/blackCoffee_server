@@ -156,28 +156,24 @@ export class SpotsService {
 
 	private async noDuplicateSnsPost(metaData: SaveRequestDto[]) {
 		try {
-			const addSnsPosts = metaData.filter((character, idx, arr) => {
-				return (
-					arr.findIndex(
-						(item) =>
-							item.date === character.date &&
-							item.likeNumber === character.likeNumber &&
-							item.photoUrl === character.photoUrl &&
-							item.content === character.content &&
-							item.themeName === character.themeName &&
-							item.name === character.name,
-					) === idx
-				);
-			});
+			const addSnsPosts = Array.from(metaData).map((meta) => [
+				meta.date,
+				meta.likeNumber,
+				meta.photoUrl,
+				meta.content,
+				meta.themeName,
+				meta.name,
+			]);
+			const noDupSnsPosts = [...new Set(addSnsPosts.join('|').split('|'))].map((s) => s.split(','));
 			const changeSpots = [];
-			for (const sns of addSnsPosts) {
+			for (const sns of noDupSnsPosts) {
 				const spot = await this.spotsRepository
 					.createQueryBuilder('spot')
-					.where('name = :name', { name: sns.name })
+					.where('name = :name', { name: sns[5] })
 					.getOne();
 				const theme = await this.themeRepository
 					.createQueryBuilder('theme')
-					.where('name = :name', { name: sns.themeName })
+					.where('name = :name', { name: sns[4] })
 					.getOne();
 				if (!theme || !spot) continue;
 				changeSpots.push(spot.id);
@@ -185,10 +181,10 @@ export class SpotsService {
 					new SnsPostRequestDto({
 						themeId: theme.id,
 						spotId: spot.id,
-						date: sns.date,
-						likeNumber: sns.likeNumber,
-						photoUrl: sns.photoUrl,
-						content: sns.content,
+						date: sns[0],
+						likeNumber: +sns[1],
+						photoUrl: sns[2],
+						content: sns[3],
 					}),
 					spot,
 					theme,
