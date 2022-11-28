@@ -1,32 +1,33 @@
+import { HttpService } from '@nestjs/axios';
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import * as fastcsv from 'fast-csv';
-import * as fs from 'fs';
-import * as path from 'path';
-import { Repository } from 'typeorm';
-
 import { ConfigService } from '@nestjs/config';
-import { SshConfig } from 'src/config/config.constant';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as fs from 'fs';
+import { firstValueFrom } from 'rxjs';
+import { JwtConfig, OauthConfig, SshConfig } from 'src/config/config.constant';
+import { ClickSpot } from 'src/entities/click-spots.entity';
 import { Location } from 'src/entities/locations.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
+import { WishSpot } from 'src/entities/wish-spots.entity';
+import { Repository } from 'typeorm';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
 import { RanksService } from '../ranks/ranks.service';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
+import { NeayByFacilityResponseDto } from './dto/neayby-facility-response.dto';
 import { SaveRequestDto } from './dto/save-request.dto';
+import { SearchPageResponseDto } from './dto/search-page-response.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
-import { SearchPageResponseDto } from './dto/search-page-response.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
-
 const { NodeSSH } = require('node-ssh');
 const ssh = new NodeSSH();
-
 @Injectable()
 export class SpotsService {
 	constructor(
@@ -38,17 +39,22 @@ export class SpotsService {
 		private readonly themeRepository: Repository<Theme>,
 		@InjectRepository(SnsPost)
 		private readonly snsPostRepository: Repository<SnsPost>,
+		@InjectRepository(ClickSpot)
+		private readonly clickSpotsRepository: Repository<ClickSpot>,
+		@InjectRepository(WishSpot)
+		private readonly wishSpotsRepository: Repository<WishSpot>,
 		private readonly ranksService: RanksService,
 		private readonly configService: ConfigService,
+		private readonly httpService: HttpService,
+		private readonly jwtService: JwtService,
 	) {}
 	#sshConfig = this.configService.get<SshConfig>('sshConfig');
-
+	#oauthConfig = this.configService.get<OauthConfig>('oauthConfig').kakao;
+	#jwtConfig = this.configService.get<JwtConfig>('jwtConfig');
 	async createSpots(file: Express.Multer.File) {
 		if (!file) throw new BadRequestException('File is not exist');
 		const fileName: string = file.filename;
-		const snsPosts = await this.readCsv(path.resolve('src/database/datas', fileName));
 		const localResultPath = './src/modules/spots/results/result.json';
-
 		await ssh
 			.connect({
 				host: this.#sshConfig.host,
@@ -85,109 +91,81 @@ export class SpotsService {
 		const metaData: SaveRequestDto[] = spots.map((spot) => new SaveRequestDto(spot));
 		return await this.saveSpot(metaData);
 	}
-
-	private async readCsv(filePath: string) {
-		return new Promise((resolve, reject) => {
-			const csvData = [];
-			const csvStream = fs.createReadStream(filePath);
-			const csvParser = fastcsv.parse({ headers: true });
-
-			csvStream
-				.pipe(csvParser)
-				.on('error', (err) => {
-					throw new InternalServerErrorException(err);
-				})
-				.on('data', (row) => {
-					const place = row.place;
-					const latitude = Number(row.latitude);
-					const longitude = Number(row.longitude);
-					const link = row.link;
-					const datetime = new Date(row.datetime);
-					const like = row.like;
-					const text = row.text;
-					csvData.push({
-						place,
-						latitude,
-						longitude,
-						link,
-						datetime,
-						like,
-						text,
-					});
-				})
-				.on('end', () => {
-					resolve(csvData);
-				});
-		});
-	}
-
-	async saveSpot(metaData: SaveRequestDto[]) {
+	private async saveSpot(metaData: SaveRequestDto[]) {
 		try {
 			await this.spotsRepository.update({}, { rank: null });
 			await this.noDuplicateSpot(metaData);
 			await this.noDuplicateSnsPost(metaData);
-
 			return true;
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
 	}
-
 	private async noDuplicateSpot(metaData: SaveRequestDto[]) {
 		try {
-			const addSpots = Array.from(metaData).map((meta) => [
-				meta.name,
-				meta.latitude,
-				meta.longitude,
-				meta.rank,
-				meta.metroName,
-				meta.localName,
-			]);
-			const noDupSpots = [...new Set(addSpots.join('|').split('|'))].map((s) => s.split(','));
-			for (const spot of noDupSpots) {
-				if (spot[5] === '') spot[5] = null;
-				const location = await this.locationsRepository
+			const addSpots = metaData.filter((character, idx, arr) => {
+				return (
+					arr.findIndex(
+						(item) =>
+							item.name === character.name &&
+							item.address === character.address &&
+							item.metroName === character.metroName &&
+							item.localName === character.localName &&
+							item.latitude === character.latitude &&
+							item.longitude === character.longitude &&
+							item.rank === character.rank,
+					) === idx
+				);
+			});
+			for (const spot of addSpots) {
+				if (!spot.rank) spot.rank = null;
+				let location = await this.locationsRepository
 					.createQueryBuilder('location')
-					.where('metro_name = :metro', { metro: spot[4] })
-					.andWhere('local_name = :local', { local: spot[5] })
-					.getOne();
-				if (!location) continue;
+					.where('metro_name = :metro', { metro: spot.metroName });
+				if (spot.localName === null) location = await location.andWhere('location.local_name is null');
+				else location = await location.andWhere('local_name = :local', { local: spot.localName });
+				const oneLocation = await location.getOne();
+				if (!oneLocation) continue;
 				await this.createSpot(
 					new SpotRequestDto({
-						locationId: location.id,
-						name: spot[0],
-						latitude: +spot[1],
-						longitude: +spot[2],
-						rank: +spot[3],
+						locationId: oneLocation.id,
+						name: spot.name,
+						address: spot.address,
+						latitude: spot.latitude,
+						longitude: spot.longitude,
+						rank: spot.rank,
 					}),
-					location,
+					oneLocation,
 				);
 			}
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
 	}
-
 	private async noDuplicateSnsPost(metaData: SaveRequestDto[]) {
 		try {
-			const addSnsPosts = Array.from(metaData).map((meta) => [
-				meta.date,
-				meta.likeNumber,
-				meta.photoUrl,
-				meta.content,
-				meta.themeName,
-				meta.name,
-			]);
-			const noDupSnsPosts = [...new Set(addSnsPosts.join('|').split('|'))].map((s) => s.split(','));
+			const addSnsPosts = metaData.filter((character, idx, arr) => {
+				return (
+					arr.findIndex(
+						(item) =>
+							item.date === character.date &&
+							item.likeNumber === character.likeNumber &&
+							item.photoUrl === character.photoUrl &&
+							item.content === character.content &&
+							item.themeName === character.themeName &&
+							item.name === character.name,
+					) === idx
+				);
+			});
 			const changeSpots = [];
-			for (const sns of noDupSnsPosts) {
+			for (const sns of addSnsPosts) {
 				const spot = await this.spotsRepository
 					.createQueryBuilder('spot')
-					.where('name = :name', { name: sns[5] })
+					.where('name = :name', { name: sns.name })
 					.getOne();
 				const theme = await this.themeRepository
 					.createQueryBuilder('theme')
-					.where('name = :name', { name: sns[4] })
+					.where('name = :name', { name: sns.themeName })
 					.getOne();
 				if (!theme || !spot) continue;
 				changeSpots.push(spot.id);
@@ -195,10 +173,10 @@ export class SpotsService {
 					new SnsPostRequestDto({
 						themeId: theme.id,
 						spotId: spot.id,
-						date: sns[0],
-						likeNumber: +sns[1],
-						photoUrl: sns[2],
-						content: sns[3],
+						date: sns.date,
+						likeNumber: sns.likeNumber,
+						photoUrl: sns.photoUrl,
+						content: sns.content,
 					}),
 					spot,
 					theme,
@@ -209,7 +187,6 @@ export class SpotsService {
 			throw new InternalServerErrorException(error.message, error);
 		}
 	}
-
 	private async updateSpotSns(changeSpots) {
 		try {
 			const noDupSpots = [...new Set(changeSpots)];
@@ -222,7 +199,6 @@ export class SpotsService {
 					.where('snsPost.spotId IN (:...spotId)', { spotId: noDupSpots })
 					.groupBy('snsPost.spotId')
 					.getRawMany();
-
 				for (const spot of updateSpots) {
 					await this.spotsRepository.update(spot.spotId, {
 						snsPostCount: spot.snsPost,
@@ -234,7 +210,6 @@ export class SpotsService {
 			throw new InternalServerErrorException(error.message, error);
 		}
 	}
-
 	private async createSpot(requestSpot: SpotRequestDto, location: Location) {
 		const IsSpot = await this.spotsRepository.findOne({ where: { name: requestSpot.name } });
 		try {
@@ -257,7 +232,6 @@ export class SpotsService {
 			throw new InternalServerErrorException(error.message, error);
 		}
 	}
-
 	private async createSnsPost(requestSnsPost: SnsPostRequestDto, spot: Spot, theme: Theme) {
 		const IsSnsPost = await this.snsPostRepository.findOne({ where: { photoUrl: requestSnsPost.photoUrl } });
 		try {
@@ -273,73 +247,164 @@ export class SpotsService {
 			throw new InternalServerErrorException(error.message, error);
 		}
 	}
-
+	private async allSelection(locationIds) {
+		return await this.locationsRepository
+			.createQueryBuilder('location')
+			.leftJoinAndSelect('location.spots', 'spots')
+			.select('location.id AS id')
+			.where((metroNames) => {
+				const subQuery = metroNames
+					.subQuery()
+					.select('location.metroName')
+					.where('location.localName is null')
+					.andWhere('location.id IN (:...ids)', { ids: locationIds })
+					.from(Location, 'location')
+					.getQuery();
+				return 'location.metroName IN' + subQuery;
+			})
+			.andWhere('spots.id is not null')
+			.distinctOn(['location.id'])
+			.getRawMany();
+	}
 	async getSearchSpot(searchRequest: SearchRequestDto) {
 		try {
 			let searchSpots = this.spotsRepository
 				.createQueryBuilder('spot')
-				.leftJoinAndSelect('spot.location', 'location')
+				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
+				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.orderBy(`spot.${searchRequest.sorter}`, 'ASC');
 			if (searchRequest.word) {
 				searchSpots = searchSpots.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
 			}
-			if (searchRequest.locationId) {
-				const locationId = searchRequest.locationId;
-				searchSpots = searchSpots.andWhere('location.id = :locationId', { locationId });
+			if (searchRequest.locationIds) {
+				let locationIds = searchRequest.locationIds;
+				const allMetros = await this.allSelection(locationIds);
+				const localsIds = Array.from(allMetros).flatMap(({ id }) => [id]);
+				locationIds = [...new Set(locationIds.concat(localsIds))];
+				searchSpots = searchSpots
+					.leftJoinAndSelect('spot.location', 'location')
+					.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
 			}
-			if (searchRequest.themeId) {
+			if (searchRequest.themeIds) {
 				searchSpots = searchSpots
 					.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
 					.leftJoinAndSelect('snsPosts.theme', 'theme')
-					.andWhere('theme.id = :id', { id: searchRequest.themeId });
+					.andWhere('theme.id IN (:...themeIds)', { themeIds: searchRequest.themeIds });
 			}
 			const totalPageSpots = await searchSpots.getMany();
 			const responseSpots = await searchSpots
 				.limit(searchRequest.take)
 				.offset((searchRequest.page - 1) * searchRequest.take)
 				.getMany();
-
 			const totalPage = Math.ceil(totalPageSpots.length / searchRequest.take);
 			const spots = Array.from(responseSpots).map(
 				(spot) =>
-					new SearchResponseDto({
-						...spot,
-						location: new LocationResponseDto({
-							id: spot.location.id,
-							metroName: spot.location.metroName,
-							localName: spot.location.localName,
-						}),
-					}),
+					new SearchResponseDto({ ...spot, views: spot.clickSpots.length, wishes: spot.wishSpots.length }),
 			);
 			return new SearchPageResponseDto({ totalPage: totalPage, spots: spots });
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
 	}
-
-	async getDetailSpot(detailRequest: DetailSpotRequestDto, spotId: number) {
-		const IsSpot = await this.spotsRepository.findOne({ where: { id: spotId } });
+	async getDetailSpot(header: string, detailRequest: DetailSpotRequestDto, spotId: number) {
+		const IsSpot = await this.spotsRepository
+			.createQueryBuilder('spot')
+			.where('spot.id = :spotId', { spotId })
+			.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
+			.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
+			.getOne();
 		if (!IsSpot) throw new NotFoundException('Spot is not found');
 		try {
-			let detailSnsPost = this.snsPostRepository
+			let isWish = false;
+			if (header) {
+				const token = header.replace('Bearer ', '');
+				const user = this.jwtService.verify(token, { secret: this.#jwtConfig.jwtAccessTokenSecret });
+				const clickSpotData = this.clickSpotsRepository.create({
+					userId: user.id,
+					spotId,
+				});
+				await this.clickSpotsRepository.save(clickSpotData);
+				const usersWishData = await this.wishSpotsRepository
+					.createQueryBuilder('wishSpot')
+					.where('wishSpot.userId = :userId', { userId: user.id })
+					.andWhere('wishSpot.spotId = :spotId', { spotId })
+					.getOne();
+				if (usersWishData) isWish = true;
+			}
+			const detailSnsPosts = await this.snsPostRepository
 				.createQueryBuilder('snsPost')
 				.leftJoinAndSelect('snsPost.spot', 'spot')
 				.leftJoinAndSelect('snsPost.theme', 'theme')
-				.where('spot.id = :spotId', { spotId });
-
-			if (detailRequest.themeId) {
-				detailSnsPost = detailSnsPost.andWhere('theme.id = :id', { id: detailRequest.themeId });
-			}
-
-			const filterSnsPosts = await detailSnsPost.limit(detailRequest.take).getMany();
-			const detailSnsPostsDto = Array.from(filterSnsPosts).map((post) => new DetailSnsPostResponseDto(post));
+				.where('spot.id = :spotId', { spotId })
+				.orderBy('snsPost.likeNumber', 'DESC')
+				.limit(detailRequest.take)
+				.getMany();
+			const detailSnsPostsDto = Array.from(detailSnsPosts).map((post) => new DetailSnsPostResponseDto(post));
 			const location = await this.locationsRepository.findOne({ where: { id: IsSpot.locationId } });
-
+			const facilitiesDto = await this.getNearbyFacility(IsSpot.latitude, IsSpot.longitude);
 			return new DetailSpotResponseDto({
 				...IsSpot,
+				isWish,
+				views: IsSpot.clickSpots.length,
+				wishes: IsSpot.wishSpots.length,
 				detailSnsPost: detailSnsPostsDto,
+				neaybyFacility: facilitiesDto,
 				location: new LocationResponseDto(location),
 			});
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+	async wishSpot(userId: number, spotId: number, isWish: boolean): Promise<boolean> {
+		const IsSpot = await this.spotsRepository
+			.createQueryBuilder('spot')
+			.where('spot.id = :spotId', { spotId })
+			.getOne();
+		console.log(isWish);
+		if (!IsSpot) throw new NotFoundException('Spot is not found');
+		if (isWish) {
+			const isWishSpot = await this.wishSpotsRepository
+				.createQueryBuilder('wishSpot')
+				.where('wishSpot.userId = :userId', { userId })
+				.andWhere('wishSpot.spotId = :spotId', { spotId })
+				.getOne();
+			if (!isWishSpot) {
+				const wishSpot = this.wishSpotsRepository.create({
+					userId,
+					spotId,
+				});
+				await this.wishSpotsRepository.save(wishSpot);
+			} else throw new BadRequestException('User already wishes spot');
+		} else {
+			await this.wishSpotsRepository.delete({
+				userId,
+				spotId,
+			});
+		}
+		return true;
+	}
+	private async getNearbyFacility(latitude, longitude) {
+		try {
+			const kakaoRequestApiMapResult = await firstValueFrom(
+				this.httpService.get(
+					`https://dapi.kakao.com/v2/local/search/category.json?category\_group\_code=PK6,FD6,CE7&y=${latitude}&x=${longitude}&radius=20000&sort=distance`,
+					{
+						headers: {
+							Authorization: `KakaoAK ${this.#oauthConfig.clientId}`,
+						},
+					},
+				),
+			);
+			return kakaoRequestApiMapResult.data.documents.map(
+				(facility) =>
+					new NeayByFacilityResponseDto({
+						name: facility.place_name,
+						placeUrl: facility.place_url,
+						address: facility.address_name,
+						distance: +facility.distance,
+						category: facility.category_name,
+					}),
+			);
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}

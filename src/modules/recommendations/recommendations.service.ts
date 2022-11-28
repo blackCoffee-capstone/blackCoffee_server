@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
@@ -74,7 +74,14 @@ export class RecommendationsService {
 		const resultJson = JSON.parse(resultFile.toString());
 		const listRecommendationSpotIds = resultJson.listRecommendation;
 		const listRecommendationSpots = await this.getSpotsUseId(listRecommendationSpotIds);
-		return listRecommendationSpots.map((listRecommendationSpot) => new SearchResponseDto(listRecommendationSpot));
+		return listRecommendationSpots.map(
+			(listRecommendationSpot) =>
+				new SearchResponseDto({
+					...listRecommendationSpot,
+					views: listRecommendationSpot.clickSpots.length,
+					wishes: listRecommendationSpot.wishSpots.length,
+				}),
+		);
 	}
 
 	async recommendationsSpotsMap(userId: number): Promise<RecommendationsMapResponseDto[]> {
@@ -140,7 +147,9 @@ export class RecommendationsService {
 				.leftJoin('taste_theme.theme', 'theme')
 				.where('user.id = :id', { id: userId })
 				.getRawMany();
-
+			if (!foundUsersThemes) {
+				throw new BadRequestException('User taste theme is not found');
+			}
 			return foundUsersThemes.map((theme) => new UsersTasteThemesResponseDto({ id: theme.id, name: theme.name }));
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
@@ -187,6 +196,8 @@ export class RecommendationsService {
 			const spots = await this.spotsRepository
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.location', 'location')
+				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
+				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.where('spot.id IN (:...spotIds)', { spotIds })
 				.getMany();
 

@@ -3,7 +3,6 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { AdFormsController } from './ad-forms.controller';
-import { AdFormsResponseDto } from './dto/ad-forms-response.dto';
 
 export const ApiDocs: SwaggerMethodDoc<AdFormsController> = {
 	registerAdForm(summary: string) {
@@ -20,11 +19,8 @@ export const ApiDocs: SwaggerMethodDoc<AdFormsController> = {
 						businessName: {
 							type: 'string',
 						},
-						latitude: {
-							type: 'number',
-						},
-						longitude: {
-							type: 'number',
+						address: {
+							type: 'string',
 						},
 						email: {
 							type: 'string',
@@ -46,7 +42,7 @@ export const ApiDocs: SwaggerMethodDoc<AdFormsController> = {
 			ApiResponse({
 				status: 201,
 				description: '',
-				type: AdFormsResponseDto,
+				type: Boolean,
 			}),
 		);
 	},

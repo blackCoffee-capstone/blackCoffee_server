@@ -5,6 +5,7 @@ import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { AuthCodeRequestDto } from '../auth-codes/dto/auth-code-request.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { AuthController } from './auth.controller';
+import { DeleteUserRequestDto } from './dto/delete-user-request.dto';
 import { KakaoLoginRequestDto } from './dto/kakao-login-request.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -66,11 +67,44 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 			}),
 		);
 	},
+	facebookLogin2(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '페이스북 서버에서 사용자 정보를 가져와, 회원가입&로그인 후 사용자 정보와 토큰 반환',
+			}),
+			ApiBody({
+				schema: {
+					type: 'object',
+					properties: {
+						code: {
+							description: '페이스북 로그인 code',
+						},
+					},
+				},
+			}),
+			ApiResponse({
+				status: 200,
+				description: '',
+				type: LoginResponseDto,
+			}),
+		);
+	},
 	facebookLogin(summary: string) {
 		return applyDecorators(
 			ApiOperation({
 				summary,
 				description: '페이스북 서버에서 사용자 정보를 가져와, 회원가입&로그인 후 사용자 정보와 토큰 반환',
+			}),
+			ApiBody({
+				schema: {
+					type: 'object',
+					properties: {
+						code: {
+							description: '페이스북 로그인 code',
+						},
+					},
+				},
 			}),
 			ApiResponse({
 				status: 200,
@@ -111,6 +145,22 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 			}),
 		);
 	},
+	adminLogin(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '관리자 로그인',
+			}),
+			ApiBody({
+				type: LoginRequestDto,
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+				type: LoginResponseDto,
+			}),
+		);
+	},
 	refreshToken(summary: string) {
 		return applyDecorators(
 			ApiOperation({
@@ -136,6 +186,35 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 			}),
 			ApiBody({
 				type: AuthCodeRequestDto,
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+				type: Boolean,
+			}),
+		);
+	},
+	logout(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '로그아웃',
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+				type: Boolean,
+			}),
+		);
+	},
+	deleteUser(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '회원탈퇴',
+			}),
+			ApiBody({
+				type: DeleteUserRequestDto,
 			}),
 			ApiResponse({
 				status: 201,

@@ -1,12 +1,10 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { boolean } from 'joi';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
-import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
-import { SearchRequestDto } from './dto/search-request.dto';
-import { SearchResponseDto } from './dto/search-response.dto';
+import { SearchPageResponseDto } from './dto/search-page-response.dto';
 import { SpotsController } from './spots.controller';
 
 export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
@@ -42,12 +40,39 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 				description: '여행지 검색(단어 검색, 정렬, 필터링, 페이지네이션)',
 			}),
 			ApiQuery({
-				type: SearchRequestDto,
+				name: 'word',
+				required: false,
+				description: '검색어',
+			}),
+			ApiQuery({
+				name: 'sorter',
+				required: false,
+				description: '정렬 기준 (이름순: Name, 인기순: Rank)',
+			}),
+			ApiQuery({
+				name: 'page',
+				required: false,
+				description: '페이지 번호',
+			}),
+			ApiQuery({
+				name: 'take',
+				required: false,
+				description: '페이지 별 데이터 개수',
+			}),
+			ApiQuery({
+				name: 'locationIds',
+				required: false,
+				description: '위치 필터링 id list',
+			}),
+			ApiQuery({
+				name: 'themeIds',
+				required: false,
+				description: '테마 필터링 id list',
 			}),
 			ApiResponse({
 				status: 200,
 				description: '',
-				type: [SearchResponseDto],
+				type: SearchPageResponseDto,
 			}),
 		);
 	},
@@ -58,17 +83,37 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 				description: '여행지 상세 페이지(여행지 기본 정보, 연관 sns posts',
 			}),
 			ApiQuery({
-				type: DetailSpotRequestDto,
-			}),
-			ApiParam({
-				name: 'spodId',
-				type: Number,
+				name: 'take',
+				required: false,
+				description: '페이지 별 데이터 개수',
 			}),
 			ApiResponse({
 				status: 200,
 				description: '',
 				type: DetailSpotResponseDto,
 			}),
+		);
+	},
+	wishSpot(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '여행지 찜하기',
+			}),
+			ApiParam({
+				name: 'spotId',
+				type: Number,
+			}),
+			ApiParam({
+				name: 'isWish',
+				type: Number,
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+				type: Boolean,
+			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 };

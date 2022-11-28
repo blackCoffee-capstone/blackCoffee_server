@@ -12,6 +12,7 @@ import { MockUsersRepository } from '../../../test/mock/users.mock';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { HashPassword } from './hash-password';
+import { FacebookAuthStrategy } from './strategies/facebook-auth.strategy';
 import { KakaoAuthStrategy } from './strategies/kakao-auth.strategy';
 
 describe('AuthController', () => {
@@ -33,6 +34,7 @@ describe('AuthController', () => {
 					},
 				},
 				KakaoAuthStrategy,
+				FacebookAuthStrategy,
 				{
 					provide: getRepositoryToken(User),
 					useClass: MockUsersRepository,

@@ -1,7 +1,9 @@
 import { IsString } from 'class-validator';
 import { Column, Entity, Index, OneToMany } from 'typeorm';
 
+import { Ad } from './ad.entity';
 import { CommonEntity } from './common.entity';
+import { Post } from './posts.entity';
 import { Spot } from './spots.entity';
 
 @Entity()
@@ -20,4 +22,16 @@ export class Location extends CommonEntity {
 		eager: true,
 	})
 	spots: Spot[];
+
+	@OneToMany(() => Post, (post: Post) => post.location, {
+		cascade: true,
+		eager: true,
+	})
+	posts: Post[];
+
+	@OneToMany(() => Ad, (ad: Ad) => ad.location, {
+		cascade: true,
+		eager: true,
+	})
+	ads: Ad[];
 }

@@ -1,5 +1,4 @@
-import { IsEmail, IsLatitude, IsLongitude, IsNotEmpty, IsString } from 'class-validator';
-import { Geometry } from 'geojson';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { Column, Entity } from 'typeorm';
 
 import { AdFormType } from 'src/types/ad-form.types';
@@ -12,23 +11,9 @@ export class AdForm extends CommonEntity {
 	@Column({ name: 'business_name', type: 'varchar', length: 40, nullable: false })
 	businessName: string;
 
-	@IsLatitude()
-	@Column({ type: 'double precision', nullable: false })
-	latitude: number;
-
-	@IsLongitude()
-	@Column({ type: 'double precision', nullable: false })
-	longitude: number;
-
-	@Column({
-		name: 'geom',
-		type: 'point',
-		spatialFeatureType: 'Point',
-		srid: 5186,
-		nullable: false,
-		comment: 'geom',
-	})
-	geom: Geometry;
+	@IsString()
+	@Column({ type: 'varchar', length: 100, nullable: false })
+	address: string;
 
 	@IsEmail()
 	@IsNotEmpty()

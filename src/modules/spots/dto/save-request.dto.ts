@@ -11,6 +11,10 @@ export class SaveRequestDto {
 	readonly localName: string | null;
 
 	@IsString()
+	@ApiProperty({ example: '경상북도 경주시 남산동', description: '여행지 상세주소' })
+	readonly address: string;
+
+	@IsString()
 	@ApiProperty({ example: '을왕리해수욕장', description: '여행지 이름' })
 	readonly name: string;
 
@@ -24,7 +28,7 @@ export class SaveRequestDto {
 
 	@IsNumber()
 	@ApiProperty({ example: 1, description: '순위' })
-	readonly rank: number | null;
+	rank: number | null;
 
 	@IsDateString()
 	@ApiProperty({ example: '2022-02-01', description: 'sns 게시글 등록일' })
@@ -49,6 +53,7 @@ export class SaveRequestDto {
 	constructor({
 		metroName,
 		localName,
+		address,
 		name,
 		latitude,
 		longitude,
@@ -61,6 +66,7 @@ export class SaveRequestDto {
 	}) {
 		this.metroName = metroName;
 		this.localName = localName;
+		this.address = address;
 		this.name = name;
 		this.latitude = latitude;
 		this.longitude = longitude;

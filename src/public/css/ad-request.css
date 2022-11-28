@@ -44,6 +44,7 @@ a {
 	height: 100%;
 	overflow: auto;
 	box-shadow: 0 5px 10px rgba(35, 0, 77, 0.2);
+	z-index: 1;
 }
 #menu li a {
 	position: relative;
@@ -84,6 +85,7 @@ a {
 	height: 70px;
 	box-shadow: 0 5px 10px -5px rgba(35, 0, 77, 0.2);
 	padding-top: 20px;
+	z-index: 1;
 }
 
 .material-symbols-outlined {
@@ -110,55 +112,15 @@ a {
 	color: #4d377b;
 }
 
-input {
-	height: 28px;
-	font-size: 12px;
-	border: 0;
-	border-radius: 5px;
-	outline: none;
-	background-color: white;
-}
-
 .ad_request {
 	padding-top: 100px;
 	padding-left: 350px;
 }
 
 .ad_request a {
-	font-size: 18px;
-	font-weight: 600;
-	color: #4d377b;
-}
-
-#append_table {
-	margin-top: 20px;
-	margin-bottom: 50px;
-}
-
-#append_table th {
-	padding-top: 5px;
 	font-size: 14px;
 	font-weight: 600;
-}
-
-#append_table td {
-	padding: 10px 20px;
-	font-size: 10px;
-}
-
-#append_row {
-	font-size: 12px;
-	font-weight: 800;
-	height: 28px;
-	outline: none;
-	border: #4d377b solid 2px;
-	cursor: pointer;
-	border-radius: 5px;
-	background-color: white;
-}
-
-#append_row:hover {
-	background-color: #ebe7f1;
+	color: #4d377b;
 }
 
 #list_table {
@@ -197,7 +159,7 @@ td {
 #list_table td {
 	font-size: 12px;
 	color: black;
-	font-weight: 600;
+	font-weight: bold;
 }
 
 #list_table .detail-link,
@@ -207,17 +169,103 @@ td {
 	font-weight: bold;
 }
 
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+	margin-top: 10px;
+	padding-right: 10px;
+	float: left;
+}
+
+.dataTables_filter {
+	float: left;
+	margin-bottom: 10px;
+	font-size: 16px;
+	font-weight: bolder;
+}
+
+.dataTables_info {
+	text-align: left !important;
+	color: #5f5f5f;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.radio {
+	float: bottom;
+	font-size: 12px;
+	font-weight: 600;
+}
+
 #popup {
 	display: none;
-	width: 500px;
+	width: 800px;
 	height: 500px;
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	margin: -250px 0 0 -250px;
+	margin: -250px 0 0 -350px;
 	background-color: #fff;
 	z-index: 2;
 	border-radius: 10px;
+	text-align: center;
+	overflow-y: auto;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.modal-title {
+	font-size: 18px;
+	color: #fff;
+	font-weight: 800;
+	background-color: #4d377b;
+	padding-top: 15px;
+	padding-bottom: 15px;
+	margin-bottom: 20px;
+}
+
+.modal-body div {
+	padding: 10px;
+}
+
+.modal-footer {
+	margin: 20px;
+}
+
+.btn {
+	cursor: pointer;
+	display: inline-block;
+	border-radius: 3px;
+	border: 1px solid #4d377b;
+	box-shadow: 0 5px 10px -5px rgba(35, 0, 77, 0.2);
+	font-size: 12px;
+	font-weight: 600;
+	padding: 6px 12px;
+}
+
+.btn:hover {
+	border: none;
+	background-color: #4d377b;
+	color: white;
+	font-size: 13px;
+}
+
+.btn-delete {
+	cursor: pointer;
+	border: 1px solid red;
+	border-radius: 3px;
+	color: red;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 6px 12px;
+	box-shadow: 0 5px 10px -5px rgba(35, 0, 77, 0.2);
+	float: right;
+	background-color: white;
+}
+
+.btn-delete:hover {
+	border: none;
+	background-color: red;
+	color: white;
+	font-size: 13px;
 }
 
 .backon {
