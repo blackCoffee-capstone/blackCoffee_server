@@ -1,26 +1,26 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { In, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as AWS from 'aws-sdk';
+import { In, Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
 
-import { Ad } from 'src/entities/ad.entity';
-import { AdForm } from 'src/entities/ad-form.entity';
-import { Location } from 'src/entities/locations.entity';
 import { NcloudConfig } from 'src/config/config.constant';
+import { AdForm } from 'src/entities/ad-form.entity';
+import { Ad } from 'src/entities/ad.entity';
+import { Location } from 'src/entities/locations.entity';
 import { AdFormsService } from '../ad-forms/ad-forms.service';
-import { AdsResponseDto } from './dto/ads-response.dto';
-import { GetAdResponseDto } from './dto/get-ad-response.dto';
+import { LocationResponseDto } from '../filters/dto/location-response.dto';
+import { AdFormsFilterRequestDto } from './dto/ad-forms-filter-request.dto';
+import { AdFormsResponseDto } from './dto/ad-forms-response.dto';
+import { AdFormsStatusRequestDto } from './dto/ad-forms-status-request.dto';
 import { AdsRegisterRequestDto } from './dto/ads-register-request.dto';
+import { AdsResponseDto } from './dto/ads-response.dto';
 import { GetAdFilterRequestDto } from './dto/get-ad-filter-request.dto';
 import { GetAdFilterResponseDto } from './dto/get-ad-filter-response.dto';
-import { AdFormsResponseDto } from './dto/ad-forms-response.dto';
-import { UpdateAdsRequestDto } from './dto/update-ads-request.dto';
 import { GetAdFormResponseDto } from './dto/get-ad-form.response.dto';
-import { AdFormsStatusRequestDto } from './dto/ad-forms-status-request.dto';
-import { AdFormsFilterRequestDto } from './dto/ad-forms-filter-request.dto';
-import { LocationResponseDto } from '../filters/dto/location-response.dto';
+import { GetAdResponseDto } from './dto/get-ad-response.dto';
+import { UpdateAdsRequestDto } from './dto/update-ads-request.dto';
 
 @Injectable()
 export class AdminsService {
@@ -52,10 +52,7 @@ export class AdminsService {
 		const adForm = await this.adFormsRepository.findOne({ where: { id: adFormId } });
 		if (!adForm) throw new NotFoundException('AdForm is not found');
 		try {
-			const locationDto = new LocationResponseDto(
-				await this.locationsRepository.findOne({ where: { id: adForm.locationId } }),
-			);
-			return new GetAdFormResponseDto({ ...adForm, location: locationDto });
+			return new GetAdFormResponseDto(adForm);
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
