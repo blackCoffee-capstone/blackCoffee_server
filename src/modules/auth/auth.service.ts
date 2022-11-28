@@ -69,7 +69,7 @@ export class AuthService {
 
 	async createOauthUser(oauthUserData: OauthUserDto, userType: UserType): Promise<UserResponseDto> {
 		const userNickname: string = userType + oauthUserData.socialId.toString();
-		oauthUserData.socialId;
+
 		if (oauthUserData.email) {
 			let compareUser = await this.usersRepository.findOne({
 				where: { email: oauthUserData.email },
@@ -101,7 +101,7 @@ export class AuthService {
 				try {
 					const newOauthUser = await this.usersRepository.save({
 						name: oauthUserData.name,
-						nickname: oauthUserData.name,
+						nickname: userNickname,
 						socialId: oauthUserData.socialId,
 						type: userType,
 					});
@@ -122,7 +122,9 @@ export class AuthService {
 		if (
 			(await this.errIfDuplicateEmail(foundUser)) &&
 			(await this.errIfNotVerifyEmail(signUpRequestDto)) &&
-			(await this.errIfDuplicateNickname(signUpRequestDto))
+			(await this.errIfDuplicateNickname(signUpRequestDto)) &&
+			this.pwCheck(signUpRequestDto.password) &&
+			this.nickNameFormat(signUpRequestDto.nickname)
 		) {
 			signUpRequestDto.password = await this.hashPassword.hash(signUpRequestDto.password);
 			const user = this.usersRepository.create({
@@ -328,5 +330,35 @@ export class AuthService {
 		return userType === UserType.Admin
 			? this.#jwtConfig.jwtAccessTokenExpireAdmin
 			: this.#jwtConfig.jwtAccessTokenExpire;
+	}
+
+	private pwCheck(newPW: string): boolean {
+		// 8~15자리 사이 숫자, 특수문자, 영어 1개 이상씩
+		const reg_pw = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[?!@#$%^&*()+=_-]).{8,15}/;
+		const pass = reg_pw.test(newPW);
+		if (pass) return true;
+		else throw new BadRequestException('Password is not valid');
+	}
+
+	private nickNameFormat(nickname: string): boolean {
+		const regex = /^[가-힣a-zA-Z0-9~!?@#$%^&*+=()[\]/'",.<>:;_-]+$/;
+
+		// 4byte 이상, 15자 이하
+		if (this.getByte(nickname) >= 4 && nickname.length <= 15 && regex.test(nickname)) {
+			return true;
+		} else {
+			throw new BadRequestException('Nickname is not valid');
+		}
+	}
+
+	private getByte(str: string) {
+		const strLength = str.length;
+		let strByteLength = 0;
+		for (let i = 0; i < strLength; i++) {
+			if (escape(str.charAt(i)).length >= 4) strByteLength += 2;
+			else if (escape(str.charAt(i)) == '%A7') strByteLength += 2;
+			else if (escape(str.charAt(i)) != '%0D') strByteLength++;
+		}
+		return strByteLength;
 	}
 }
