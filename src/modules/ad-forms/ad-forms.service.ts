@@ -38,8 +38,9 @@ export class AdFormsService {
 			await this.adFormsRepository.save({
 				businessName: adFormData.businessName,
 				address: adFormData.address,
-				email: adFormData.email ? adFormData.email : null,
+				email: adFormData.email,
 				requirement: adFormData.requirement,
+				phoneNumber: adFormData.phoneNumber ? adFormData.phoneNumber : null,
 				licenseUrl,
 				locationId,
 			});
