@@ -178,6 +178,7 @@ export class AdminsService {
 				pageUrl: updateAd.pageUrl ? updateAd.pageUrl : ad.pageUrl,
 				photoUrl: photo ? null : ad.photoUrl,
 				locationId: updateAd.address ? 0 : ad.locationId,
+				address: updateAd.address ? updateAd.address : ad.address,
 			};
 			if (photo) {
 				await this.deleteFileToS3('ads', ad.photoUrl);
