@@ -19,6 +19,7 @@ import { User } from 'src/entities/users.entity';
 import { AuthCodeType } from 'src/types/auth-code.types';
 import { UserType } from 'src/types/users.types';
 import { UserResponseDto } from '../users/dto/user-response.dto';
+import { DeleteUserRequestDto } from './dto/delete-user-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { OauthUserDto } from './dto/oauth-user.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
@@ -39,6 +40,7 @@ export class AuthService {
 		private readonly mailerService: MailerService,
 	) {}
 	#oauthConfig = this.configService.get<OauthConfig>('oauthConfig').kakao;
+	#facebookConfig = this.configService.get<OauthConfig>('oauthConfig').facebook;
 	#jwtConfig = this.configService.get<JwtConfig>('jwtConfig');
 
 	//Test
@@ -46,6 +48,13 @@ export class AuthService {
 		return `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${
 			this.#oauthConfig.clientId
 		}&redirect_uri=${this.#oauthConfig.callbackUrl}`;
+	}
+
+	//Test
+	getFacebookLoginPage(): string {
+		return `https://www.facebook.com/v2.11/dialog/oauth?client_id=${this.#facebookConfig.clientId}&redirect_uri=${
+			this.#facebookConfig.callbackUrl
+		}`;
 	}
 
 	//Test
@@ -150,6 +159,33 @@ export class AuthService {
 		}
 	}
 
+	async adminLogin(user: UserResponseDto): Promise<LoginResponseDto> {
+		try {
+			if (user.type !== UserType.Admin) {
+				throw new UnauthorizedException('User is not admin');
+			}
+			const payload = { id: user.id, role: user.type };
+			const jwtAccessTokenExpire: string = this.jwtAccessTokenExpireByType(user.type);
+
+			const accessToken = this.jwtService.sign(payload, {
+				secret: this.#jwtConfig.jwtAccessTokenSecret,
+				expiresIn: jwtAccessTokenExpire,
+			});
+			const refreshToken = this.jwtService.sign(payload, {
+				secret: this.#jwtConfig.jwtRefreshTokenSecret,
+				expiresIn: this.#jwtConfig.jwtRefreshTokenExpire,
+			});
+
+			return new LoginResponseDto({
+				accessToken,
+				refreshToken,
+				user,
+			});
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
 	async validateEmailPassword(email: string, password: string): Promise<UserResponseDto> {
 		const types = [UserType.Admin, UserType.Normal];
 		const foundUser = await this.usersRepository
@@ -206,6 +242,17 @@ export class AuthService {
 		`,
 		});
 		return true;
+	}
+
+	async deleteUser(id: number, passwordData: DeleteUserRequestDto) {
+		const user = await this.usersRepository.findOne({
+			where: { id },
+		});
+
+		if (await this.isValidPassword(user.password, passwordData.password)) {
+			await this.usersRepository.delete({ id });
+			return true;
+		} else throw new UnauthorizedException('Password is incorrect');
 	}
 
 	async getUserIdIfExist(id: number, role: UserType) {
