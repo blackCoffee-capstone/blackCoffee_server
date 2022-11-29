@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import { SshConfig } from 'src/config/config.constant';
 import { Spot } from 'src/entities/spots.entity';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
+import { WishSpot } from 'src/entities/wish-spots.entity';
 import { Repository } from 'typeorm';
 import { SearchResponseDto } from '../spots/dto/search-response.dto';
 import { UsersTasteThemesResponseDto } from '../taste-themes/dto/users-taste-themes-response.dto';
@@ -21,6 +22,8 @@ export class RecommendationsService {
 		private readonly spotsRepository: Repository<Spot>,
 		@InjectRepository(TasteTheme)
 		private readonly tasteThemesRepository: Repository<TasteTheme>,
+		@InjectRepository(WishSpot)
+		private readonly wishSpotsRepository: Repository<WishSpot>,
 		private readonly configService: ConfigService,
 	) {}
 	#sshConfig = this.configService.get<SshConfig>('sshConfig');
@@ -48,7 +51,7 @@ export class RecommendationsService {
 				username: this.#sshConfig.userName,
 				port: this.#sshConfig.port,
 				password: this.#sshConfig.password,
-			}) //bash run_recommend.sh testingData/testTaste.json resultshell.json 1
+			})
 			.then(async function () {
 				await ssh
 					.putFile(localInputPath, `/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json`)
@@ -74,14 +77,22 @@ export class RecommendationsService {
 		const resultJson = JSON.parse(resultFile.toString());
 		const listRecommendationSpotIds = resultJson.listRecommendation;
 		const listRecommendationSpots = await this.getSpotsUseId(listRecommendationSpotIds);
-		return listRecommendationSpots.map(
-			(listRecommendationSpot) =>
+
+		const results: SearchResponseDto[] = [];
+		for (const listRecommendationSpot of listRecommendationSpots) {
+			let isWish = false;
+			if (await this.isUsersWishSpot(userId, listRecommendationSpot.id)) isWish = true;
+
+			results.push(
 				new SearchResponseDto({
 					...listRecommendationSpot,
 					views: listRecommendationSpot.clickSpots.length,
 					wishes: listRecommendationSpot.wishSpots.length,
+					isWish,
 				}),
-		);
+			);
+		}
+		return results;
 	}
 
 	async recommendationsSpotsMap(userId: number): Promise<RecommendationsMapResponseDto[]> {
@@ -107,7 +118,7 @@ export class RecommendationsService {
 				username: this.#sshConfig.userName,
 				port: this.#sshConfig.port,
 				password: this.#sshConfig.password,
-			}) //bash run_recommend.sh testingData/testTaste.json resultshell.json 1
+			})
 			.then(async function () {
 				await ssh
 					.putFile(localInputPath, `/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json`)
@@ -205,5 +216,16 @@ export class RecommendationsService {
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
+	}
+
+	private async isUsersWishSpot(userId: number, spotId: number): Promise<boolean> {
+		const usersWishData = await this.wishSpotsRepository
+			.createQueryBuilder('wishSpot')
+			.where('wishSpot.userId = :userId', { userId })
+			.andWhere('wishSpot.spotId = :spotId', { spotId })
+			.getOne();
+
+		if (usersWishData) return true;
+		return false;
 	}
 }

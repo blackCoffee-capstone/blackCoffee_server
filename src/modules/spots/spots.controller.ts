@@ -71,8 +71,8 @@ export class SpotsController {
 
 	@Get()
 	@ApiDocs.searchSpot('여행지 검색(단어 검색, 정렬, 필터링, 페이지네이션)')
-	async searchSpot(@Query() searchRequest: SearchRequestDto) {
-		return await this.spotsService.getSearchSpot(searchRequest);
+	async searchSpot(@Headers() headers, @Query() searchRequest: SearchRequestDto) {
+		return await this.spotsService.getSearchSpot(headers.authorization, searchRequest);
 	}
 
 	@Get(':spotId')

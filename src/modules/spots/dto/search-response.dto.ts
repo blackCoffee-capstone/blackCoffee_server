@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class SearchResponseDto {
 	@IsNumber()
@@ -22,11 +22,16 @@ export class SearchResponseDto {
 	@ApiProperty({ example: 10, description: '여행지 찜하기 개수' })
 	readonly wishes: number;
 
-	constructor({ id, name, address, views, wishes }) {
+	@IsBoolean()
+	@ApiProperty({ example: false, description: '여행지 찜하기 여부' })
+	readonly isWish: boolean;
+
+	constructor({ id, name, address, views, wishes, isWish }) {
 		this.id = id;
 		this.name = name;
 		this.address = address;
 		this.views = views;
 		this.wishes = wishes;
+		this.isWish = isWish;
 	}
 }
