@@ -17,7 +17,11 @@ export class DetailSnsPostResponseDto {
 	readonly likeNumber: number;
 
 	@IsString()
-	@ApiProperty({ example: 100, description: 'sns 게시글 사진 링크' })
+	@ApiProperty({ example: 'https://www~', description: 'sns 게시글 링크' })
+	readonly snsPostUrl: string;
+
+	@IsString()
+	@ApiProperty({ example: 'https://scontent~', description: 'sns 게시글 사진 링크' })
 	readonly photoUrl: string;
 
 	@IsString()
