@@ -9,9 +9,13 @@ export class ViewController {
 	}
 
 	@Get()
-	@Render('admin-main')
-	adminMain() {
-		return {};
+	adminMain(@Res() res: Response) {
+		return res.render('admin-main');
+	}
+
+	@Get('/forbidden')
+	forbidden(@Res() res: Response) {
+		return res.render('forbidden');
 	}
 
 	@Get('/ad-request')

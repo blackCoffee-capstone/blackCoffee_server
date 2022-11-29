@@ -11,6 +11,34 @@
 			rel='stylesheet'
 			href='https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0'
 		/>
+		<link
+			rel='stylesheet'
+			type='text/css'
+			href='https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap4.min.css'
+		/>
+		<link
+			rel='stylesheet'
+			type='text/css'
+			href='https://cdn.datatables.net/responsive/2.4.0/css/responsive.bootstrap4.min.css'
+		/>
+		<script
+			type='text/javascript'
+			src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js'
+		></script>
+		<script type='text/javascript' src='https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js'></script>
+		<script type='text/javascript' src='https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap4.min.js'></script>
+		<script
+			type='text/javascript'
+			src='https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js'
+		></script>
+		<script
+			type='text/javascript'
+			src='https://cdn.datatables.net/responsive/2.4.0/js/responsive.bootstrap4.min.js'
+		></script>
+		<link
+			rel='stylesheet'
+			href='https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0'
+		/>
 	</head>
 	<body>
 
@@ -50,59 +78,17 @@
 				<div class='manage_top'>
 					광고 요청 목록
 				</div>
-				<table>
+				<table id='list_table' class='list_table'>
 					<thead>
 						<tr>
-							<th>NAME</th><th>TELL</th><th>STATUS</th><th>APPROVE</th>
+							<th>NO</th>
+							<th>BUSINESS</th>
+							<th>EMAIL</th>
+							<th>DATE</th>
+							<th>STATUS</th>
+							<th>DETAIL</th>
 						</tr>
 					</thead>
-					<tbody>
-						<tr>
-							<td>A</td><td>032-123-4567</td><td>NOT APPROVE</td><td><button
-									class='btn'
-									type='button'
-									onClick="location.href='/admin/ad-request'"
-								>
-									상세 정보
-								</button></td>
-						</tr>
-						<tr>
-							<td>B</td><td>070-567-9845</td><td>NOT APPROVE</td><td><button
-									class='btn'
-									type='button'
-									onClick="location.href='/admin/ad-request'"
-								>
-									상세 정보
-								</button></td>
-						</tr>
-						<tr>
-							<td>C</td><td>031-4931</td><td>NOT APPROVE</td><td><button
-									class='btn'
-									type='button'
-									onClick="location.href='/admin/ad-request'"
-								>
-									상세 정보
-								</button></td>
-						</tr>
-						<tr>
-							<td>D</td><td>062-124-4623</td><td>NOT APPROVE</td><td><button
-									class='btn'
-									type='button'
-									onClick="location.href='/admin/ad-request'"
-								>
-									상세 정보
-								</button></td>
-						</tr>
-						<tr>
-							<td>E</td><td>043-453-9948</td><td>NOT APPROVE</td><td><button
-									class='btn'
-									type='button'
-									onClick="location.href='/admin/ad-request'"
-								>
-									상세 정보
-								</button></td>
-						</tr>
-					</tbody>
 				</table>
 			</div>
 			<div class='community_box box'>

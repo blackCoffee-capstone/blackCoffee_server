@@ -1,4 +1,15 @@
 $(document).ready(function () {
+	var accessToken = localStorage.getItem('accessToken');
+	$.ajax({
+		url: '/users/admin-test',
+		type: 'Get',
+		headers: { Authorization: 'Bearer ' + accessToken },
+		success: function (data) {
+			alert('이미 로그인 된 계정입니다!');
+			window.location.href = '/admin';
+		},
+	});
+
 	$('#login').on('click', function () {
 		var param = {};
 		param.email = $('#email').val();
@@ -30,7 +41,6 @@ $(document).ready(function () {
 				alert('이메일 혹은 비밀번호를 다시 한 번 확인해주세요.');
 				return false;
 			},
-			headers: { Authorization: localStorage.getItem('accessToken') },
 		});
 	});
 });
