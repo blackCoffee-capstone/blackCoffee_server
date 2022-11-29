@@ -307,6 +307,7 @@ export class SpotsService {
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
 				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
+				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
 				.orderBy(`spot.${searchRequest.sorter}`, 'ASC');
 			if (searchRequest.word) {
 				searchSpots = searchSpots.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
@@ -347,6 +348,7 @@ export class SpotsService {
 						views: spot.clickSpots.length,
 						wishes: spot.wishSpots.length,
 						isWish,
+						photoUrl: spot.snsPosts[0].photoUrl,
 					}),
 				);
 			}

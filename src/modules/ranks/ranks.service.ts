@@ -4,6 +4,9 @@ import { Repository } from 'typeorm';
 
 import { Rank } from 'src/entities/rank.entity';
 import { Spot } from 'src/entities/spots.entity';
+import { SnsPost } from 'src/entities/sns-posts.entity';
+import { WishSpot } from 'src/entities/wish-spots.entity';
+import { ClickSpot } from 'src/entities/click-spots.entity';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { RankingListResponseDto } from './dto/ranking-list-response.dto';
 import { RankingMapResponseDto } from './dto/ranking-map-response.dto';
@@ -56,8 +59,6 @@ export class RanksService {
 				.createQueryBuilder('spot')
 				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
-				.innerJoinAndSelect('spot.clickSpots', 'clickSpots')
-				.innerJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.where('rankings.date = :date', { date: rankingRequest.date })
 				.select('spot.id AS id, spot.name AS name')
 				.addSelect('location.id AS location_id, location.metroName AS metro, location.localName AS local')
@@ -77,6 +78,27 @@ export class RanksService {
 						.from(Rank, 'rankings')
 						.limit(1);
 				}, 'before_rank')
+				.addSelect((wishes) => {
+					return wishes
+						.select('COUNT (*)', 'wishSpots')
+						.from(WishSpot, 'wishSpots')
+						.where('wishSpots.spotId = spot.id')
+						.limit(1);
+				}, 'wishes')
+				.addSelect((clicks) => {
+					return clicks
+						.select('COUNT (*)', 'clickSpots')
+						.from(ClickSpot, 'clickSpots')
+						.where('clickSpots.spotId = spot.id')
+						.limit(1);
+				}, 'clicks')
+				.addSelect((photo) => {
+					return photo
+						.select('snsPosts.photoUrl', 'photo')
+						.from(SnsPost, 'snsPosts')
+						.where('snsPosts.spotId = spot.id')
+						.limit(1);
+				}, 'photo')
 				.orderBy('after_rank', 'ASC')
 				.getRawMany();
 
@@ -87,8 +109,9 @@ export class RanksService {
 					...spot,
 					rank: spot.after_rank,
 					variance: variance,
-					views: spot.clickSpots.length,
-					wishes: spot.wishSpots.length,
+					views: +spot.clicks,
+					wishes: +spot.wishes,
+					photoUrl: spot.photo,
 					location: new LocationResponseDto({
 						id: spot.location_id,
 						metroName: spot.metro,

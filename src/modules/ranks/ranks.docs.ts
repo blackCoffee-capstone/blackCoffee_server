@@ -39,7 +39,7 @@ export const ApiDocs: SwaggerMethodDoc<RanksController> = {
 			ApiResponse({
 				status: 200,
 				description: '',
-				type: RankingMapResponseDto,
+				type: [RankingMapResponseDto],
 			}),
 		);
 	},
