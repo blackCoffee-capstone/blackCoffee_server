@@ -76,7 +76,6 @@ export class AuthController {
 	@Post('/facebook-login')
 	@ApiDocs.facebookLogin('페이스북 로그인 회원가입&로그인 후 유저 정보, 토큰 반환')
 	async facebookLogin(@Body('facebookUser') facebookUser) {
-		console.log(facebookUser as OauthUserDto);
 		const user: UserResponseDto = await this.authService.createOauthUser(
 			facebookUser as OauthUserDto,
 			UserType.Facebook,

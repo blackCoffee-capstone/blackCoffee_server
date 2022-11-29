@@ -3,8 +3,11 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fastcsv from 'fast-csv';
 import * as fs from 'fs';
+import * as path from 'path';
 import { firstValueFrom } from 'rxjs';
+
 import { JwtConfig, OauthConfig, SshConfig } from 'src/config/config.constant';
 import { ClickSpot } from 'src/entities/click-spots.entity';
 import { Location } from 'src/entities/locations.entity';
@@ -26,6 +29,7 @@ import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
+import { SpotsJsonDto } from './dto/spots-json.dto';
 const { NodeSSH } = require('node-ssh');
 const ssh = new NodeSSH();
 @Injectable()
@@ -54,6 +58,38 @@ export class SpotsService {
 	async createSpots(file: Express.Multer.File) {
 		if (!file) throw new BadRequestException('File is not exist');
 		const fileName: string = file.filename;
+		const snsPosts: SpotsJsonDto[] = await this.readCsv(path.resolve('src/database/datas', fileName));
+		const resultJson = [];
+
+		for (const snsPost of snsPosts) {
+			let locationData;
+			try {
+				locationData = await firstValueFrom(
+					this.httpService.get(
+						`https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURI(snsPost.place)}`,
+						{
+							headers: {
+								Authorization: `KakaoAK ${this.#oauthConfig.clientId}`,
+							},
+						},
+					),
+				);
+				if (locationData && locationData.data.documents.length > 0)
+					resultJson.push({
+						...snsPost,
+						addressName: locationData.data.documents[0].address_name,
+						placeName: locationData.data.documents[0].place_name,
+						latitude: locationData.data.documents[0].y,
+						longitude: locationData.data.documents[0].x,
+					});
+			} catch (error) {
+				continue;
+			}
+		}
+		const resultJsonFile = JSON.stringify(resultJson);
+		fs.writeFileSync('./src/modules/spots/inputs/input.json', resultJsonFile);
+
+		const localInputPath = './src/modules/spots/inputs/input.json';
 		const localResultPath = './src/modules/spots/results/result.json';
 		await ssh
 			.connect({
@@ -64,14 +100,11 @@ export class SpotsService {
 			})
 			.then(async function () {
 				await ssh
-					.putFile(
-						`./src/database/datas/${fileName}`,
-						`/home/iknow/Desktop/blackcoffee/postClassifier/testingData/${fileName}`,
-					)
+					.putFile(localInputPath, `/home/iknow/Desktop/blackcoffee/postClassifier/testingData/input.json`)
 					.then(async function () {
 						await ssh
 							.execCommand(
-								`bash "/home/iknow/Desktop/blackcoffee/postClassifier/run_classify.sh" "/home/iknow/Desktop/blackcoffee/postClassifier/testingData/${fileName}" "/home/iknow/Desktop/blackcoffee/postClassifier/spotresult4.json"`,
+								`bash "/home/iknow/Desktop/blackcoffee/postClassifier/run_classify.sh" "/home/iknow/Desktop/blackcoffee/postClassifier/testingData/input.json" "/home/iknow/Desktop/blackcoffee/postClassifier/spotresult4.json"`,
 								{},
 							)
 							.then(async function () {
@@ -266,7 +299,7 @@ export class SpotsService {
 			.distinctOn(['location.id'])
 			.getRawMany();
 	}
-	async getSearchSpot(searchRequest: SearchRequestDto) {
+	async getSearchSpot(header: string, searchRequest: SearchRequestDto) {
 		try {
 			let searchSpots = this.spotsRepository
 				.createQueryBuilder('spot')
@@ -297,10 +330,25 @@ export class SpotsService {
 				.offset((searchRequest.page - 1) * searchRequest.take)
 				.getMany();
 			const totalPage = Math.ceil(totalPageSpots.length / searchRequest.take);
-			const spots = Array.from(responseSpots).map(
-				(spot) =>
-					new SearchResponseDto({ ...spot, views: spot.clickSpots.length, wishes: spot.wishSpots.length }),
-			);
+			const spots = [];
+			for (const spot of responseSpots) {
+				let isWish = false;
+				if (header) {
+					const token = header.replace('Bearer ', '');
+					const user = this.jwtService.verify(token, { secret: this.#jwtConfig.jwtAccessTokenSecret });
+
+					if (await this.isUsersWishSpot(user.id, spot.id)) isWish = true;
+				}
+				spots.push(
+					new SearchResponseDto({
+						...spot,
+						views: spot.clickSpots.length,
+						wishes: spot.wishSpots.length,
+						isWish,
+					}),
+				);
+			}
+
 			return new SearchPageResponseDto({ totalPage: totalPage, spots: spots });
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
@@ -345,7 +393,7 @@ export class SpotsService {
 			return new DetailSpotResponseDto({
 				...IsSpot,
 				isWish,
-				views: IsSpot.clickSpots.length,
+				views: IsSpot.clickSpots.length + 1,
 				wishes: IsSpot.wishSpots.length,
 				detailSnsPost: detailSnsPostsDto,
 				neaybyFacility: facilitiesDto,
@@ -360,7 +408,7 @@ export class SpotsService {
 			.createQueryBuilder('spot')
 			.where('spot.id = :spotId', { spotId })
 			.getOne();
-		console.log(isWish);
+
 		if (!IsSpot) throw new NotFoundException('Spot is not found');
 		if (isWish) {
 			const isWishSpot = await this.wishSpotsRepository
@@ -408,5 +456,51 @@ export class SpotsService {
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
+	}
+
+	private async isUsersWishSpot(userId: number, spotId: number): Promise<boolean> {
+		const usersWishData = await this.wishSpotsRepository
+			.createQueryBuilder('wishSpot')
+			.where('wishSpot.userId = :userId', { userId })
+			.andWhere('wishSpot.spotId = :spotId', { spotId })
+			.getOne();
+
+		if (usersWishData) return true;
+		return false;
+	}
+
+	private async readCsv(filePath: string): Promise<SpotsJsonDto[]> {
+		return new Promise((resolve, reject) => {
+			const csvData: SpotsJsonDto[] = [];
+			const csvStream = fs.createReadStream(filePath);
+			const csvParser = fastcsv.parse({ headers: true });
+
+			csvStream
+				.pipe(csvParser)
+				.on('error', (err) => {
+					throw new InternalServerErrorException(err);
+				})
+				.on('data', (row) => {
+					const place = row.place;
+					const snsPostUrl = row.snsPostUrl;
+					const photoUrl = row.photoUrl;
+					const datetime = new Date(row.datetime);
+					const like = row.like;
+					const text = row.text;
+					csvData.push(
+						new SpotsJsonDto({
+							place,
+							snsPostUrl,
+							photoUrl,
+							datetime,
+							like,
+							text,
+						}),
+					);
+				})
+				.on('end', () => {
+					resolve(csvData);
+				});
+		});
 	}
 }
