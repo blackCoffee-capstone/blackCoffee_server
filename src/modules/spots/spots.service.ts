@@ -312,7 +312,7 @@ export class SpotsService {
 			if (searchRequest.word) {
 				searchSpots = searchSpots.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
 			}
-			if (searchRequest.locationIds) {
+			if (searchRequest.locationIds && searchRequest.locationIds[0] !== 0) {
 				let locationIds = searchRequest.locationIds;
 				const allMetros = await this.allSelection(locationIds);
 				const localsIds = Array.from(allMetros).flatMap(({ id }) => [id]);
@@ -321,9 +321,8 @@ export class SpotsService {
 					.leftJoinAndSelect('spot.location', 'location')
 					.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
 			}
-			if (searchRequest.themeIds) {
+			if (searchRequest.themeIds && searchRequest.themeIds[0] !== 0) {
 				searchSpots = searchSpots
-					.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
 					.leftJoinAndSelect('snsPosts.theme', 'theme')
 					.andWhere('theme.id IN (:...themeIds)', { themeIds: searchRequest.themeIds });
 			}
@@ -392,7 +391,6 @@ export class SpotsService {
 				.limit(detailRequest.take)
 				.getMany();
 			const detailSnsPostsDto = Array.from(detailSnsPosts).map((post) => new DetailSnsPostResponseDto(post));
-			const location = await this.locationsRepository.findOne({ where: { id: IsSpot.locationId } });
 			const facilitiesDto = await this.getNearbyFacility(IsSpot.latitude, IsSpot.longitude);
 			return new DetailSpotResponseDto({
 				...IsSpot,
@@ -401,7 +399,6 @@ export class SpotsService {
 				wishes: IsSpot.wishSpots.length,
 				detailSnsPost: detailSnsPostsDto,
 				neaybyFacility: facilitiesDto,
-				location: new LocationResponseDto(location),
 			});
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);

@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
 
-import { LocationResponseDto } from 'src/modules/filters/dto/location-response.dto';
-
 export class RankingMapResponseDto {
 	@IsNumber()
 	@ApiProperty({ example: 1, description: '여행지 id' })
@@ -24,15 +22,16 @@ export class RankingMapResponseDto {
 	@ApiProperty({ example: 126.234523, description: '경도' })
 	readonly longitude: number;
 
-	@ApiProperty({ description: '위치 정보' })
-	readonly location: LocationResponseDto;
+	@IsString()
+	@ApiProperty({ example: '인천 옹진군 자월면 승봉로29번길 15', description: '주소 이름' })
+	readonly address: string;
 
-	constructor({ id, name, rank, latitude, longitude, location }) {
+	constructor({ id, name, rank, latitude, longitude, address }) {
 		this.id = id;
 		this.name = name;
 		this.rank = rank;
 		this.latitude = latitude;
 		this.longitude = longitude;
-		this.location = new LocationResponseDto(location);
+		this.address = address;
 	}
 }
