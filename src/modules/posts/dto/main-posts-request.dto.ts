@@ -15,7 +15,7 @@ export class MainPostsRequestDto {
 	@ApiProperty({
 		enum: PostsSortType,
 		default: PostsSortType.CreatedAt,
-		description: '정렬 기준 (최신순: CreatedAt)',
+		description: '정렬 기준 (최신순: CreatedAt, 조회순: View, 인기순: Like)',
 	})
 	readonly sorter?: PostsSortType = PostsSortType.CreatedAt;
 
