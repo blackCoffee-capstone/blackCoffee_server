@@ -541,7 +541,7 @@ export class PostsService {
 			else if (searchRequest.sorter === PostsSortType.Like) posts = posts.orderBy('likes', 'DESC');
 			else if (searchRequest.sorter === PostsSortType.CreatedAt) posts = posts.orderBy('post.createdAt', 'DESC');
 
-			const totalPagePosts = await posts.getMany();
+			const totalPagePosts = await posts.getRawMany();
 			const responsePosts = await posts
 				.limit(searchRequest.take)
 				.offset((searchRequest.page - 1) * searchRequest.take)
