@@ -230,6 +230,11 @@ td {
 	margin: 20px;
 }
 
+.btn-update {
+	margin-bottom: 15px;
+	background-color: white;
+}
+
 .btn {
 	cursor: pointer;
 	display: inline-block;
@@ -249,23 +254,15 @@ td {
 }
 
 .btn-delete {
-	cursor: pointer;
 	border: 1px solid red;
-	border-radius: 3px;
 	color: red;
-	font-size: 12px;
-	font-weight: 600;
 	padding: 6px 12px;
-	box-shadow: 0 5px 10px -5px rgba(35, 0, 77, 0.2);
 	float: right;
 	background-color: white;
 }
 
 .btn-delete:hover {
-	border: none;
 	background-color: red;
-	color: white;
-	font-size: 13px;
 }
 
 .backon {

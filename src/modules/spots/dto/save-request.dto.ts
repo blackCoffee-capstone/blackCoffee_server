@@ -39,7 +39,11 @@ export class SaveRequestDto {
 	readonly likeNumber: number;
 
 	@IsString()
-	@ApiProperty({ example: 100, description: 'sns 게시글 링크' })
+	@ApiProperty({ example: 'https://www~', description: 'sns 게시글 링크' })
+	readonly snsPostUrl: string;
+
+	@IsString()
+	@ApiProperty({ example: 'https://scontent~', description: 'sns 게시글 사진 링크' })
 	readonly photoUrl: string;
 
 	@IsString()
@@ -60,6 +64,7 @@ export class SaveRequestDto {
 		rank,
 		date,
 		likeNumber,
+		snsPostUrl,
 		photoUrl,
 		content,
 		themeName,
@@ -73,6 +78,7 @@ export class SaveRequestDto {
 		this.rank = rank;
 		this.date = date;
 		this.likeNumber = likeNumber;
+		this.snsPostUrl = snsPostUrl;
 		this.photoUrl = photoUrl;
 		this.content = content;
 		this.themeName = themeName;

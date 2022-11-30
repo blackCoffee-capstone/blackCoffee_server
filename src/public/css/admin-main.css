@@ -216,6 +216,14 @@ td {
 	padding: 10px;
 }
 
+.dataTables_paginate {
+	display: none;
+}
+
+.dataTables_length {
+	display: none;
+}
+
 .btn {
 	cursor: pointer;
 	border: none;

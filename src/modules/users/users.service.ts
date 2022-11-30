@@ -152,6 +152,7 @@ export class UsersService {
 				.leftJoinAndSelect('wishSpot.spot', 'spot')
 				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
 				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
+				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
 				.where('user.id = :userId', { userId })
 				.orderBy('wishSpot.created_at', 'DESC');
 
@@ -171,6 +172,7 @@ export class UsersService {
 						views: wish.spot.clickSpots.length,
 						wishes: wish.spot.wishSpots.length,
 						isWish: true,
+						photoUrl: wish.spot.snsPosts[0].photoUrl,
 					}),
 			);
 			return new UserWishesResponseDto({

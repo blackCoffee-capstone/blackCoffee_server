@@ -40,6 +40,10 @@ export class SnsPost extends CommonEntity {
 	likeNumber: number;
 
 	@IsString()
+	@Column({ name: 'sns_post_url', type: 'text', nullable: false })
+	snsPostUrl: string;
+
+	@IsString()
 	@Column({ name: 'photo_url', type: 'text', nullable: false })
 	photoUrl: string;
 

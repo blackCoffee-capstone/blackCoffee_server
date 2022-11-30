@@ -19,18 +19,23 @@ export class SnsPostRequestDto {
 	readonly likeNumber: number;
 
 	@IsString()
-	@ApiProperty({ example: 100, description: 'sns 게시글 링크' })
+	@ApiProperty({ example: 'https://www~', description: 'sns 게시글 링크' })
+	readonly snsPostUrl: string;
+
+	@IsString()
+	@ApiProperty({ example: 'https://scontent~', description: 'sns 게시글 사진 링크' })
 	readonly photoUrl: string;
 
 	@IsString()
 	@ApiProperty({ example: '해변가 캠핑', description: 'sns 게시글 내용' })
 	readonly content: string;
 
-	constructor({ themeId, spotId, date, likeNumber, photoUrl, content }) {
+	constructor({ themeId, spotId, date, likeNumber, snsPostUrl, photoUrl, content }) {
 		this.themeId = themeId;
 		this.spotId = spotId;
 		this.date = date;
 		this.likeNumber = likeNumber;
+		this.snsPostUrl = snsPostUrl;
 		this.photoUrl = photoUrl;
 		this.content = content;
 	}
