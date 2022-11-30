@@ -89,6 +89,7 @@ export class RecommendationsService {
 					views: listRecommendationSpot.clickSpots.length,
 					wishes: listRecommendationSpot.wishSpots.length,
 					isWish,
+					photoUrl: listRecommendationSpot.snsPosts[0].photoUrl,
 				}),
 			);
 		}
@@ -209,6 +210,7 @@ export class RecommendationsService {
 				.leftJoinAndSelect('spot.location', 'location')
 				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
 				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
+				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
 				.where('spot.id IN (:...spotIds)', { spotIds })
 				.getMany();
 

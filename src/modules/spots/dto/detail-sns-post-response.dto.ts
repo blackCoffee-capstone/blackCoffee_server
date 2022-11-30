@@ -17,7 +17,11 @@ export class DetailSnsPostResponseDto {
 	readonly likeNumber: number;
 
 	@IsString()
-	@ApiProperty({ example: 100, description: 'sns 게시글 사진 링크' })
+	@ApiProperty({ example: 'https://www~', description: 'sns 게시글 링크' })
+	readonly snsPostUrl: string;
+
+	@IsString()
+	@ApiProperty({ example: 'https://scontent~', description: 'sns 게시글 사진 링크' })
 	readonly photoUrl: string;
 
 	@IsString()
@@ -27,11 +31,12 @@ export class DetailSnsPostResponseDto {
 	@ApiProperty({ description: '테마' })
 	readonly theme: ThemeResponseDto;
 
-	constructor({ id, date, likeNumber, photoUrl, content, theme }) {
+	constructor({ id, date, likeNumber, photoUrl, snsPostUrl, content, theme }) {
 		this.id = id;
 		this.date = date;
 		this.likeNumber = likeNumber;
 		this.photoUrl = photoUrl;
+		this.snsPostUrl = snsPostUrl;
 		this.content = content;
 		this.theme = new ThemeResponseDto(theme);
 	}

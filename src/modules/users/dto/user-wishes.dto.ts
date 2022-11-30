@@ -26,12 +26,17 @@ export class UserWishesDto {
 	@ApiProperty({ example: false, description: '여행지 찜하기 여부' })
 	readonly isWish: boolean;
 
-	constructor({ id, name, address, views, wishes, isWish }) {
+	@IsString()
+	@ApiProperty({ example: 'https://scontent~', description: '여행지 사진 링크' })
+	readonly photoUrl: string;
+
+	constructor({ id, name, address, views, wishes, isWish, photoUrl }) {
 		this.id = id;
 		this.name = name;
 		this.address = address;
 		this.views = views;
 		this.wishes = wishes;
 		this.isWish = isWish;
+		this.photoUrl = photoUrl;
 	}
 }

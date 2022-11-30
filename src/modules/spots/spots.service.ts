@@ -183,6 +183,7 @@ export class SpotsService {
 						(item) =>
 							item.date === character.date &&
 							item.likeNumber === character.likeNumber &&
+							item.snsPostUrl === character.snsPostUrl &&
 							item.photoUrl === character.photoUrl &&
 							item.content === character.content &&
 							item.themeName === character.themeName &&
@@ -209,6 +210,7 @@ export class SpotsService {
 						date: sns.date,
 						likeNumber: sns.likeNumber,
 						photoUrl: sns.photoUrl,
+						snsPostUrl: sns.snsPostUrl,
 						content: sns.content,
 					}),
 					spot,
@@ -266,7 +268,7 @@ export class SpotsService {
 		}
 	}
 	private async createSnsPost(requestSnsPost: SnsPostRequestDto, spot: Spot, theme: Theme) {
-		const IsSnsPost = await this.snsPostRepository.findOne({ where: { photoUrl: requestSnsPost.photoUrl } });
+		const IsSnsPost = await this.snsPostRepository.findOne({ where: { snsPostUrl: requestSnsPost.snsPostUrl } });
 		try {
 			if (IsSnsPost) {
 				if (requestSnsPost.likeNumber !== IsSnsPost.likeNumber)
@@ -305,6 +307,7 @@ export class SpotsService {
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
 				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
+				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
 				.orderBy(`spot.${searchRequest.sorter}`, 'ASC');
 			if (searchRequest.word) {
 				searchSpots = searchSpots.where('spot.name Like :name', { name: `%${searchRequest.word}%` });
@@ -345,6 +348,7 @@ export class SpotsService {
 						views: spot.clickSpots.length,
 						wishes: spot.wishSpots.length,
 						isWish,
+						photoUrl: spot.snsPosts[0].photoUrl,
 					}),
 				);
 			}

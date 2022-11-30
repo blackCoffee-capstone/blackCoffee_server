@@ -28,16 +28,21 @@ export class RankingListResponseDto {
 	@ApiProperty({ example: 10, description: '여행지 찜하기 개수' })
 	readonly wishes: number;
 
+	@IsString()
+	@ApiProperty({ example: 'https://scontent~', description: '여행지 사진 링크' })
+	readonly photoUrl: string;
+
 	@ApiProperty({ description: '위치 정보' })
 	readonly location: LocationResponseDto;
 
-	constructor({ id, name, rank, variance, views, wishes, location }) {
+	constructor({ id, name, rank, variance, views, wishes, photoUrl, location }) {
 		this.id = id;
 		this.name = name;
 		this.rank = rank;
 		this.variance = variance;
 		this.views = views;
 		this.wishes = wishes;
+		this.photoUrl = photoUrl;
 		this.location = new LocationResponseDto(location);
 	}
 }

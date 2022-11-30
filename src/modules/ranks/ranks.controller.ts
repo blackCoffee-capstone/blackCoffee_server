@@ -1,10 +1,12 @@
 import { Controller, Get, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { RankingRequestDto } from './dto/ranking-request.dto';
 import { ApiDocs } from './ranks.docs';
 import { RanksService } from './ranks.service';
 
 @Controller('ranks')
+@ApiTags('ranks - 최신 트렌드 여행지')
 export class RanksController {
 	constructor(private readonly ranksService: RanksService) {}
 

@@ -105,18 +105,18 @@ export class AdminsService {
 
 	async getAdsFilter(getAdRequest?: GetAdFilterRequestDto) {
 		try {
-			let locationIds;
+			const ads = this.adsRepository.createQueryBuilder('ad');
 			if (getAdRequest.locationIds) {
-				locationIds = getAdRequest.locationIds;
+				let locationIds = getAdRequest.locationIds;
 				const allSelection = await this.allSelection(locationIds);
 				const localsIds = allSelection.flatMap(({ id }) => [id]);
 				locationIds = [...new Set(locationIds.concat(localsIds))];
+
+				ads.where('ad.locationId IN (:...ids)', { ids: locationIds });
 			}
-			const ads = await this.adsRepository.find({
-				where: { locationId: In([...locationIds]) },
-				order: { createdAt: 'DESC' },
-			});
-			return ads.map((ad) => new GetAdFilterResponseDto(ad));
+			const finalAds = await ads.orderBy('RANDOM()').limit(5).getMany();
+
+			return finalAds.map((ad) => new GetAdFilterResponseDto(ad));
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
