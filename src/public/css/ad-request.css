@@ -212,14 +212,17 @@ td {
 	font-weight: bold;
 }
 
-.modal-title {
-	font-size: 18px;
+.modal-header {
 	color: #fff;
-	font-weight: 800;
 	background-color: #4d377b;
 	padding-top: 15px;
 	padding-bottom: 15px;
 	margin-bottom: 20px;
+}
+
+.modal-title {
+	font-size: 18px;
+	font-weight: 800;
 }
 
 .modal-body div {
@@ -265,6 +268,14 @@ td {
 	background-color: red;
 }
 
+.close {
+	float: right;
+	cursor: pointer;
+	font-size: 16px;
+	font-weight: 600;
+	margin-right: 15px;
+}
+
 .backon {
 	content: '';
 	width: 100%;
@@ -274,11 +285,4 @@ td {
 	top: 0;
 	left: 0;
 	z-index: 1;
-}
-
-.close {
-	position: absolute;
-	top: -25px;
-	right: 0;
-	cursor: pointer;
 }

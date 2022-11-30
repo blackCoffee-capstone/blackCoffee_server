@@ -1,5 +1,6 @@
 $(document).ready(function () {
 	var accessToken = localStorage.getItem('accessToken');
+	var empty;
 	$.ajax({
 		url: '/users/admin-test',
 		type: 'Get',
@@ -57,6 +58,11 @@ $(document).ready(function () {
 						},
 					},
 				],
+				fnDrawCallback: function () {
+					if ($(this).find('.dataTables_empty').length == 1) {
+						empty = 'true';
+					}
+				},
 				ordering: true,
 				lengthChange: false,
 				pagingType: 'full_numbers',
@@ -82,36 +88,38 @@ $(document).ready(function () {
 	});
 
 	$('#list_table').on('click', 'td', function () {
-		$('#popup').show();
-		$('.modal-body').empty();
-		var row_data = table.row(this).data();
-		var data_list = '';
-		console.log(row_data.id); //row_data 확인
-		$.ajax({
-			url: '/admins/ad-forms/' + row_data.id,
-			type: 'GET',
-			dataType: 'json',
-			dataSrc: '',
-			headers: { Authorization: 'Bearer ' + accessToken },
-			success: function (adform) {
-				console.log(adform);
-				var img_data = '<img src="' + adform.licenseUrl + '" alt="license">';
-				$('.modal-body').append('<div> 회사명 : ' + adform.businessName + '</div>');
-				$('.modal-body').append('<div> 위치 : ' + adform.address + '</div>');
-				$('.modal-body').append('<div> 이메일 : ' + adform.email + '</div>');
-				if (adform.phoneNumber != null) {
-					$('.modal-body').append('<div> 전화번호 : ' + adform.phoneNumber + '</div>');
-				}
-				$('.modal-body').append('<div> 상태 : ' + adform.status + '</div>');
-				$('.modal-body').append('<div>사업자 등록증</div>');
-				$('.modal-body').append(img_data);
-				$('#popup').append(data_list);
-				$('body').append('<div class="backon"></div>');
-			},
-			error: function (response) {
-				alert(response.responseText);
-			},
-		});
+		if (empty != 'true') {
+			$('#popup').show();
+			$('.modal-body').empty();
+			var row_data = table.row(this).data();
+			var data_list = '';
+			console.log(row_data.id); //row_data 확인
+			$.ajax({
+				url: '/admins/ad-forms/' + row_data.id,
+				type: 'GET',
+				dataType: 'json',
+				dataSrc: '',
+				headers: { Authorization: 'Bearer ' + accessToken },
+				success: function (adform) {
+					console.log(adform);
+					var img_data = '<img src="' + adform.licenseUrl + '" alt="license">';
+					$('.modal-body').append('<div> 회사명 : ' + adform.businessName + '</div>');
+					$('.modal-body').append('<div> 위치 : ' + adform.address + '</div>');
+					$('.modal-body').append('<div> 이메일 : ' + adform.email + '</div>');
+					if (adform.phoneNumber != null) {
+						$('.modal-body').append('<div> 전화번호 : ' + adform.phoneNumber + '</div>');
+					}
+					$('.modal-body').append('<div> 상태 : ' + adform.status + '</div>');
+					$('.modal-body').append('<div>사업자 등록증</div>');
+					$('.modal-body').append(img_data);
+					$('#popup').append(data_list);
+					$('body').append('<div class="backon"></div>');
+				},
+				error: function (response) {
+					alert(response.responseText);
+				},
+			});
+		}
 		$('.btn-approve').click(function () {
 			var result = confirm("해당 광고의 상태를 'approve'로 변경하시겠습니까?");
 			if (result) {
