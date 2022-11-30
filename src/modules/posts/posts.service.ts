@@ -519,11 +519,13 @@ export class PostsService {
 				.offset((searchRequest.page - 1) * searchRequest.take)
 				.getMany();
 
+			let order = responsePosts.length;
 			const totalPage = Math.ceil(totalPagePosts.length / searchRequest.take);
 			const postsDto = Array.from(responsePosts).map(
 				(post) =>
 					new MainPostsResponseDto({
 						...post,
+						order: order--,
 						views: post.clickPosts.length,
 						likes: post.likePosts.length,
 						isLike: this.isLikePost(userId, post.likePosts) ? true : false,
