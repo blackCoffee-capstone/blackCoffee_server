@@ -62,6 +62,9 @@ $(document).ready(function () {
 				pagingType: 'full_numbers',
 				info: true,
 				autoWidth: false,
+				colReorder: {
+					realtime: true,
+				},
 			});
 		},
 		error: function (response) {
@@ -192,6 +195,9 @@ $(document).ready(function () {
 						console.log(data);
 					},
 				});
+				$('#popup').hide();
+				$('.backon').hide();
+				location.reload();
 			} else {
 			}
 		});
@@ -211,5 +217,9 @@ $(document).ready(function () {
 				console.log(data);
 			},
 		});
+	});
+
+	$('.btn-update').click(function () {
+		location.reload();
 	});
 });
