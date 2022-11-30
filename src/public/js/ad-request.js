@@ -62,9 +62,6 @@ $(document).ready(function () {
 				pagingType: 'full_numbers',
 				info: true,
 				autoWidth: false,
-				colReorder: {
-					realtime: true,
-				},
 			});
 		},
 		error: function (response) {
