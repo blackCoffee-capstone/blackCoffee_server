@@ -60,7 +60,7 @@ export class RanksService {
 				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
-				.select('spot.id AS id, spot.name AS name')
+				.select('spot.id AS id, spot.name AS name, spot.address AS address')
 				.addSelect('location.id AS location_id, location.metroName AS metro, location.localName AS local')
 				.addSelect((afterRank) => {
 					return afterRank
@@ -112,11 +112,6 @@ export class RanksService {
 					views: +spot.clicks,
 					wishes: +spot.wishes,
 					photoUrl: spot.photo,
-					location: new LocationResponseDto({
-						id: spot.location_id,
-						metroName: spot.metro,
-						localName: spot.local,
-					}),
 				});
 			});
 		} catch (error) {
@@ -134,7 +129,9 @@ export class RanksService {
 				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
-				.select('spot.id AS id, spot.name AS name, spot.latitude AS latitude, spot.longitude AS longitude')
+				.select(
+					'spot.id AS id, spot.name AS name, spot.latitude AS latitude, spot.longitude AS longitude, spot.address AS address',
+				)
 				.addSelect('location.id AS location_id, location.metroName AS metro, location.localName AS local')
 				.addSelect((currentRank) => {
 					return currentRank
@@ -152,11 +149,6 @@ export class RanksService {
 					new RankingMapResponseDto({
 						...spot,
 						rank: spot.current_rank,
-						location: new LocationResponseDto({
-							id: spot.location_id,
-							metroName: spot.metro,
-							localName: spot.local,
-						}),
 					}),
 			);
 		} catch (error) {

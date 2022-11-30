@@ -494,7 +494,6 @@ export class PostsService {
 				.select(
 					'post.id AS id, post.title AS title, post.address AS address, post.createdAt AS create, post.photoUrls AS photos',
 				)
-				.addSelect('location.id AS location, location.metroName AS metro, location.localName AS local')
 				.addSelect('user.id AS user, user.nickname AS name')
 				.addSelect((clicks) => {
 					return clicks
@@ -522,7 +521,7 @@ export class PostsService {
 			if (searchRequest.word) {
 				posts = posts.where('post.title Like :title', { title: `%${searchRequest.word}%` });
 			}
-			if (searchRequest.locationIds) {
+			if (searchRequest.locationIds && searchRequest.locationIds[0] !== 0) {
 				let locationIds = searchRequest.locationIds;
 				const allMetros = await this.allSelection(locationIds);
 				const localsIds = Array.from(allMetros).flatMap(({ id }) => [id]);
@@ -530,7 +529,7 @@ export class PostsService {
 
 				posts = posts.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
 			}
-			if (searchRequest.themeIds) {
+			if (searchRequest.themeIds && searchRequest.themeIds[0] !== 0) {
 				posts = posts
 					.leftJoinAndSelect('post.postThemes', 'postThemes')
 					.leftJoinAndSelect('postThemes.theme', 'theme')
@@ -560,11 +559,6 @@ export class PostsService {
 						photoUrls: post.photos,
 						isLike: post.likeUsers ? true : false,
 						user: new CommentsUserResponseDto({ id: post.user, nickname: post.name }),
-						location: new LocationResponseDto({
-							id: post.location,
-							metroName: post.metro,
-							localName: post.local,
-						}),
 					}),
 			);
 			return new MainPostsPageResponseDto({ totalPage: totalPage, posts: postsDto });

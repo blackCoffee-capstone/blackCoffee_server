@@ -106,7 +106,7 @@ export class AdminsService {
 	async getAdsFilter(getAdRequest?: GetAdFilterRequestDto) {
 		try {
 			const ads = this.adsRepository.createQueryBuilder('ad');
-			if (getAdRequest.locationIds) {
+			if (getAdRequest.locationIds && getAdRequest.locationIds[0] !== 0) {
 				let locationIds = getAdRequest.locationIds;
 				const allSelection = await this.allSelection(locationIds);
 				const localsIds = allSelection.flatMap(({ id }) => [id]);
