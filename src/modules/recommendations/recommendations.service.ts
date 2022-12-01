@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import { SshConfig } from 'src/config/config.constant';
+import { ClickSpot } from 'src/entities/click-spots.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { WishSpot } from 'src/entities/wish-spots.entity';
@@ -24,26 +25,24 @@ export class RecommendationsService {
 		private readonly tasteThemesRepository: Repository<TasteTheme>,
 		@InjectRepository(WishSpot)
 		private readonly wishSpotsRepository: Repository<WishSpot>,
+		@InjectRepository(ClickSpot)
+		private readonly clickSpotsRepository: Repository<ClickSpot>,
 		private readonly configService: ConfigService,
 	) {}
 	#sshConfig = this.configService.get<SshConfig>('sshConfig');
 
 	async recommendationsSpotsList(userId: number) {
 		const usersTastes: UsersTasteThemesResponseDto[] = await this.getUsersTasteThemes(userId);
-		const spots: UsersTasteThemesResponseDto[] = await this.getSpotsThemes();
-		const allTasteThemes = await this.getAllTasteThemes();
 		const inputJson = {
+			userId,
 			usersTastes,
-			spots,
-			allTasteThemes,
 		};
-
 		const inputJsonFile = JSON.stringify(inputJson);
 
-		fs.writeFileSync('./src/modules/recommendations/inputs/input.json', inputJsonFile);
+		fs.writeFileSync('./src/modules/recommendations/inputs/list-input.json', inputJsonFile);
 
-		const localInputPath = './src/modules/recommendations/inputs/input.json';
-		const localResultPath = './src/modules/recommendations/results/result.json';
+		const localInputPath = './src/modules/recommendations/inputs/list-input.json';
+		const localResultPath = './src/modules/recommendations/results/list-result.json';
 
 		await ssh
 			.connect({
@@ -54,18 +53,21 @@ export class RecommendationsService {
 			})
 			.then(async function () {
 				await ssh
-					.putFile(localInputPath, `/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json`)
+					.putFile(
+						localInputPath,
+						`/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/list-input.json`,
+					)
 					.then(async function () {
 						await ssh
 							.execCommand(
-								`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommend.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/result.json" "${userId}"`,
+								`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommend.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/list-input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/list-result.json" "${userId}"`,
 								{},
 							)
 							.then(async function () {
 								await ssh
 									.getFile(
 										localResultPath,
-										'/home/iknow/Desktop/blackcoffee/placeRecommender/result.json',
+										'/home/iknow/Desktop/blackcoffee/placeRecommender/list-result.json',
 									)
 									.then(async function () {
 										await ssh.dispose();
@@ -98,20 +100,17 @@ export class RecommendationsService {
 
 	async recommendationsSpotsMap(userId: number): Promise<RecommendationsMapResponseDto[]> {
 		const usersTastes: UsersTasteThemesResponseDto[] = await this.getUsersTasteThemes(userId);
-		const spots: UsersTasteThemesResponseDto[] = await this.getSpotsThemes();
-		const allTasteThemes = await this.getAllTasteThemes();
 		const inputJson = {
+			userId,
 			usersTastes,
-			spots,
-			allTasteThemes,
 		};
 
 		const inputJsonFile = JSON.stringify(inputJson);
 
-		fs.writeFileSync('./src/modules/recommendations/inputs/input.json', inputJsonFile);
+		fs.writeFileSync('./src/modules/recommendations/inputs/map-input.json', inputJsonFile);
 
-		const localInputPath = './src/modules/recommendations/inputs/input.json';
-		const localResultPath = './src/modules/recommendations/results/result.json';
+		const localInputPath = './src/modules/recommendations/inputs/map-input.json';
+		const localResultPath = './src/modules/recommendations/results/map-result.json';
 
 		await ssh
 			.connect({
@@ -122,18 +121,21 @@ export class RecommendationsService {
 			})
 			.then(async function () {
 				await ssh
-					.putFile(localInputPath, `/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json`)
+					.putFile(
+						localInputPath,
+						`/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/map-input.json`,
+					)
 					.then(async function () {
 						await ssh
 							.execCommand(
-								`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommend.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/result.json" "${userId}"`,
+								`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommend.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/map-input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/map-result.json" "${userId}"`,
 								{},
 							)
 							.then(async function () {
 								await ssh
 									.getFile(
 										localResultPath,
-										'/home/iknow/Desktop/blackcoffee/placeRecommender/result.json',
+										'/home/iknow/Desktop/blackcoffee/placeRecommender/map-result.json',
 									)
 									.then(async function () {
 										await ssh.dispose();
@@ -148,6 +150,63 @@ export class RecommendationsService {
 		return mapRecommendationSpots.map(
 			(mapRecommendationSpot) => new RecommendationsMapResponseDto(mapRecommendationSpot),
 		);
+	}
+
+	async updateMlRecommendations(): Promise<boolean> {
+		const spots: UsersTasteThemesResponseDto[] = await this.getSpotsThemes();
+		const allTasteThemes = await this.getAllTasteThemes();
+		const allClickSpots = await this.getAllClickSpots();
+		const allWishSpots = await this.getAllWishSpots();
+
+		const spotsJsonFile = JSON.stringify(spots);
+		const allTasteThemesJsonFile = JSON.stringify(allTasteThemes);
+		const allClickSpotsJsonFile = JSON.stringify(allClickSpots);
+		const allWishSpotsJsonFile = JSON.stringify(allWishSpots);
+
+		fs.writeFileSync('./src/modules/recommendations/inputs/spots.json', spotsJsonFile);
+		fs.writeFileSync('./src/modules/recommendations/inputs/taste-themes.json', allTasteThemesJsonFile);
+		fs.writeFileSync('./src/modules/recommendations/inputs/click-spots.json', allClickSpotsJsonFile);
+		fs.writeFileSync('./src/modules/recommendations/inputs/wish-spots.json', allWishSpotsJsonFile);
+
+		const localInputPath1 = './src/modules/recommendations/inputs/spots.json';
+		const localInputPath2 = './src/modules/recommendations/inputs/taste-themes.json';
+		const localInputPath3 = './src/modules/recommendations/inputs/click-spots.json';
+		const localInputPath4 = './src/modules/recommendations/inputs/wish-spots.json';
+		const localResultPath = './src/modules/recommendations/results/result.json';
+
+		// await ssh
+		// 	.connect({
+		// 		host: this.#sshConfig.host,
+		// 		username: this.#sshConfig.userName,
+		// 		port: this.#sshConfig.port,
+		// 		password: this.#sshConfig.password,
+		// 	})
+		// 	.then(async function () {
+		// 		await ssh
+		// 			.putFile(localInputPath, `/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json`)
+		// 			.then(async function () {
+		// 				await ssh
+		// 					.execCommand(
+		// 						`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommend.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/result.json" "${1}"`,
+		// 						{},
+		// 					)
+		// 					.then(async function () {
+		// 						await ssh
+		// 							.getFile(
+		// 								localResultPath,
+		// 								'/home/iknow/Desktop/blackcoffee/placeRecommender/result.json',
+		// 							)
+		// 							.then(async function () {
+		// 								await ssh.dispose();
+		// 							});
+		// 					});
+		// 			});
+		// 	});
+		// const resultFile = fs.readFileSync(localResultPath);
+		// const resultJson = JSON.parse(resultFile.toString());
+		// const mapRecommendationSpotIds = resultJson.mapRecommendation;
+		// const mapRecommendationSpots = await this.getSpotsUseId(mapRecommendationSpotIds);
+		return true;
 	}
 
 	private async getUsersTasteThemes(userId: number): Promise<UsersTasteThemesResponseDto[]> {
@@ -197,7 +256,6 @@ export class RecommendationsService {
 				.groupBy('user.id')
 				.getRawMany();
 			return allTasteThemes;
-			// return allTasteThemes.map((spot) => new RecommendationsSpotResponseDto(spot));
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
@@ -229,5 +287,23 @@ export class RecommendationsService {
 
 		if (usersWishData) return true;
 		return false;
+	}
+
+	private async getAllClickSpots() {
+		const allClickSpots = await this.clickSpotsRepository
+			.createQueryBuilder('clickSpot')
+			.select('clickSpot.spot_id, clickSpot.user_id, clickSpot.createdAt')
+			.getRawMany();
+
+		return allClickSpots;
+	}
+
+	private async getAllWishSpots() {
+		const allWishSpots = await this.wishSpotsRepository
+			.createQueryBuilder('wishSpot')
+			.select('wishSpot.spot_id, wishSpot.user_id, wishSpot.createdAt')
+			.getRawMany();
+
+		return allWishSpots;
 	}
 }

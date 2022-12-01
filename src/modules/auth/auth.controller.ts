@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, HttpCode, Post, Query, Redirect, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Header, Post, Redirect, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { AuthUser, FacebookUser } from 'src/decorators/auth.decorator';
@@ -21,25 +21,6 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 @ApiTags('auth')
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
-
-	//Test - kakao
-	@Get('/kakao-login')
-	@Header('Content-Type', 'text/html')
-	@Redirect()
-	@ApiDocs.getKakaoLoginPage('카카오 로그인 페이지로 리디렉트')
-	getKakaoLoginPage() {
-		const kakaoCallbackUrl: string = this.authService.getKakaoLoginPage();
-		return {
-			url: kakaoCallbackUrl,
-		};
-	}
-
-	@Get('/kakao-callback')
-	@HttpCode(200)
-	@ApiDocs.kakaoLoginCallback('카카오 로그인 redirect url')
-	async kakaoLoginCallback(@Query('code') code: string) {
-		return await this.authService.test(code);
-	}
 
 	@UseGuards(KakaoAuthGuard)
 	@Post('/kakao-login')
