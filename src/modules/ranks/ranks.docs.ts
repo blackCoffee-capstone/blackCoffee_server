@@ -2,8 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
-import { RankingListResponseDto } from './dto/ranking-list-response.dto';
-import { RankingMapResponseDto } from './dto/ranking-map-response.dto';
+import { RankingResponseDto } from './dto/ranking-response.dto';
 import { RanksController } from './ranks.controller';
 
 export const ApiDocs: SwaggerMethodDoc<RanksController> = {
@@ -21,7 +20,7 @@ export const ApiDocs: SwaggerMethodDoc<RanksController> = {
 			ApiResponse({
 				status: 200,
 				description: '',
-				type: [RankingListResponseDto],
+				type: RankingResponseDto,
 			}),
 		);
 	},
@@ -39,7 +38,7 @@ export const ApiDocs: SwaggerMethodDoc<RanksController> = {
 			ApiResponse({
 				status: 200,
 				description: '',
-				type: [RankingMapResponseDto],
+				type: RankingResponseDto,
 			}),
 		);
 	},
