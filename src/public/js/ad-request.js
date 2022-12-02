@@ -1,5 +1,6 @@
 $(document).ready(function () {
 	var accessToken = localStorage.getItem('accessToken');
+	var empty;
 	$.ajax({
 		url: '/users/admin-test',
 		type: 'Get',
@@ -57,6 +58,11 @@ $(document).ready(function () {
 						},
 					},
 				],
+				fnDrawCallback: function () {
+					if ($(this).find('.dataTables_empty').length == 1) {
+						$('.ad-request').hide();
+					}
+				},
 				ordering: true,
 				lengthChange: false,
 				pagingType: 'full_numbers',
@@ -82,9 +88,11 @@ $(document).ready(function () {
 	});
 
 	$('#list_table').on('click', 'td', function () {
-		$('#popup').show();
-		$('.modal-body').empty();
 		var row_data = table.row(this).data();
+		if (typeof row_data != 'undefined') {
+			$('#popup').show();
+			$('.modal-body').empty();
+		}
 		var data_list = '';
 		console.log(row_data.id); //row_data 확인
 		$.ajax({
@@ -112,6 +120,7 @@ $(document).ready(function () {
 				alert(response.responseText);
 			},
 		});
+
 		$('.btn-approve').click(function () {
 			var result = confirm("해당 광고의 상태를 'approve'로 변경하시겠습니까?");
 			if (result) {
@@ -187,6 +196,7 @@ $(document).ready(function () {
 					headers: { Authorization: 'Bearer ' + accessToken },
 					success: function (data) {
 						alert('삭제 완료!');
+						window.location.reload();
 					},
 					error: function (data) {
 						console.log(data);
@@ -194,7 +204,6 @@ $(document).ready(function () {
 				});
 				$('#popup').hide();
 				$('.backon').hide();
-				location.reload();
 			} else {
 			}
 		});

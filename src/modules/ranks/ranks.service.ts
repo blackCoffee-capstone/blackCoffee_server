@@ -7,12 +7,12 @@ import { Spot } from 'src/entities/spots.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
 import { WishSpot } from 'src/entities/wish-spots.entity';
 import { ClickSpot } from 'src/entities/click-spots.entity';
-import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { RankingListResponseDto } from './dto/ranking-list-response.dto';
 import { RankingMapResponseDto } from './dto/ranking-map-response.dto';
 import { RankingRequestDto } from './dto/ranking-request.dto';
 import { RanksRecordRequestDto } from './dto/ranks-record-request.dto';
 import { RanksUpdateRequestDto } from './dto/ranks-update-request.dto';
+import { RankingResponseDto } from './dto/ranking-response.dto';
 
 @Injectable()
 export class RanksService {
@@ -32,27 +32,24 @@ export class RanksService {
 		if (rankingRequest.date < previousCheckWeek.date) throw new NotFoundException('Previous is not found');
 	}
 
-	private async beforeWeek(rankingRequest: RankingRequestDto) {
-		let beforeDate = rankingRequest.date - 1;
-		if ((rankingRequest.date - 1) / 10) {
-			const beforeCheckWeek = await this.ranksRepository
-				.createQueryBuilder('rank')
-				.select('date')
-				.distinctOn(['date'])
-				.orderBy('date', 'ASC')
-				.getRawMany();
+	private async beforeWeek(rankingRequest: RankingRequestDto, week: boolean) {
+		const beforeCheckWeek = await this.ranksRepository
+			.createQueryBuilder('rank')
+			.select('date')
+			.distinctOn(['date'])
+			.orderBy('date', 'ASC')
+			.getRawMany();
 
-			const weekList = Array.from(beforeCheckWeek).flatMap(({ date }) => [date]);
-			const dateIdx = weekList.lastIndexOf(rankingRequest.date);
-			if (dateIdx === -1) throw new BadRequestException('Date is not exist');
-			beforeDate = weekList[dateIdx - 1];
-		}
-		return beforeDate;
+		const weekList = Array.from(beforeCheckWeek).flatMap(({ date }) => [date]);
+		const dateIdx = weekList.lastIndexOf(rankingRequest.date);
+		if (dateIdx === -1) throw new BadRequestException('Date is not exist');
+		return week ? weekList[dateIdx - 1] : weekList[dateIdx + 1];
 	}
 
 	async getRanksList(rankingRequest: RankingRequestDto) {
 		await this.checkWeek(rankingRequest);
-		const beforeDate = await this.beforeWeek(rankingRequest);
+		const beforeDate = await this.beforeWeek(rankingRequest, true);
+		const afterDate = await this.beforeWeek(rankingRequest, false);
 
 		try {
 			const rankingListSpots = await this.spotsRepository
@@ -60,7 +57,7 @@ export class RanksService {
 				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
-				.select('spot.id AS id, spot.name AS name')
+				.select('spot.id AS id, spot.name AS name, spot.address AS address')
 				.addSelect('location.id AS location_id, location.metroName AS metro, location.localName AS local')
 				.addSelect((afterRank) => {
 					return afterRank
@@ -102,22 +99,20 @@ export class RanksService {
 				.orderBy('after_rank', 'ASC')
 				.getRawMany();
 
-			return Array.from(rankingListSpots).map(function (spot) {
-				let variance = null;
-				if (spot.before_rank) variance = spot.before_rank - spot.after_rank;
+			const ranking = Array.from(rankingListSpots).map(function (spot) {
 				return new RankingListResponseDto({
 					...spot,
 					rank: spot.after_rank,
-					variance: variance,
+					variance: spot.before_rank ? spot.before_rank - spot.after_rank : null,
 					views: +spot.clicks,
 					wishes: +spot.wishes,
 					photoUrl: spot.photo,
-					location: new LocationResponseDto({
-						id: spot.location_id,
-						metroName: spot.metro,
-						localName: spot.local,
-					}),
 				});
+			});
+			return new RankingResponseDto({
+				prev: beforeDate ? beforeDate : null,
+				next: afterDate ? afterDate : null,
+				ranking: ranking,
 			});
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
@@ -125,16 +120,19 @@ export class RanksService {
 	}
 
 	async getRanksMap(rankingRequest: RankingRequestDto) {
-		await this.checkWeek(rankingRequest);
-		await this.beforeWeek(rankingRequest);
-
 		try {
+			await this.checkWeek(rankingRequest);
+			const beforeDate = await this.beforeWeek(rankingRequest, true);
+			const afterDate = await this.beforeWeek(rankingRequest, false);
+
 			const rankingMapSpots = await this.spotsRepository
 				.createQueryBuilder('spot')
 				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
-				.select('spot.id AS id, spot.name AS name, spot.latitude AS latitude, spot.longitude AS longitude')
+				.select(
+					'spot.id AS id, spot.name AS name, spot.latitude AS latitude, spot.longitude AS longitude, spot.address AS address',
+				)
 				.addSelect('location.id AS location_id, location.metroName AS metro, location.localName AS local')
 				.addSelect((currentRank) => {
 					return currentRank
@@ -147,18 +145,19 @@ export class RanksService {
 				.orderBy('current_rank', 'ASC')
 				.getRawMany();
 
-			return Array.from(rankingMapSpots).map(
+			const ranking = Array.from(rankingMapSpots).map(
 				(spot) =>
 					new RankingMapResponseDto({
 						...spot,
 						rank: spot.current_rank,
-						location: new LocationResponseDto({
-							id: spot.location_id,
-							metroName: spot.metro,
-							localName: spot.local,
-						}),
 					}),
 			);
+
+			return new RankingResponseDto({
+				prev: beforeDate ? beforeDate : null,
+				next: afterDate ? afterDate : null,
+				ranking: ranking,
+			});
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}

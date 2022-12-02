@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { SearchResponseDto } from '../spots/dto/search-response.dto';
@@ -7,6 +7,19 @@ import { RecommendationsMapResponseDto } from './dto/recommendations-map-respons
 import { RecommendationsController } from './recommendations.controller';
 
 export const ApiDocs: SwaggerMethodDoc<RecommendationsController> = {
+	updateMlRecommendations(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: '추천 모델 훈련 (일주일에 한번)',
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
 	recommendationsSpotsList(summary: string) {
 		return applyDecorators(
 			ApiOperation({
@@ -18,6 +31,7 @@ export const ApiDocs: SwaggerMethodDoc<RecommendationsController> = {
 				description: '',
 				type: [SearchResponseDto],
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	recommendationsSpotsMap(summary: string) {
@@ -31,6 +45,7 @@ export const ApiDocs: SwaggerMethodDoc<RecommendationsController> = {
 				description: '',
 				type: [RecommendationsMapResponseDto],
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 };

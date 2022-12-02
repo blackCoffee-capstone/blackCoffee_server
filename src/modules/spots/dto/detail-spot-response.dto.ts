@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator';
 
-import { LocationResponseDto } from 'src/modules/filters/dto/location-response.dto';
-
 export class DetailSpotResponseDto<S, N> {
 	@IsNumber()
 	@ApiProperty({ example: 1, description: '여행지 id' })
@@ -36,8 +34,9 @@ export class DetailSpotResponseDto<S, N> {
 	@ApiProperty({ example: false, description: '여행지 찜하기 여부' })
 	readonly isWish: boolean;
 
-	@ApiProperty({ description: '위치 정보' })
-	readonly location: LocationResponseDto;
+	@IsString()
+	@ApiProperty({ example: '인천 옹진군 자월면 승봉로29번길 15', description: '주소 이름' })
+	readonly address: string;
 
 	@IsArray()
 	@ApiProperty({ isArray: true, example: '관련 sns 게시글 정보' })
@@ -56,7 +55,7 @@ export class DetailSpotResponseDto<S, N> {
 		views,
 		wishes,
 		isWish,
-		location,
+		address,
 		detailSnsPost,
 		neaybyFacility,
 	}) {
@@ -65,10 +64,10 @@ export class DetailSpotResponseDto<S, N> {
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.snsPostLikeNumber = snsPostLikeNumber;
+		this.address = address;
 		this.views = views;
 		this.wishes = wishes;
 		this.isWish = isWish;
-		this.location = new LocationResponseDto(location);
 		this.detailSnsPost = detailSnsPost;
 		this.neaybyFacility = neaybyFacility;
 	}

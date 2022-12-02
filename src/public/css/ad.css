@@ -112,19 +112,19 @@ a {
 	color: #4d377b;
 }
 
-.ad_request {
+.ad {
 	padding-top: 100px;
 	padding-left: 350px;
 }
 
-.ad_request a {
+.ad a {
 	font-size: 14px;
 	font-weight: 600;
 	color: #4d377b;
 }
 
 #list_table {
-	width: 1000px;
+	width: 900px;
 	border-radius: 8px;
 	border-collapse: collapse;
 	margin-top: 10px;
@@ -162,8 +162,7 @@ td {
 	font-weight: bold;
 }
 
-#list_table .detail-link,
-#list_table .delete-link {
+#list_table .detail-link {
 	font-size: 14px;
 	color: #4d377b;
 	font-weight: bold;
@@ -189,27 +188,30 @@ td {
 	font-weight: 600;
 }
 
-.radio {
-	float: bottom;
-	font-size: 12px;
-	font-weight: 600;
-}
-
-#popup {
+.popup {
 	display: none;
 	width: 800px;
 	height: 500px;
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	margin: -250px 0 0 -350px;
 	background-color: #fff;
 	z-index: 2;
 	border-radius: 10px;
-	text-align: center;
 	overflow-y: auto;
 	font-size: 14px;
 	font-weight: bold;
+}
+
+.popup-detail {
+	margin: -250px 0 0 -350px;
+	text-align: center;
+}
+
+.popup-register {
+	width: 500px;
+	height: 400px;
+	margin: -250px 0 0 -150px;
 }
 
 .modal-header {
@@ -218,6 +220,7 @@ td {
 	padding-top: 15px;
 	padding-bottom: 15px;
 	margin-bottom: 20px;
+	text-align: center;
 }
 
 .modal-title {
@@ -225,15 +228,36 @@ td {
 	font-weight: 800;
 }
 
+.input {
+	margin-bottom: 5px;
+}
+
 .modal-body div {
 	padding: 10px;
+}
+
+.ad-register-body {
+	margin-left: 20px;
+}
+
+.ad-register-body div {
+	text-align: center;
 }
 
 .modal-footer {
 	margin: 20px;
 }
 
-.btn-update {
+.input {
+	margin-left: 10px;
+	width: 200px;
+	height: 25px;
+	border: 1px solid #5f5f5f;
+	border-radius: 3px;
+}
+
+.btn-update,
+.btn-register {
 	margin-bottom: 15px;
 	background-color: white;
 }
@@ -268,14 +292,6 @@ td {
 	background-color: red;
 }
 
-.close {
-	float: right;
-	cursor: pointer;
-	font-size: 16px;
-	font-weight: 600;
-	margin-right: 15px;
-}
-
 .backon {
 	content: '';
 	width: 100%;
@@ -285,4 +301,12 @@ td {
 	top: 0;
 	left: 0;
 	z-index: 1;
+}
+
+.close {
+	float: right;
+	cursor: pointer;
+	font-size: 16px;
+	font-weight: 600;
+	margin-right: 15px;
 }
