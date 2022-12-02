@@ -1,6 +1,7 @@
 $(document).ready(function () {
 	var accessToken = localStorage.getItem('accessToken');
 	var empty;
+
 	$.ajax({
 		url: '/users/admin-test',
 		type: 'Get',
@@ -113,13 +114,19 @@ $(document).ready(function () {
 					headers: { Authorization: 'Bearer ' + accessToken },
 					success: function (data) {
 						alert('등록 완료!');
-						console.log(formData);
+						window.location.reload();
 					},
-					error: function (data) {
-						alert('유효한 값을 입력해주세요!');
+					error: function (request, status, error) {
+						if (
+							request.responseText ==
+							'{"statusCode":400,"message":"Ad is already registered","error":"Bad Request"}'
+						) {
+							alert('이미 등록된 광고입니다.');
+						} else {
+							alert('유효한 값을 입력해주세요!');
+						}
 					},
 				});
-			} else {
 			}
 		});
 	});
@@ -242,6 +249,7 @@ $(document).ready(function () {
 						headers: { Authorization: 'Bearer ' + accessToken },
 						success: function (data) {
 							alert('변경 완료!');
+							window.location.reload();
 						},
 						error: function (data) {
 							alert('유효한 값을 입력해주세요!');
