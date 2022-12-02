@@ -264,6 +264,7 @@ $(document).ready(function () {
 					headers: { Authorization: 'Bearer ' + accessToken },
 					success: function (data) {
 						alert('삭제 완료!');
+						window.location.reload();
 					},
 					error: function (data) {
 						console.log(data);
@@ -271,7 +272,6 @@ $(document).ready(function () {
 				});
 				$('.popup').hide();
 				$('.backon').hide();
-				location.reload();
 			} else {
 			}
 		});
