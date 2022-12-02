@@ -204,7 +204,6 @@ $(document).ready(function () {
 				});
 				$('#popup').hide();
 				$('.backon').hide();
-				location.reload();
 			} else {
 			}
 		});
