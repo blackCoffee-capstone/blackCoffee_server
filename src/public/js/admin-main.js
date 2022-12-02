@@ -21,7 +21,7 @@ $(document).ready(function () {
 		dataSrc: '',
 		headers: { Authorization: 'Bearer ' + accessToken },
 		success: function (response) {
-			table = $('#list_table').DataTable({
+			table = $('.ad-request').DataTable({
 				data: response,
 				columns: [
 					{
@@ -44,7 +44,7 @@ $(document).ready(function () {
 					{
 						data: null,
 						render: function (data) {
-							return "<button class='btn btn-detail' type='button'>자세히보기</button>";
+							return "<button class='btn request-detail' type='button'>자세히보기</button>";
 						},
 					},
 				],
@@ -65,8 +65,62 @@ $(document).ready(function () {
 		},
 	});
 
-	$(document).on('click', '.btn-detail', function () {
+	$(document).on('click', '.request-detail', function () {
 		location.href = '/admin/ad-request';
+	});
+
+	$.ajax({
+		url: '/admins/adsAll',
+		type: 'Get',
+		dataType: 'json',
+		dataSrc: '',
+		headers: { Authorization: 'Bearer ' + accessToken },
+		success: function (response) {
+			table = $('.ad-register').DataTable({
+				data: response,
+				columns: [
+					{
+						data: null,
+						render: function (data, type, row, meta) {
+							return meta.row + meta.settings._iDisplayStart + 1;
+						},
+					},
+					{ data: 'businessName' },
+					{ data: 'email' },
+					{
+						data: null,
+						title: 'DATE',
+						render: function (data) {
+							let date = '' + data.createdAt;
+							return date.substring(0, 10);
+						},
+					},
+					{
+						data: null,
+						render: function (data) {
+							return "<button class='btn register-detail' type='button'>자세히보기</button>";
+						},
+					},
+				],
+				ordering: false,
+				pageLength: 5,
+				lengthMenu: [
+					[5, 10, 20, -1],
+					[5, 10, 20, 'Todos'],
+				],
+				visible: false,
+				searching: false,
+				info: false,
+				autoWidth: false,
+			});
+		},
+		error: function (response) {
+			console.log(response.responseText);
+		},
+	});
+
+	$(document).on('click', '.register-detail', function () {
+		location.href = '/admin/ad';
 	});
 
 	$('.main_menu').click(function () {
