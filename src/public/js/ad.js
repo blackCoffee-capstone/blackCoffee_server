@@ -57,11 +57,6 @@ $(document).ready(function () {
 						},
 					},
 				],
-				fnDrawCallback: function () {
-					if ($(this).find('.dataTables_empty').length == 1) {
-						empty = 'true';
-					}
-				},
 				ordering: true,
 				lengthChange: false,
 				pagingType: 'full_numbers',
@@ -132,38 +127,37 @@ $(document).ready(function () {
 	});
 
 	$('#list_table').on('click', 'td', function () {
-		if (empty != 'true') {
+		var row_data = table.row(this).data();
+		if (typeof row_data != 'undefined') {
 			$('.popup-detail').show();
 			$('.ad-body').empty();
-			var row_data = table.row(this).data();
-
-			$.ajax({
-				url: '/admins/ads/' + row_data.id,
-				type: 'GET',
-				dataType: 'json',
-				dataSrc: '',
-				headers: { Authorization: 'Bearer ' + accessToken },
-				success: function (adform) {
-					var img_data = '<img src="' + adform.photoUrl + '" alt="license">';
-					$('.modal-body').append('<div> 회사명 : ' + adform.businessName + '</div>');
-					$('.modal-body').append('<div> 위치 : ' + adform.address + '</div>');
-					$('.modal-body').append('<div> 이메일 : ' + adform.email + '</div>');
-					$('.modal-body').append(
-						'<div> 홈페이지 : <a href = "' +
-							adform.pageUrl +
-							'" target="_blank">' +
-							adform.pageUrl +
-							'</a></div>',
-					);
-					$('.modal-body').append('<div>광고 배너</div>');
-					$('.modal-body').append(img_data);
-					$('body').append('<div class="backon"></div>');
-				},
-				error: function (response) {
-					alert(response.responseText);
-				},
-			});
 		}
+		$.ajax({
+			url: '/admins/ads/' + row_data.id,
+			type: 'GET',
+			dataType: 'json',
+			dataSrc: '',
+			headers: { Authorization: 'Bearer ' + accessToken },
+			success: function (adform) {
+				var img_data = '<img src="' + adform.photoUrl + '" alt="license">';
+				$('.modal-body').append('<div> 회사명 : ' + adform.businessName + '</div>');
+				$('.modal-body').append('<div> 위치 : ' + adform.address + '</div>');
+				$('.modal-body').append('<div> 이메일 : ' + adform.email + '</div>');
+				$('.modal-body').append(
+					'<div> 홈페이지 : <a href = "' +
+						adform.pageUrl +
+						'" target="_blank">' +
+						adform.pageUrl +
+						'</a></div>',
+				);
+				$('.modal-body').append('<div>광고 배너</div>');
+				$('.modal-body').append(img_data);
+				$('body').append('<div class="backon"></div>');
+			},
+			error: function (response) {
+				alert(response.responseText);
+			},
+		});
 
 		$('.btn-edit').click(function () {
 			$('.ad-body').empty();
