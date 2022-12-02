@@ -1,9 +1,11 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { ClickSpot } from 'src/entities/click-spots.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { TasteTheme } from 'src/entities/taste-themes.entity';
 import { WishSpot } from 'src/entities/wish-spots.entity';
+import { MockClickSpotsRepository } from 'test/mock/click-spots.mock';
 import { MockSpotsRepository } from 'test/mock/spots.mock';
 import { MockTasteThemesRepository } from 'test/mock/taste-themes.mock';
 import { MockWishSpotsRepository } from 'test/mock/wish-spots.mock';
@@ -29,6 +31,10 @@ describe('RecommendationsController', () => {
 				{
 					provide: getRepositoryToken(WishSpot),
 					useClass: MockWishSpotsRepository,
+				},
+				{
+					provide: getRepositoryToken(ClickSpot),
+					useClass: MockClickSpotsRepository,
 				},
 				{
 					provide: ConfigService,
