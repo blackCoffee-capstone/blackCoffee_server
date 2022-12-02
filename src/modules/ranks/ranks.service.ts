@@ -150,8 +150,8 @@ export class RanksService {
 			);
 
 			return new RankingResponseDto({
-				prev: week[0],
-				next: week[1],
+				prev: week[0] ? week[0] : null,
+				next: week[1] ? week[1] : null,
 				ranking: ranking,
 			});
 		} catch (error) {
