@@ -33,7 +33,7 @@ export class AuthCodesService {
 
 		if (await this.errIfExistEmailOrNot(email, type)) {
 			try {
-				const foundAuthCode = await this.authCodesRepository
+				let foundAuthCode = await this.authCodesRepository
 					.createQueryBuilder('auth_code')
 					.where('auth_code.email = :email', { email })
 					.andWhere('auth_code.type = :type', { type })
@@ -42,6 +42,20 @@ export class AuthCodesService {
 				if (foundAuthCode) {
 					foundAuthCode.code = code;
 					await this.authCodesRepository.save(foundAuthCode);
+				} else if (type === AuthCodeType.SignUp) {
+					foundAuthCode = await this.authCodesRepository
+						.createQueryBuilder('auth_code')
+						.where('auth_code.email = :email', { email })
+						.andWhere('auth_code.type = :type', { type: AuthCodeType.SignUpAble })
+						.getOne();
+					if (foundAuthCode) throw new BadRequestException('Email is already verified');
+					else {
+						await this.authCodesRepository.save({
+							email,
+							type,
+							code,
+						});
+					}
 				} else {
 					await this.authCodesRepository.save({
 						email,
