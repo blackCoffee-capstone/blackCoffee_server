@@ -31,7 +31,7 @@ export class RecommendationsService {
 	) {}
 	#sshConfig = this.configService.get<SshConfig>('sshConfig');
 
-	async recommendationsSpotsList(userId: number) {
+	async recommendationsSpotsList(userId: number): Promise<SearchResponseDto[]> {
 		const usersTastes: UsersTasteThemesResponseDto[] = await this.getUsersTasteThemes(userId);
 		const inputJson = {
 			userId,
@@ -60,7 +60,7 @@ export class RecommendationsService {
 					.then(async function () {
 						await ssh
 							.execCommand(
-								`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommend.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/list-input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/list-result.json" "${userId}"`,
+								`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommendwithHybridSys.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/list-input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/list-result.json"`,
 								{},
 							)
 							.then(async function () {
@@ -128,7 +128,7 @@ export class RecommendationsService {
 					.then(async function () {
 						await ssh
 							.execCommand(
-								`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommend.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/map-input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/map-result.json" "${userId}"`,
+								`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommendwithHybridSys.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/map-input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/map-result.json"`,
 								{},
 							)
 							.then(async function () {
@@ -168,44 +168,57 @@ export class RecommendationsService {
 		fs.writeFileSync('./src/modules/recommendations/inputs/click-spots.json', allClickSpotsJsonFile);
 		fs.writeFileSync('./src/modules/recommendations/inputs/wish-spots.json', allWishSpotsJsonFile);
 
-		const localInputPath1 = './src/modules/recommendations/inputs/spots.json';
-		const localInputPath2 = './src/modules/recommendations/inputs/taste-themes.json';
-		const localInputPath3 = './src/modules/recommendations/inputs/click-spots.json';
-		const localInputPath4 = './src/modules/recommendations/inputs/wish-spots.json';
-		const localResultPath = './src/modules/recommendations/results/result.json';
+		const localInputSpotsPath = './src/modules/recommendations/inputs/spots.json';
+		const localInputTasteThemesPath = './src/modules/recommendations/inputs/taste-themes.json';
+		const localInputClickSpotsPath = './src/modules/recommendations/inputs/click-spots.json';
+		const localInputWishSpotsPath = './src/modules/recommendations/inputs/wish-spots.json';
 
-		// await ssh
-		// 	.connect({
-		// 		host: this.#sshConfig.host,
-		// 		username: this.#sshConfig.userName,
-		// 		port: this.#sshConfig.port,
-		// 		password: this.#sshConfig.password,
-		// 	})
-		// 	.then(async function () {
-		// 		await ssh
-		// 			.putFile(localInputPath, `/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json`)
-		// 			.then(async function () {
-		// 				await ssh
-		// 					.execCommand(
-		// 						`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommend.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/result.json" "${1}"`,
-		// 						{},
-		// 					)
-		// 					.then(async function () {
-		// 						await ssh
-		// 							.getFile(
-		// 								localResultPath,
-		// 								'/home/iknow/Desktop/blackcoffee/placeRecommender/result.json',
-		// 							)
-		// 							.then(async function () {
-		// 								await ssh.dispose();
-		// 							});
-		// 					});
-		// 			});
-		// 	});
-		// const resultFile = fs.readFileSync(localResultPath);
-		// const resultJson = JSON.parse(resultFile.toString());
-		// const mapRecommendationSpotIds = resultJson.mapRecommendation;
-		// const mapRecommendationSpots = await this.getSpotsUseId(mapRecommendationSpotIds);
+		await ssh
+			.connect({
+				host: this.#sshConfig.host,
+				username: this.#sshConfig.userName,
+				port: this.#sshConfig.port,
+				password: this.#sshConfig.password,
+			})
+			.then(async function () {
+				await ssh
+					.putFile(
+						localInputSpotsPath,
+						`/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_spots.json`,
+					)
+					.then(async function () {
+						await ssh
+							.putFile(
+								localInputTasteThemesPath,
+								`/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_taste_themes.json`,
+							)
+							.then(async function () {
+								await ssh
+									.putFile(
+										localInputClickSpotsPath,
+										`/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_click_spots.json`,
+									)
+									.then(async function () {
+										await ssh
+											.putFile(
+												localInputWishSpotsPath,
+												`/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_wish_spots.json`,
+											)
+											.then(async function () {
+												await ssh
+													.execCommand(
+														`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_training.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_taste_themes.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_spots.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_wish_spots.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_click_spots.json" True`,
+														{},
+													)
+													.then(async function () {
+														await ssh.dispose();
+													});
+											});
+									});
+							});
+					});
+			});
+
 		return true;
 	}
 
