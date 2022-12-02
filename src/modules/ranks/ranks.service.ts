@@ -23,16 +23,14 @@ export class RanksService {
 		private readonly ranksRepository: Repository<Rank>,
 	) {}
 
-	private async checkWeek(rankingRequest: RankingRequestDto) {
+	private async weekCalulation(rankingRequest: RankingRequestDto) {
 		const nextCheckWeek = await this.ranksRepository.createQueryBuilder('rank').orderBy('date', 'DESC').getOne();
-		if (!nextCheckWeek) throw new NotFoundException('Rank is not found');
-		if (rankingRequest.date > nextCheckWeek.date) throw new NotFoundException('Next is not found');
+		if (!nextCheckWeek) return [null, null];
+		if (rankingRequest.date > nextCheckWeek.date) return [nextCheckWeek.date, null];
 
 		const previousCheckWeek = await this.ranksRepository.createQueryBuilder('rank').orderBy('date', 'ASC').getOne();
-		if (rankingRequest.date < previousCheckWeek.date) throw new NotFoundException('Previous is not found');
-	}
+		if (rankingRequest.date < previousCheckWeek.date) return [null, previousCheckWeek.date];
 
-	private async beforeWeek(rankingRequest: RankingRequestDto, week: boolean) {
 		const beforeCheckWeek = await this.ranksRepository
 			.createQueryBuilder('rank')
 			.select('date')
@@ -40,16 +38,16 @@ export class RanksService {
 			.orderBy('date', 'ASC')
 			.getRawMany();
 
-		const weekList = Array.from(beforeCheckWeek).flatMap(({ date }) => [date]);
+		let weekList = Array.from(beforeCheckWeek).flatMap(({ date }) => [date]);
+		weekList.push(rankingRequest.date);
+		weekList = [...new Set(weekList.sort())];
 		const dateIdx = weekList.lastIndexOf(rankingRequest.date);
-		if (dateIdx === -1) throw new BadRequestException('Date is not exist');
-		return week ? weekList[dateIdx - 1] : weekList[dateIdx + 1];
+
+		return [weekList[dateIdx - 1], weekList[dateIdx + 1]];
 	}
 
 	async getRanksList(rankingRequest: RankingRequestDto) {
-		await this.checkWeek(rankingRequest);
-		const beforeDate = await this.beforeWeek(rankingRequest, true);
-		const afterDate = await this.beforeWeek(rankingRequest, false);
+		const week = await this.weekCalulation(rankingRequest);
 
 		try {
 			const rankingListSpots = await this.spotsRepository
@@ -70,7 +68,7 @@ export class RanksService {
 				.addSelect((berforRank) => {
 					return berforRank
 						.select('rankings.rank', 'before_rank')
-						.where('rankings.Date = :beforeDate', { beforeDate: beforeDate })
+						.where('rankings.Date = :beforeDate', { beforeDate: week[0] })
 						.andWhere('rankings.spotId = spot.id')
 						.from(Rank, 'rankings')
 						.limit(1);
@@ -110,8 +108,8 @@ export class RanksService {
 				});
 			});
 			return new RankingResponseDto({
-				prev: beforeDate ? beforeDate : null,
-				next: afterDate ? afterDate : null,
+				prev: week[0] ? week[0] : null,
+				next: week[1] ? week[1] : null,
 				ranking: ranking,
 			});
 		} catch (error) {
@@ -121,9 +119,7 @@ export class RanksService {
 
 	async getRanksMap(rankingRequest: RankingRequestDto) {
 		try {
-			await this.checkWeek(rankingRequest);
-			const beforeDate = await this.beforeWeek(rankingRequest, true);
-			const afterDate = await this.beforeWeek(rankingRequest, false);
+			const week = await this.weekCalulation(rankingRequest);
 
 			const rankingMapSpots = await this.spotsRepository
 				.createQueryBuilder('spot')
@@ -154,8 +150,8 @@ export class RanksService {
 			);
 
 			return new RankingResponseDto({
-				prev: beforeDate ? beforeDate : null,
-				next: afterDate ? afterDate : null,
+				prev: week[0],
+				next: week[1],
 				ranking: ranking,
 			});
 		} catch (error) {
