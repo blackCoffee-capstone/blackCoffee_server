@@ -1,3 +1,5 @@
 export enum PostsSortType {
-	CreatedAt = 'Created_At',
+	CreatedAt = 'CreatedAt',
+	View = 'View',
+	Like = 'Like',
 }

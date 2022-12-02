@@ -22,4 +22,9 @@ export class ViewController {
 	adRequestn(@Res() res: Response) {
 		return res.render('ad-request');
 	}
+
+	@Get('/ad')
+	ad(@Res() res: Response) {
+		return res.render('ad');
+	}
 }

@@ -1,9 +1,9 @@
 <html>
 	<head>
 		<meta charset='utf-8' />
-		<link rel='stylesheet' href='/css/ad-request.css' />
+		<link rel='stylesheet' href='/css/ad.css' />
 		<script src='/lib/jquery-3.6.1.min.js'></script>
-		<script src='/js/ad-request.js'></script>
+		<script src='/js/ad.js'></script>
 		<link rel='preconnect' href='https://fonts.googleapis.com' />
 		<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
 		<link href='https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap' rel='stylesheet' />
@@ -40,7 +40,7 @@
 
 		<div class='header'>
 			<div id='admin_page'>
-				<a>요청 광고 확인</a>
+				<a>광고 등록 및 수정</a>
 				<div class='material-symbols-outlined logout'>
 					logout
 				</div>
@@ -69,14 +69,9 @@
 			</ul>
 		</div>
 
-		<div class='ad_request'>
+		<div class='ad'>
 			<button class='btn btn-update' type='button'>테이블 업데이트</button>
-			<form class='radio'>
-				<input type='radio' name='status' value='' checked='checked' />ALL
-				<input type='radio' name='status' value='Todo' />TODO
-				<input type='radio' name='status' value='Approve' />APPROVE
-				<input type='radio' name='status' value='Reject' />REJECT
-			</form>
+			<button class='btn btn-register' type='button'>광고 등록</button>
 			<table id='list_table' class='list_table'>
 				<thead>
 					<tr>
@@ -84,24 +79,42 @@
 						<th>BUSINESS</th>
 						<th>EMAIL</th>
 						<th>DATE</th>
-						<th>STATUS</th>
 						<th>DETAIL</th>
 					</tr>
 				</thead>
 			</table>
 		</div>
-		<div id='popup'>
+		<div class='popup popup-detail'>
 			<div class='modal-header'>
-				<span class='modal-title'>광고 요청 상세 보기</span>
+				<span class='modal-title'>등록 상세 보기</span>
 				<span class='close'>X</span>
 			</div>
-			<div class='modal-body'>
+			<div class='modal-body ad-body'>
 			</div>
-			<div class='modal-footer'>
-				<button type='button' class='btn btn-approve'>Approve</button>
-				<button type='button' class='btn btn-reject'>Reject</button>
-				<button type='button' class='btn btn-todo'>Todo</button>
+			<div class='modal-footer ad-footer'>
+				<button type='button' class='btn btn-edit'>Edit</button>
 				<button type='button' class='btn btn-delete'>Delete</button>
+			</div>
+		</div>
+
+		<div class='popup popup-register'>
+			<div class='modal-header'>
+				<span class='modal-title'>광고 등록</span>
+				<span class='close'>X</span>
+			</div>
+			<div class='modal-body ad-register-body'>
+				<form id='ad-register'>
+					<p>회사명 : <input class='input' type='text' name='businessName' /> </p>
+					<p>이메일 : <input class='input' type='email' name='email' /> </p>
+					<p>홈페이지 : <input class='input' type='text' name='pageUrl' /> </p>
+					<p>주소 :
+						<input class='input' type='text' placeholder='ex)인천 연수구 동춘2동' name='address' />
+					</p>
+					<p>광고 배너 업로드 : <input type='file' name='file' /> </p>
+					<div><button type='button' class='btn btn-submit'>등록</button></div>
+				</form>
+			</div>
+			<div class='modal-footer ad-register-footer'>
 			</div>
 		</div>
 	</body>

@@ -15,6 +15,7 @@ import { Post } from 'src/entities/posts.entity';
 import { ReportPost } from 'src/entities/report-posts.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { UserType } from 'src/types/users.types';
+import { PostsSortType } from 'src/types/posts-sort.types';
 import { AdFormsService } from '../ad-forms/ad-forms.service';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { CommentsUserResponseDto } from '../users/dto/comments-user-response.dto';
@@ -490,14 +491,37 @@ export class PostsService {
 				.createQueryBuilder('post')
 				.leftJoinAndSelect('post.location', 'location')
 				.leftJoinAndSelect('post.user', 'user')
-				.leftJoinAndSelect('post.clickPosts', 'clickPosts')
-				.leftJoinAndSelect('post.likePosts', 'likePosts')
-				.orderBy(`post.${searchRequest.sorter}`, 'ASC');
+				.select(
+					'post.id AS id, post.title AS title, post.address AS address, post.createdAt AS create, post.photoUrls AS photos',
+				)
+				.addSelect('user.id AS user, user.nickname AS name')
+				.addSelect((clicks) => {
+					return clicks
+						.select('COUNT (*)', 'clickPosts')
+						.from(ClickPost, 'clickPosts')
+						.where('clickPosts.postId = post.id')
+						.limit(1);
+				}, 'clicks')
+				.addSelect((likes) => {
+					return likes
+						.select('COUNT (*)', 'likePosts')
+						.from(LikePost, 'likePosts')
+						.where('likePosts.postId = post.id')
+						.limit(1);
+				}, 'likes')
+				.addSelect((likeUsers) => {
+					return likeUsers
+						.select('likePosts.id', 'likePosts')
+						.from(LikePost, 'likePosts')
+						.where('likePosts.postId = post.id')
+						.andWhere('likePosts.userId = :user', { user: userId })
+						.limit(1);
+				}, 'likeUsers');
 
 			if (searchRequest.word) {
 				posts = posts.where('post.title Like :title', { title: `%${searchRequest.word}%` });
 			}
-			if (searchRequest.locationIds) {
+			if (searchRequest.locationIds && searchRequest.locationIds[0] !== 0) {
 				let locationIds = searchRequest.locationIds;
 				const allMetros = await this.allSelection(locationIds);
 				const localsIds = Array.from(allMetros).flatMap(({ id }) => [id]);
@@ -505,30 +529,36 @@ export class PostsService {
 
 				posts = posts.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
 			}
-
-			if (searchRequest.themeIds) {
+			if (searchRequest.themeIds && searchRequest.themeIds[0] !== 0) {
 				posts = posts
 					.leftJoinAndSelect('post.postThemes', 'postThemes')
 					.leftJoinAndSelect('postThemes.theme', 'theme')
 					.andWhere('theme.id IN (:...themeIds)', { themeIds: searchRequest.themeIds });
 			}
 
-			const totalPagePosts = await posts.getMany();
+			if (searchRequest.sorter === PostsSortType.View) posts = posts.orderBy('clicks', 'DESC');
+			else if (searchRequest.sorter === PostsSortType.Like) posts = posts.orderBy('likes', 'DESC');
+			else if (searchRequest.sorter === PostsSortType.CreatedAt) posts = posts.orderBy('post.createdAt', 'DESC');
+
+			const totalPagePosts = await posts.getRawMany();
 			const responsePosts = await posts
 				.limit(searchRequest.take)
 				.offset((searchRequest.page - 1) * searchRequest.take)
-				.getMany();
+				.getRawMany();
 
+			let order = responsePosts.length;
 			const totalPage = Math.ceil(totalPagePosts.length / searchRequest.take);
 			const postsDto = Array.from(responsePosts).map(
 				(post) =>
 					new MainPostsResponseDto({
 						...post,
-						views: post.clickPosts.length,
-						likes: post.likePosts.length,
-						isLike: this.isLikePost(userId, post.likePosts) ? true : false,
-						user: new CommentsUserResponseDto(post.user),
-						location: new LocationResponseDto(post.location),
+						order: order--,
+						views: +post.clicks,
+						likes: +post.likes,
+						createdAt: post.create,
+						photoUrls: post.photos,
+						isLike: post.likeUsers ? true : false,
+						user: new CommentsUserResponseDto({ id: post.user, nickname: post.name }),
 					}),
 			);
 			return new MainPostsPageResponseDto({ totalPage: totalPage, posts: postsDto });

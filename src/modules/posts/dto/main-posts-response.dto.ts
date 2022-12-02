@@ -8,6 +8,10 @@ export class MainPostsResponseDto {
 	@ApiProperty({ example: 1, description: '커뮤니티 게시글 id' })
 	readonly id: number;
 
+	@IsNumber()
+	@ApiProperty({ example: 1, description: '커뮤니티 게시글 순서' })
+	readonly order: number;
+
 	@IsString()
 	@ApiProperty({ example: 'test', description: '제목' })
 	readonly title: string;
@@ -35,15 +39,13 @@ export class MainPostsResponseDto {
 	@ApiProperty({ example: false, description: '게시글 좋아요 여부' })
 	readonly isLike: boolean;
 
-	@ApiProperty({ description: '위치 정보' })
-	readonly location: LocationResponseDto;
-
 	@IsArray()
 	@ApiProperty({ isArray: true, example: ['test'], description: '사진 url 리스트' })
 	readonly photoUrls: string[];
 
-	constructor({ id, title, user, address, createdAt, views, likes, isLike, location, photoUrls }) {
+	constructor({ id, order, title, user, address, createdAt, views, likes, isLike, photoUrls }) {
 		this.id = id;
+		this.order = order;
 		this.title = title;
 		this.user = user;
 		this.address = address;
@@ -51,7 +53,6 @@ export class MainPostsResponseDto {
 		this.views = views;
 		this.likes = likes;
 		this.isLike = isLike;
-		this.location = new LocationResponseDto(location);
 		this.photoUrls = photoUrls;
 	}
 }
