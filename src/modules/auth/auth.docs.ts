@@ -14,30 +14,6 @@ import { TokenRefreshRequestDto } from './dto/token-refresh-request.dto';
 import { TokenRefreshResponseDto } from './dto/token-refresh-response.dto';
 
 export const ApiDocs: SwaggerMethodDoc<AuthController> = {
-	getKakaoLoginPage(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '카카오 로그인 페이지로 리디렉트',
-			}),
-			ApiResponse({
-				status: 200,
-				description: '',
-			}),
-		);
-	},
-	kakaoLoginCallback(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '카카오 로그인 redirect url',
-			}),
-			ApiResponse({
-				status: 200,
-				description: '',
-			}),
-		);
-	},
 	kakaoLogin(summary: string) {
 		return applyDecorators(
 			ApiOperation({
