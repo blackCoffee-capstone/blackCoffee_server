@@ -33,6 +33,9 @@ export class RecommendationsService {
 
 	async recommendationsSpotsList(userId: number): Promise<SearchResponseDto[]> {
 		const usersTastes: UsersTasteThemesResponseDto[] = await this.getUsersTasteThemes(userId);
+		if (usersTastes.length === 0) {
+			throw new BadRequestException('Users taste themes is not exist');
+		}
 		const inputJson = {
 			userId,
 			usersTastes,
@@ -100,6 +103,9 @@ export class RecommendationsService {
 
 	async recommendationsSpotsMap(userId: number): Promise<RecommendationsMapResponseDto[]> {
 		const usersTastes: UsersTasteThemesResponseDto[] = await this.getUsersTasteThemes(userId);
+		if (usersTastes.length === 0) {
+			throw new BadRequestException('Users taste themes is not exist');
+		}
 		const inputJson = {
 			userId,
 			usersTastes,
