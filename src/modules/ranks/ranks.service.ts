@@ -173,7 +173,7 @@ export class RanksService {
 					{ spotId: updateRequest.spotId },
 				);
 			}
-			if (!rank) {
+			if (!rank && updateRequest.rank) {
 				const ranksRequestDto = new RanksRecordRequestDto({
 					date: rankingRequestDto.getDate,
 					spotId: updateRequest.spotId,
