@@ -27,4 +27,9 @@ export class ViewController {
 	ad(@Res() res: Response) {
 		return res.render('ad');
 	}
+
+	@Get('/posts/report')
+	postsReport(@Res() res: Response) {
+		return res.render('posts-report');
+	}
 }
