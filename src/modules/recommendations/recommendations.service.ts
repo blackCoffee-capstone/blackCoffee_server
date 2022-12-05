@@ -54,30 +54,50 @@ export class RecommendationsService {
 				port: this.#sshConfig.port,
 				password: this.#sshConfig.password,
 			})
-			.then(async function () {
-				await ssh
-					.putFile(
-						localInputPath,
-						`/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/list-input.json`,
-					)
-					.then(async function () {
-						await ssh
-							.execCommand(
-								`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommendwithHybridSys.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/list-input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/list-result.json"`,
-								{},
-							)
-							.then(async function () {
+			.then(
+				async function () {
+					await ssh
+						.putFile(
+							localInputPath,
+							`/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/list-input.json`,
+						)
+						.then(
+							async function () {
 								await ssh
-									.getFile(
-										localResultPath,
-										'/home/iknow/Desktop/blackcoffee/placeRecommender/list-result.json',
+									.execCommand(
+										`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommendwithHybridSys.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/list-input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/list-result.json"`,
+										{},
 									)
-									.then(async function () {
-										await ssh.dispose();
-									});
-							});
-					});
-			});
+									.then(
+										async function () {
+											await ssh
+												.getFile(
+													localResultPath,
+													'/home/iknow/Desktop/blackcoffee/placeRecommender/list-result.json',
+												)
+												.then(
+													async function () {
+														await ssh.dispose();
+													},
+													function (error) {
+														return 0;
+													},
+												);
+										},
+										function (error) {
+											return 0;
+										},
+									);
+							},
+							function (error) {
+								return 0;
+							},
+						);
+				},
+				function (error) {
+					return 0;
+				},
+			);
 		const resultFile = fs.readFileSync(localResultPath);
 		const resultJson = JSON.parse(resultFile.toString());
 		const listRecommendationSpotIds = resultJson.listRecommendation;
@@ -125,30 +145,50 @@ export class RecommendationsService {
 				port: this.#sshConfig.port,
 				password: this.#sshConfig.password,
 			})
-			.then(async function () {
-				await ssh
-					.putFile(
-						localInputPath,
-						`/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/map-input.json`,
-					)
-					.then(async function () {
-						await ssh
-							.execCommand(
-								`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommendwithHybridSys.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/map-input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/map-result.json"`,
-								{},
-							)
-							.then(async function () {
+			.then(
+				async function () {
+					await ssh
+						.putFile(
+							localInputPath,
+							`/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/map-input.json`,
+						)
+						.then(
+							async function () {
 								await ssh
-									.getFile(
-										localResultPath,
-										'/home/iknow/Desktop/blackcoffee/placeRecommender/map-result.json',
+									.execCommand(
+										`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_recommendwithHybridSys.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/map-input.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/map-result.json"`,
+										{},
 									)
-									.then(async function () {
-										await ssh.dispose();
-									});
-							});
-					});
-			});
+									.then(
+										async function () {
+											await ssh
+												.getFile(
+													localResultPath,
+													'/home/iknow/Desktop/blackcoffee/placeRecommender/map-result.json',
+												)
+												.then(
+													async function () {
+														await ssh.dispose();
+													},
+													function (error) {
+														return 0;
+													},
+												);
+										},
+										function (error) {
+											return 0;
+										},
+									);
+							},
+							function (error) {
+								return 0;
+							},
+						);
+				},
+				function (error) {
+					return 0;
+				},
+			);
 		const resultFile = fs.readFileSync(localResultPath);
 		const resultJson = JSON.parse(resultFile.toString());
 		const mapRecommendationSpotIds = resultJson.mapRecommendation;
