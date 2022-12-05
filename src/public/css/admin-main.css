@@ -161,8 +161,9 @@ a {
 	margin-bottom: 130px;
 }
 
-.box_wrap .numbers {
+.box_wrap .user-page {
 	float: left;
+	overflow: hidden;
 	background-color: white;
 	margin-top: 40px;
 	width: 100%;
@@ -173,22 +174,35 @@ a {
 	text-align: left;
 }
 
-.numbers p {
-	margin-top: 25px;
+.user-page p {
+	margin-top: 15px;
 	margin-left: 20px;
 	margin-bottom: 10px;
-	font-size: 12px;
+	font-size: 14px;
 	font-weight: 600;
 	text-align: left;
 	color: gray;
 }
 
-.numbers a {
+.model a {
 	margin-left: 20px;
-	font-size: 36px;
+	font-size: 12px;
 	font-weight: 800;
-	text-align: center;
 	color: #4d377b;
+}
+
+#file-upload {
+	margin-left: 20px;
+}
+
+.btn-submit {
+	margin-left: 20px;
+}
+
+.btn-training {
+	margin-top: 20px;
+	margin-left: 20px;
+	font-size: 18px;
 }
 
 #ascent p {

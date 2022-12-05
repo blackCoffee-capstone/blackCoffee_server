@@ -162,6 +162,54 @@ $(document).ready(function () {
 		location.href = '/admin/posts/report';
 	});
 
+	$(document).ajaxSend(function (event, jqxhr, settings) {
+		$.LoadingOverlay('show');
+	});
+
+	$(document).ajaxComplete(function (event, jqxhr, settings) {
+		$.LoadingOverlay('hide');
+	});
+
+	$('.btn-submit').click(function () {
+		alert('시간이 소요될 수 있습니다. 로딩 중 창을 닫지 마세요.');
+		var form = new FormData();
+		form.append('file', $('#file-upload')[0].files[0]);
+
+		$.ajax({
+			type: 'POST',
+			url: '/spots',
+			processData: false,
+			contentType: false,
+			headers: { Authorization: 'Bearer ' + accessToken },
+			data: form,
+			success: function () {
+				alert('저장 완료!');
+			},
+			err: function (err) {
+				alert('실패! 다시 시도해주세요.');
+				console.log('err:', err);
+			},
+		});
+	});
+
+	$('.btn-training').click(function () {
+		$.ajax({
+			type: 'POST',
+			url: '/recommendations',
+			processData: false,
+			contentType: false,
+			headers: { Authorization: 'Bearer ' + accessToken },
+			data: '',
+			success: function () {
+				alert('훈련 완료!');
+			},
+			err: function (err) {
+				alert('실패! 다시 시도해주세요.');
+				console.log('err:', err);
+			},
+		});
+	});
+
 	$('.main_menu').click(function () {
 		$('.sub_menu').slideUp();
 		if ($(this).children('.sub_menu').is(':hidden')) {
@@ -170,6 +218,7 @@ $(document).ready(function () {
 			$(this).children('.sub_menu').slideUp();
 		}
 	});
+
 	$('.logout').click(function () {
 		$.ajax({
 			url: '/auth/logout',

@@ -35,6 +35,11 @@
 			type='text/javascript'
 			src='https://cdn.datatables.net/responsive/2.4.0/js/responsive.bootstrap4.min.js'
 		></script>
+		<script
+			type='text/javascript'
+			src='https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js'
+		></script>
+
 		<link
 			rel='stylesheet'
 			href='https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0'
@@ -98,7 +103,7 @@
 				<table class='list_table posts-report'>
 					<thead>
 						<tr>
-							<th>ID</th>
+							<th>USER</th>
 							<th>DETAIL</th>
 						</tr>
 					</thead>
@@ -125,27 +130,17 @@
 			</div>
 
 			<div class='box_wrap'>
-				<div class='numbers'>
-					{{! <span class='material-symbols-outlined'>
-						person_filled
-					</span> }}
-					<p>TOTAL USERS</p>
-					<a>13,256</a>
-					<span id='ascent'>
-						<p>(+14.2%)</p>
-					</span>
-
+				<div class='user-page csv'>
+					<p>CSV 파일 업로드</p>
+					<form id='upload-form' enctype='multipart/form-data'>
+						<input type='file' name='file' id='file-upload' />
+					</form>
+					<button class='btn btn-submit'>업로드</button>
 				</div>
-				<div class='numbers'>
-					{{! <span class='material-symbols-outlined'>
-						list_alt
-					</span> }}
-					<p>TOTAL ADVERTISEMENT</p>
-					<a>256</a>
-					<span id='ascent'>
-						<p>(+27.2%)</p>
-					</span>
-
+				<div class='user-page model'>
+					<p>추천 모델 훈련</p>
+					<a>일주일에 한 번 아래의 버튼을 눌러주세요!</a>
+					<div><button class='btn btn-training'>모델 훈련</button></div>
 				</div>
 			</div>
 
