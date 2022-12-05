@@ -1,12 +1,11 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { AuthCodeRequestDto } from '../auth-codes/dto/auth-code-request.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { AuthController } from './auth.controller';
 import { DeleteUserRequestDto } from './dto/delete-user-request.dto';
-import { KakaoLoginRequestDto } from './dto/kakao-login-request.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
@@ -18,11 +17,12 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 		return applyDecorators(
 			ApiOperation({
 				summary,
-				description:
-					'카카오 서버 access token으로 사용자 정보를 가져와, 회원가입&로그인 후 사용자 정보와 토큰 반환',
+				description: '카카오 서버 code로 사용자 정보를 가져와, 회원가입&로그인 후 사용자 정보와 토큰 반환',
 			}),
-			ApiBody({
-				type: KakaoLoginRequestDto,
+			ApiQuery({
+				name: 'code',
+				required: true,
+				description: '카카오 서버로부터 받은 code',
 			}),
 			ApiResponse({
 				status: 201,
