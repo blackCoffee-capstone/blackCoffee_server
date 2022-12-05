@@ -75,6 +75,12 @@ export class SpotsController {
 		return await this.spotsService.getSearchSpot(headers.authorization, searchRequest);
 	}
 
+	//TODO: Test
+	@Get('sns-urls')
+	async getSnsPostUrls() {
+		return await this.spotsService.getSnsPostUrls();
+	}
+
 	@Get(':spotId')
 	@ApiDocs.detailSpot('여행지 상세 페이지(여행지 기본 정보, 연관 sns posts')
 	async detailSpot(
