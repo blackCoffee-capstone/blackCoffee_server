@@ -51,7 +51,7 @@ $(document).ready(function () {
 					{ orderable: false, data: 'reason' },
 					{ data: 'status', width: '80px' },
 					{
-						width: '80px',
+						width: '60px',
 						orderable: false,
 						data: null,
 						render: function (data) {
@@ -59,7 +59,7 @@ $(document).ready(function () {
 						},
 					},
 					{
-						width: '80px',
+						width: '60px',
 						orderable: false,
 						data: null,
 						defaultContent: "<button class='btn btn-delete'>Delete</button>",
@@ -235,6 +235,7 @@ $(document).ready(function () {
 
 	$('#list_table').on('click', '.detail-link', function () {
 		var data = table.row($(this).parents('td')).data();
-		alert(data.post.id);
+		sessionStorage.setItem('postNumber', data.post.id);
+		window.open('/admin/posts/detail');
 	});
 });

@@ -32,4 +32,9 @@ export class ViewController {
 	postsReport(@Res() res: Response) {
 		return res.render('posts-report');
 	}
+
+	@Get('/posts/detail')
+	postsDetail(@Res() res: Response) {
+		return res.render('community-posts');
+	}
 }
