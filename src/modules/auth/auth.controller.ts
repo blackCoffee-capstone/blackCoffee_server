@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, Post, Redirect, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Header, Post, Query, Redirect, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { AuthUser, FacebookUser } from 'src/decorators/auth.decorator';
@@ -14,7 +14,6 @@ import { SignUpRequestDto } from './dto/signup-request.dto';
 import { FacebookAuthGuard } from './guards/facebook-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
-import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
@@ -22,11 +21,12 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
-	@UseGuards(KakaoAuthGuard)
 	@Post('/kakao-login')
 	@ApiDocs.kakaoLogin('카카오 로그인 회원가입&로그인 후 유저 정보, 토큰 반환')
-	async kakaoLogin(@Body('kakaoUser') kakaoUser) {
-		const user: UserResponseDto = await this.authService.createOauthUser(kakaoUser as OauthUserDto, UserType.Kakao);
+	async kakaoLogin(@Query('code') code: string) {
+		const accessToken: string = await this.authService.getKakaoAccessToken(code);
+		const kakaoUser: OauthUserDto = await this.authService.getKakaoUserData(accessToken);
+		const user: UserResponseDto = await this.authService.createOauthUser(kakaoUser, UserType.Kakao);
 		return this.authService.login(user);
 	}
 

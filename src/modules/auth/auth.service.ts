@@ -44,13 +44,6 @@ export class AuthService {
 	#jwtConfig = this.configService.get<JwtConfig>('jwtConfig');
 
 	//Test
-	getKakaoLoginPage(): string {
-		return `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${
-			this.#oauthConfig.clientId
-		}&redirect_uri=${this.#oauthConfig.callbackUrl}`;
-	}
-
-	//Test
 	getFacebookLoginPage(): string {
 		return `https://www.facebook.com/v2.11/dialog/oauth?client_id=${this.#facebookConfig.clientId}&redirect_uri=${
 			this.#facebookConfig.callbackUrl
@@ -58,13 +51,46 @@ export class AuthService {
 	}
 
 	//Test
-	async test(code: string) {
-		const kakao_api_url = `https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id=${
-			this.#oauthConfig.clientId
-		}&redirect_url=${this.#oauthConfig.callbackUrl}&code=${code}`;
-		const token_res = await firstValueFrom(this.httpService.post(kakao_api_url));
-		const access_token: string = token_res.data.access_token;
-		return access_token;
+	async getKakaoAccessToken(code: string): Promise<string> {
+		try {
+			const kakao_api_url = `https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id=${
+				this.#oauthConfig.clientId
+			}&redirect_url=${this.#oauthConfig.callbackUrl}&code=${code}`;
+			const token_res = await firstValueFrom(this.httpService.post(kakao_api_url));
+			const access_token: string = token_res.data.access_token;
+			return access_token;
+		} catch (error) {
+			throw new BadRequestException('Code is not valid');
+		}
+	}
+
+	async getKakaoUserData(accessToken: string): Promise<OauthUserDto> {
+		if (!accessToken) throw new UnauthorizedException();
+
+		const validateTokenResult: any = await this.ValidateTokenAndDecode(accessToken);
+		if (!validateTokenResult.id) throw new UnauthorizedException();
+
+		const kakaoAccount = validateTokenResult.kakao_account;
+		return new OauthUserDto({
+			name: kakaoAccount.profile.nickname,
+			socialId: validateTokenResult.id,
+			email: kakaoAccount.has_email && !kakaoAccount.email_needs_agreement ? kakaoAccount.email : null,
+		});
+	}
+
+	private async ValidateTokenAndDecode(accessToken: string): Promise<any> {
+		try {
+			const kakaoRequestApiResult = await firstValueFrom(
+				this.httpService.get('https://kapi.kakao.com/v2/user/me', {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				}),
+			);
+			return kakaoRequestApiResult.data;
+		} catch (error) {
+			throw new BadRequestException('Access Token is not valid');
+		}
 	}
 
 	async createOauthUser(oauthUserData: OauthUserDto, userType: UserType): Promise<UserResponseDto> {
