@@ -23,6 +23,7 @@ jobs:
                   password: ${{secrets.NCLOUD_SERVER_PW}}
                   port: ${{secrets.NCLOUD_SERVER_PORT}}
                   script: |
+                      rm blackCoffee_server/.env.integ
                       touch blackCoffee_server/.env.integ
                       echo NODE_ENV=integ >> blackCoffee_server/.env.integ
                       echo PORT=${{secrets.PORT}} >> blackCoffee_server/.env.integ
