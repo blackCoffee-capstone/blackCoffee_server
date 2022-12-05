@@ -116,4 +116,18 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
+	getSnsPostUrls(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: 'sns post url들 파일(test.txt)로 출력 (테스트위해)',
+			}),
+			ApiResponse({
+				status: 200,
+				description: '',
+				type: Boolean,
+			}),
+			ApiBearerAuth('Authorization'),
+		);
+	},
 };

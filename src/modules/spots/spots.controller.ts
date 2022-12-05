@@ -77,6 +77,7 @@ export class SpotsController {
 
 	//TODO: Test
 	@Get('sns-urls')
+	@ApiDocs.getSnsPostUrls('sns post url들 파일(test.txt)로 출력 (테스트위해)')
 	async getSnsPostUrls() {
 		return await this.spotsService.getSnsPostUrls();
 	}
