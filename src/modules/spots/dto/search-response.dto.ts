@@ -6,6 +6,10 @@ export class SearchResponseDto {
 	@ApiProperty({ example: 1, description: '여행지 id' })
 	readonly id: number;
 
+	@IsNumber()
+	@ApiProperty({ example: 1, description: 'spot 순서' })
+	readonly order: number;
+
 	@IsString()
 	@ApiProperty({ example: '을왕리해수욕장', description: '여행지 이름' })
 	readonly name: string;
@@ -30,8 +34,9 @@ export class SearchResponseDto {
 	@ApiProperty({ example: 'https://scontent~', description: '여행지 사진 링크' })
 	readonly photoUrl: string;
 
-	constructor({ id, name, address, views, wishes, isWish, photoUrl }) {
+	constructor({ id, order, name, address, views, wishes, isWish, photoUrl }) {
 		this.id = id;
+		this.order = order;
 		this.name = name;
 		this.address = address;
 		this.views = views;
