@@ -123,6 +123,45 @@ $(document).ready(function () {
 		location.href = '/admin/ad';
 	});
 
+	$.ajax({
+		url: '/report-posts',
+		type: 'Get',
+		dataType: 'json',
+		dataSrc: '',
+		headers: { Authorization: 'Bearer ' + accessToken },
+		success: function (response) {
+			table = $('.posts-report').DataTable({
+				data: response,
+				columns: [
+					{ data: 'user.nickname' },
+					{
+						data: null,
+						render: function (data) {
+							return "<button class='btn report-detail' type='button'>자세히보기</button>";
+						},
+					},
+				],
+				ordering: false,
+				pageLength: 5,
+				lengthMenu: [
+					[5, 10, 20, -1],
+					[5, 10, 20, 'Todos'],
+				],
+				visible: false,
+				searching: false,
+				info: false,
+				autoWidth: false,
+			});
+		},
+		error: function (response) {
+			console.log(response.responseText);
+		},
+	});
+
+	$(document).on('click', '.report-detail', function () {
+		location.href = '/admin/posts/report';
+	});
+
 	$('.main_menu').click(function () {
 		$('.sub_menu').slideUp();
 		if ($(this).children('.sub_menu').is(':hidden')) {
