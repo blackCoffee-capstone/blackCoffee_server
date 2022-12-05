@@ -97,7 +97,7 @@ export class RanksService {
 				.orderBy('after_rank', 'ASC')
 				.getRawMany();
 
-			const ranking = Array.from(rankingListSpots).map(function (spot) {
+			let ranking = Array.from(rankingListSpots).map(function (spot) {
 				return new RankingListResponseDto({
 					...spot,
 					rank: spot.after_rank,
@@ -107,6 +107,7 @@ export class RanksService {
 					photoUrl: spot.photo,
 				});
 			});
+			ranking = ranking.filter((spot) => spot.photoUrl !== null);
 			return new RankingResponseDto({
 				prev: week[0] ? week[0] : null,
 				next: week[1] ? week[1] : null,

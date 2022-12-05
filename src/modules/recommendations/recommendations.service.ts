@@ -329,6 +329,7 @@ export class RecommendationsService {
 				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
 				.where('spot.id IN (:...spotIds)', { spotIds })
+				.andWhere('snsPosts.photoUrl is not null')
 				.getMany();
 
 			return spots;
