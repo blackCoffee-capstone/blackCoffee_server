@@ -359,6 +359,7 @@ export class AuthService {
 
 	private pwCheck(newPW: string): boolean {
 		// 8~15자리 사이 숫자, 특수문자, 영어 1개 이상씩
+		if (newPW.length > 15 || newPW.length < 8) throw new BadRequestException('Password is not valid');
 		const reg_pw = /(?=.*\d)(?=.*[a-zA-Z])(?=.*[?!@#$%^&*()+=_-]).{8,15}/;
 		const pass = reg_pw.test(newPW);
 		if (pass) return true;
