@@ -1,32 +1,24 @@
-name: blackcoffee nestjs unit test
+name: Deploy to Naver Cloud
 
 on:
     push:
-        branches: [develop]
-    pull_request:
-        branches: [develop, main]
+        branches: [main]
 
 jobs:
-    test:
-        runs-on: ubuntu-20.04
-        timeout-minutes: 10
-
-        strategy:
-            matrix:
-                node-version: [16.5]
+    deploy:
+        name: Deploy
+        runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v3
-            - name: Set up Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: ${{ matrix.node-version }}
-            - name: Create env.test file
+            - name: Check out the repo
+              uses: actions/checkout@v2
+
+            - name: Create env.prod file
               run: |
-                  touch .env.test
-                  echo NODE_ENV=${{ secrets.NODE_ENV }} >> .env.test
-                  echo PORT=${{secrets.PORT}} >> .env.test
-                  echo DATABASE_USER=${{secrets.DATABASE_USER}} >> .env.test
+                  touch .env.integ
+                  echo NODE_ENV=integ >> .env.integ
+                  echo PORT=${{secrets.PORT}} >> .env.integ
+                  echo DATABASE_USER=${{secrets.DATABASE_USER}} >> .env.integ
                   echo DATABASE_PASSWORD=${{secrets.DATABASE_PASSWORD}} >> .env.test
                   echo DATABASE_HOST=${{secrets.DATABASE_HOST}} >> .env.test
                   echo DATABASE_PORT=${{secrets.DATABASE_PORT}} >> .env.test
@@ -60,8 +52,16 @@ jobs:
                   echo SSH_USERNAME=${{secrets.SSH_USERNAME}} >> .env.test
                   echo SSH_PORT=${{secrets.SSH_PORT}} >> .env.test
                   echo SSH_PASSWORD=${{secrets.SSH_PASSWORD}} >> .env.test
-
-            - name: Install packages
-              run: npm install --force
-            - name: Run unit test
-              run: npm test
+            - name: Deploy ncloud
+              uses: appleboy/ssh-action@master
+              id: deploy-prod
+              if: contains(github.ref, 'main')
+              with:
+                  host: ${{secrets.NCLOUD_SERVER_IP}}
+                  username: ${{secrets.NCLOUD_SERVER_USER}}
+                  password: ${{secrets.NCLOUD_SERVER_PW}}
+                  port: ${{secrets.NCLOUD_SERVER_PORT}}
+                  script: |
+                      cd blackCoffee_server/
+                      docker-compose -f docker-compose.dev.yml stop
+                      docker-compose -f docker-compose.dev.yml up
