@@ -62,5 +62,6 @@ jobs:
                       echo SSH_PORT=${{secrets.SSH_PORT}} >> blackCoffee_server/.env.integ
                       echo SSH_PASSWORD=${{secrets.SSH_PASSWORD}} >> blackCoffee_server/.env.integ
                       cd blackCoffee_server/
+                      git pull
                       docker-compose -f docker-compose.dev.yml stop
                       docker-compose -f docker-compose.dev.yml up -d
