@@ -150,12 +150,15 @@ export class SpotsService {
 			path.resolve('src/database/datas', fileName),
 		);
 		for (const snsPhoto of snsPhotos) {
-			await this.snsPostRepository.update(
-				{
-					snsPostUrl: snsPhoto.snsPostUrl,
-				},
-				{ photoUrl: snsPhoto.photoUrl },
-			);
+			if (snsPhoto.photoUrl === '-') await this.snsPostRepository.delete({ snsPostUrl: snsPhoto.snsPostUrl });
+			else {
+				await this.snsPostRepository.update(
+					{
+						snsPostUrl: snsPhoto.snsPostUrl,
+					},
+					{ photoUrl: snsPhoto.photoUrl },
+				);
+			}
 		}
 		return true;
 	}
