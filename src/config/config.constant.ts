@@ -50,6 +50,10 @@ export type NcloudConfig = {
 	secretAccessKey: string;
 	storageEndPoint: string;
 	storageBucket: string;
+	serverIp: string;
+	serverUser: string;
+	serverPort: string;
+	serverPw: string;
 };
 
 export type SshConfig = {
@@ -116,6 +120,10 @@ export const ncloudConfig = (): { ncloudConfig: NcloudConfig } => ({
 		secretAccessKey: process.env.NCLOUD_SECRET_ACCESS_KEY,
 		storageEndPoint: process.env.NCLOUD_STORAGE_ENDPOINT,
 		storageBucket: process.env.NCLOUD_STORAGE_BUCKET,
+		serverIp: process.env.NCLOUD_SERVER_IP,
+		serverUser: process.env.NCLOUD_SERVER_USER,
+		serverPw: process.env.NCLOUD_SERVER_PW,
+		serverPort: process.env.NCLOUD_SERVER_PORT,
 	},
 });
 
