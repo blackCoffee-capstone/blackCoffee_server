@@ -97,10 +97,11 @@ export class RanksService {
 				.orderBy('after_rank', 'ASC')
 				.getRawMany();
 
+			let rank = 1;
 			let ranking = Array.from(rankingListSpots).map(function (spot) {
 				return new RankingListResponseDto({
 					...spot,
-					rank: spot.after_rank,
+					rank: rank++,
 					variance: spot.before_rank ? spot.before_rank - spot.after_rank : null,
 					views: +spot.clicks,
 					wishes: +spot.wishes,
@@ -142,14 +143,13 @@ export class RanksService {
 				.orderBy('current_rank', 'ASC')
 				.getRawMany();
 
-			const ranking = Array.from(rankingMapSpots).map(
-				(spot) =>
-					new RankingMapResponseDto({
-						...spot,
-						rank: spot.current_rank,
-					}),
-			);
-
+			let rank = 1;
+			const ranking = Array.from(rankingMapSpots).map(function (spot) {
+				return new RankingMapResponseDto({
+					...spot,
+					rank: rank++,
+				});
+			});
 			return new RankingResponseDto({
 				prev: week[0] ? week[0] : null,
 				next: week[1] ? week[1] : null,
