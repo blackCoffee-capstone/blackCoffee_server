@@ -228,7 +228,7 @@ export class AuthService {
 			throw new NotFoundException('User is not found');
 		}
 
-		const tempPw: string = Math.random().toString(36).slice(2);
+		const tempPw: string = this.getTmpPw();
 		const tempHashPw = await this.hashPassword.hash(tempPw);
 		await this.usersRepository.update(foundEmailUser.id, {
 			password: tempHashPw,
@@ -237,7 +237,6 @@ export class AuthService {
 		this.mailerService.sendMail({
 			to: email,
 			subject: '[지금,여기] 임시 비밀번호 발급 메일입니다 :)',
-			// TODO: Template
 			html: `
 		<p>지금,여기 서비스 입니다! 아래 임시 비밀번호로 지금,여기 앱에 로그인해주세요.</p>
 		<p>임시 비밀번호: <span>${tempPw}</span></p>
@@ -334,7 +333,7 @@ export class AuthService {
 
 	private pwCheck(newPW: string): boolean {
 		// 8~15자리 사이 숫자, 특수문자, 영어 1개 이상씩
-		const reg_pw = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[?!@#$%^&*()+=_-]).{8,15}/;
+		const reg_pw = /(?=.*\d)(?=.*[a-zA-Z])(?=.*[?!@#$%^&*()+=_-]).{8,15}/;
 		const pass = reg_pw.test(newPW);
 		if (pass) return true;
 		else throw new BadRequestException('Password is not valid');
@@ -360,5 +359,77 @@ export class AuthService {
 			else if (escape(str.charAt(i)) != '%0D') strByteLength++;
 		}
 		return strByteLength;
+	}
+
+	private getTmpPw(): string {
+		const ranValue1 = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+		const ranValue2 = [
+			'A',
+			'B',
+			'C',
+			'D',
+			'E',
+			'F',
+			'G',
+			'H',
+			'I',
+			'J',
+			'K',
+			'L',
+			'M',
+			'N',
+			'O',
+			'P',
+			'Q',
+			'R',
+			'S',
+			'T',
+			'U',
+			'V',
+			'W',
+			'X',
+			'Y',
+			'Z',
+		];
+		const ranValue3 = [
+			'a',
+			'b',
+			'c',
+			'd',
+			'e',
+			'f',
+			'g',
+			'h',
+			'i',
+			'j',
+			'k',
+			'l',
+			'm',
+			'n',
+			'o',
+			'p',
+			'q',
+			'r',
+			's',
+			't',
+			'u',
+			'v',
+			'w',
+			'x',
+			'y',
+			'z',
+		];
+		const ranValue4 = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')'];
+
+		let temp_pw = '';
+
+		for (let i = 0; i < 2; i++) {
+			const ranPick1 = Math.floor(Math.random() * ranValue1.length);
+			const ranPick2 = Math.floor(Math.random() * ranValue2.length);
+			const ranPick3 = Math.floor(Math.random() * ranValue3.length);
+			const ranPick4 = Math.floor(Math.random() * ranValue4.length);
+			temp_pw = temp_pw + ranValue1[ranPick1] + ranValue2[ranPick2] + ranValue3[ranPick3] + ranValue4[ranPick4];
+		}
+		return temp_pw;
 	}
 }
