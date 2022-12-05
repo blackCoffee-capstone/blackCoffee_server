@@ -1,6 +1,5 @@
 $(document).ready(function () {
 	var accessToken = localStorage.getItem('accessToken');
-	var empty;
 
 	$.ajax({
 		url: '/users/admin-test',
