@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, Post, Query, Redirect, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Header, Post, Redirect, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { AuthUser, FacebookUser } from 'src/decorators/auth.decorator';
@@ -8,6 +8,7 @@ import { UserResponseDto } from '../users/dto/user-response.dto';
 import { ApiDocs } from './auth.docs';
 import { AuthService } from './auth.service';
 import { DeleteUserRequestDto } from './dto/delete-user-request.dto';
+import { KakaoLoginRequestDto } from './dto/kakao-login-request.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { OauthUserDto } from './dto/oauth-user.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
@@ -23,8 +24,8 @@ export class AuthController {
 
 	@Post('/kakao-login')
 	@ApiDocs.kakaoLogin('카카오 로그인 회원가입&로그인 후 유저 정보, 토큰 반환')
-	async kakaoLogin(@Query('code') code: string) {
-		const accessToken: string = await this.authService.getKakaoAccessToken(code);
+	async kakaoLogin(@Body() codeReq: KakaoLoginRequestDto) {
+		const accessToken: string = await this.authService.getKakaoAccessToken(codeReq.code);
 		const kakaoUser: OauthUserDto = await this.authService.getKakaoUserData(accessToken);
 		const user: UserResponseDto = await this.authService.createOauthUser(kakaoUser, UserType.Kakao);
 		return this.authService.login(user);
