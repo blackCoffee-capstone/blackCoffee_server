@@ -52,6 +52,10 @@ jobs:
                   echo NCLOUD_SECRET_ACCESS_KEY=${{secrets.NCLOUD_SECRET_ACCESS_KEY}} >> .env.test
                   echo NCLOUD_STORAGE_ENDPOINT=${{secrets.NCLOUD_STORAGE_ENDPOINT}} >> .env.test
                   echo NCLOUD_STORAGE_BUCKET=${{secrets.NCLOUD_STORAGE_BUCKET}} >> .env.test
+                  echo NCLOUD_SERVER_IP=${{secrets.NCLOUD_SERVER_IP}} >> .env.test
+                  echo NCLOUD_SERVER_USER=${{secrets.NCLOUD_SERVER_USER}} >> .env.test
+                  echo NCLOUD_SERVER_PW=${{secrets.NCLOUD_SERVER_PW}} >> .env.test
+                  echo NCLOUD_SERVER_PORT=${{secrets.NCLOUD_SERVER_PORT}} >> .env.test
                   echo SSH_HOST=${{secrets.SSH_HOST}} >> .env.test
                   echo SSH_USERNAME=${{secrets.SSH_USERNAME}} >> .env.test
                   echo SSH_PORT=${{secrets.SSH_PORT}} >> .env.test
