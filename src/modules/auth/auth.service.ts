@@ -150,7 +150,8 @@ export class AuthService {
 			(await this.errIfNotVerifyEmail(signUpRequestDto)) &&
 			(await this.errIfDuplicateNickname(signUpRequestDto)) &&
 			this.pwCheck(signUpRequestDto.password) &&
-			this.nickNameFormat(signUpRequestDto.nickname)
+			this.nickNameFormat(signUpRequestDto.nickname) &&
+			this.nameFormat(signUpRequestDto.name)
 		) {
 			signUpRequestDto.password = await this.hashPassword.hash(signUpRequestDto.password);
 			const user = this.usersRepository.create({
@@ -367,16 +368,24 @@ export class AuthService {
 	}
 
 	private nickNameFormat(nickname: string): boolean {
-		const regex = /^[가-힣a-zA-Z0-9~!?@#$%^&*+=()[\]/'",.<>:;_-]+$/;
-
-		// 4byte 이상, 15자 이하
-		if (this.getByte(nickname) >= 4 && nickname.length <= 15 && regex.test(nickname)) {
+		// 4byte 이상, 18자 이하
+		const regex_nick = /^[가-힣a-zA-Z0-9~!?@#$%^&*+=()[\]/'",.<>:;_-]+$/;
+		// 4byte 이상, 18자 이하
+		if (this.getByte(nickname) >= 4 && nickname.length <= 18 && regex_nick.test(nickname)) {
 			return true;
 		} else {
 			throw new BadRequestException('Nickname is not valid');
 		}
 	}
 
+	private nameFormat(name: string): boolean {
+		const regex_name = /^[가-힣]{2,8}|[a-zA-Z]{2,16}$/;
+		if (this.getByte(name) <= 16 && regex_name.test(name)) {
+			return true;
+		} else {
+			throw new BadRequestException('Name is not valid');
+		}
+	}
 	private getByte(str: string) {
 		const strLength = str.length;
 		let strByteLength = 0;
