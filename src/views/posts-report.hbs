@@ -1,9 +1,9 @@
 <html>
 	<head>
 		<meta charset='utf-8' />
-		<link rel='stylesheet' href='/css/admin-main.css' />
+		<link rel='stylesheet' href='/css/posts-report.css' />
 		<script src='/lib/jquery-3.6.1.min.js'></script>
-		<script src='/js/admin-main.js'></script>
+		<script src='/js/posts-report.js'></script>
 		<link rel='preconnect' href='https://fonts.googleapis.com' />
 		<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
 		<link href='https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap' rel='stylesheet' />
@@ -21,6 +21,11 @@
 			type='text/css'
 			href='https://cdn.datatables.net/responsive/2.4.0/css/responsive.bootstrap4.min.css'
 		/>
+		<link
+			type='text/css'
+			href='//gyrocode.github.io/jquery-datatables-checkboxes/1.2.12/css/dataTables.checkboxes.css'
+			rel='stylesheet'
+		/>
 		<script
 			type='text/javascript'
 			src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js'
@@ -37,19 +42,15 @@
 		></script>
 		<script
 			type='text/javascript'
-			src='https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js'
+			src='//gyrocode.github.io/jquery-datatables-checkboxes/1.2.12/js/dataTables.checkboxes.min.js'
 		></script>
 
-		<link
-			rel='stylesheet'
-			href='https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0'
-		/>
 	</head>
 	<body>
 
 		<div class='header'>
 			<div id='admin_page'>
-				<a>ADMIN PAGE</a>
+				<a>커뮤니티 신고 내역</a>
 				<div class='material-symbols-outlined logout'>
 					logout
 				</div>
@@ -59,7 +60,7 @@
 
 		<div class='container'>
 			<div class='home'>
-				<a href='/admin'>지금, 여기</a>
+				<a href='/admin'> 지금, 여기 </a>
 			</div>
 			<ul id='menu'>
 				<li class='main_menu'>
@@ -78,72 +79,35 @@
 			</ul>
 		</div>
 
-		<div class='wrap'>
-			<div class='ad_box box'>
-				<div class='manage_top'>
-					광고 요청 목록
-				</div>
-				<table class='list_table ad-request'>
-					<thead>
-						<tr>
-							<th>NO</th>
-							<th>BUSINESS</th>
-							<th>EMAIL</th>
-							<th>DATE</th>
-							<th>STATUS</th>
-							<th>DETAIL</th>
-						</tr>
-					</thead>
-				</table>
+		<div class='ad'>
+			<button class='btn btn-update' type='button'>테이블 업데이트</button>
+			<form class='radio'>
+				<input type='radio' name='status' value='' checked='checked' />ALL
+				<input type='radio' name='status' value='Todo' />TODO
+				<input type='radio' name='status' value='Approve' />APPROVE
+				<input type='radio' name='status' value='Reject' />REJECT
+			</form>
+			<div>
+				<button type='button' class='btn btn-todo'>Todo</button>
+				<button type='button' class='btn btn-approve'>Approve</button>
+				<button type='button' class='btn btn-reject'>Reject</button>
 			</div>
-			<div class='community_box box'>
-				<div class='manage_top'>
-					신고 내역 목록
-				</div>
-				<table class='list_table posts-report'>
+			<form id='frm-example'>
+				<table id='list_table' class='list_table'>
 					<thead>
 						<tr>
+							<th></th>
+							<th>NO</th>
 							<th>USER</th>
-							<th>DETAIL</th>
+							<th>REASON</th>
+							<th>STATUS</th>
+							<th>LINK</th>
+							<th>DELETE</th>
 						</tr>
 					</thead>
 				</table>
-			</div>
+			</form>
 		</div>
 
-		<div class='wrap'>
-			<div class='ad_reg_box box'>
-				<div class='manage_top'>
-					광고 등록 및 수정 목록
-				</div>
-				<table class='list_table ad-register'>
-					<thead>
-						<tr>
-							<th>NO</th>
-							<th>BUSINESS</th>
-							<th>EMAIL</th>
-							<th>DATE</th>
-							<th>DETAIL</th>
-						</tr>
-					</thead>
-				</table>
-			</div>
-
-			<div class='box_wrap'>
-				<div class='user-page csv'>
-					<p>CSV 파일 업로드</p>
-					<form id='upload-form' enctype='multipart/form-data'>
-						<input type='file' name='file' id='file-upload' />
-					</form>
-					<button class='btn btn-submit'>업로드</button>
-				</div>
-				<div class='user-page model'>
-					<p>추천 모델 훈련</p>
-					<a>일주일에 한 번 아래의 버튼을 눌러주세요!</a>
-					<div><button class='btn btn-training'>모델 훈련</button></div>
-				</div>
-			</div>
-
-		</div>
 	</body>
 </html>

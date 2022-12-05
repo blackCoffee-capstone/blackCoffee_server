@@ -76,6 +76,31 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 			}),
 		);
 	},
+	updateSnsPostPhotos(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: 'sns post의 photourl 업데이트 (유효기간때문)',
+			}),
+			ApiConsumes('multipart/form-data'),
+			ApiBody({
+				schema: {
+					type: 'object',
+					properties: {
+						file: {
+							type: 'string',
+							format: 'binary',
+						},
+					},
+				},
+			}),
+			ApiResponse({
+				status: 201,
+				description: '',
+				type: boolean,
+			}),
+		);
+	},
 	detailSpot(summary: string) {
 		return applyDecorators(
 			ApiOperation({

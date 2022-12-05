@@ -59,13 +59,16 @@ export class UsersService {
 	}
 
 	async updateUser(userId: number, updateUserData: UpdateUserRequestDto): Promise<boolean> {
+		if (!updateUserData.name && !updateUserData.nickname) {
+			throw new BadRequestException(`Name and nickname is null`);
+		}
+		if (updateUserData.nickname && this.nickNameFormat(updateUserData.nickname)) {
+			await this.errIfDuplicateNickname(updateUserData.nickname);
+		}
+		if (updateUserData.name) {
+			this.nameFormat(updateUserData.name);
+		}
 		try {
-			if (!updateUserData.name && !updateUserData.nickname) {
-				throw new BadRequestException(`Name and nickname is null`);
-			}
-			if (updateUserData.nickname) {
-				await this.errIfDuplicateNickname(updateUserData.nickname);
-			}
 			await this.usersRepository.update(userId, updateUserData);
 			return true;
 		} catch (error) {
@@ -138,9 +141,10 @@ export class UsersService {
 		if (!(await this.isValidPassword(foundUser.password, changePwDto.originPw))) {
 			throw new UnauthorizedException('Password is incorrect');
 		}
-		foundUser.password = await this.hashPassword.hash(changePwDto.newPw);
-		await this.usersRepository.update(user.id, foundUser);
-
+		if (this.pwCheck(changePwDto.newPw)) {
+			foundUser.password = await this.hashPassword.hash(changePwDto.newPw);
+			await this.usersRepository.update(user.id, foundUser);
+		}
 		return true;
 	}
 
@@ -153,7 +157,8 @@ export class UsersService {
 				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
 				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
-				.where('user.id = :userId', { userId })
+				.where('snsPosts.photoUrl is not null')
+				.andWhere('user.id = :userId', { userId })
 				.orderBy('wishSpot.created_at', 'DESC');
 
 			const totalPageWishes = await wishes.getMany();
@@ -334,5 +339,44 @@ export class UsersService {
 		if (foundNicknameUser) {
 			throw new BadRequestException('Nickname is already exist');
 		} else return true;
+	}
+
+	private pwCheck(newPW: string): boolean {
+		// 8~15자리 사이 숫자, 특수문자, 영어 1개 이상씩
+		if (newPW.length > 15 || newPW.length < 8) throw new BadRequestException('Password is not valid');
+		const reg_pw = /(?=.*\d)(?=.*[a-zA-Z])(?=.*[?!@#$%^&*()+=_-]).{8,15}/;
+		const pass = reg_pw.test(newPW);
+		if (pass) return true;
+		else throw new BadRequestException('Password is not valid');
+	}
+
+	private nickNameFormat(nickname: string): boolean {
+		// 4byte 이상, 18자 이하
+		const regex_nick = /^[가-힣a-zA-Z0-9~!?@#$%^&*+=()[\]/'",.<>:;_-]+$/;
+		// 4byte 이상, 18자 이하
+		if (this.getByte(nickname) >= 4 && nickname.length <= 18 && regex_nick.test(nickname)) {
+			return true;
+		} else {
+			throw new BadRequestException('Nickname is not valid');
+		}
+	}
+
+	private nameFormat(name: string): boolean {
+		const regex_name = /^[가-힣]{2,8}|[a-zA-Z]{2,16}$/;
+		if (this.getByte(name) <= 16 && regex_name.test(name)) {
+			return true;
+		} else {
+			throw new BadRequestException('Name is not valid');
+		}
+	}
+	private getByte(str: string) {
+		const strLength = str.length;
+		let strByteLength = 0;
+		for (let i = 0; i < strLength; i++) {
+			if (escape(str.charAt(i)).length >= 4) strByteLength += 2;
+			else if (escape(str.charAt(i)) == '%A7') strByteLength += 2;
+			else if (escape(str.charAt(i)) != '%0D') strByteLength++;
+		}
+		return strByteLength;
 	}
 }
