@@ -15,6 +15,7 @@ import { SnsPost } from 'src/entities/sns-posts.entity';
 import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { WishSpot } from 'src/entities/wish-spots.entity';
+import { SortType } from 'src/types/sort.types';
 import { Repository } from 'typeorm';
 import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
 import { RanksService } from '../ranks/ranks.service';
@@ -192,11 +193,11 @@ export class SpotsService {
 			});
 			for (const spot of addSpots) {
 				if (!spot.rank) spot.rank = null;
-				let location = await this.locationsRepository
+				let location = this.locationsRepository
 					.createQueryBuilder('location')
 					.where('metro_name = :metro', { metro: spot.metroName });
-				if (spot.localName === null) location = await location.andWhere('location.local_name is null');
-				else location = await location.andWhere('local_name = :local', { local: spot.localName });
+				if (spot.localName === null) location = location.andWhere('location.local_name is null');
+				else location = location.andWhere('local_name = :local', { local: spot.localName });
 				const oneLocation = await location.getOne();
 				if (!oneLocation) continue;
 				await this.createSpot(
@@ -348,8 +349,7 @@ export class SpotsService {
 				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
 				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
-				.where('snsPosts.photoUrl is not null')
-				.orderBy(`spot.${searchRequest.sorter}`, 'ASC');
+				.where('snsPosts.photoUrl is not null');
 			if (searchRequest.word) {
 				searchSpots = searchSpots.andWhere('spot.name Like :name', { name: `%${searchRequest.word}%` });
 			}
@@ -367,12 +367,17 @@ export class SpotsService {
 					.leftJoinAndSelect('snsPosts.theme', 'theme')
 					.andWhere('theme.id IN (:...themeIds)', { themeIds: searchRequest.themeIds });
 			}
+			if (searchRequest.sorter === SortType.Name) searchSpots = searchSpots.orderBy('spot.name', 'ASC');
+			else if (searchRequest.sorter === SortType.Rank) searchSpots = searchSpots.orderBy('spot.rank', 'ASC');
+
 			const totalPageSpots = await searchSpots.getMany();
 			const responseSpots = await searchSpots
-				.limit(searchRequest.take)
-				.offset((searchRequest.page - 1) * searchRequest.take)
+				.take(searchRequest.take)
+				.skip((searchRequest.page - 1) * searchRequest.take)
 				.getMany();
+
 			const totalPage = Math.ceil(totalPageSpots.length / searchRequest.take);
+			let order = totalPageSpots.length - (searchRequest.page - 1) * searchRequest.take;
 			const spots = [];
 			for (const spot of responseSpots) {
 				let isWish = false;
@@ -385,6 +390,7 @@ export class SpotsService {
 				spots.push(
 					new SearchResponseDto({
 						...spot,
+						order: order--,
 						views: spot.clickSpots.length,
 						wishes: spot.wishSpots.length,
 						isWish,

@@ -104,6 +104,7 @@ export class RecommendationsService {
 		const listRecommendationSpots = await this.getSpotsUseId(listRecommendationSpotIds);
 
 		const results: SearchResponseDto[] = [];
+		let order = 1;
 		for (const listRecommendationSpot of listRecommendationSpots) {
 			let isWish = false;
 			if (await this.isUsersWishSpot(userId, listRecommendationSpot.id)) isWish = true;
@@ -111,6 +112,7 @@ export class RecommendationsService {
 			results.push(
 				new SearchResponseDto({
 					...listRecommendationSpot,
+					order: order++,
 					views: listRecommendationSpot.clickSpots.length,
 					wishes: listRecommendationSpot.wishSpots.length,
 					isWish,
