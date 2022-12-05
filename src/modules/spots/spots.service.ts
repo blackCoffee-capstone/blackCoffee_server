@@ -26,6 +26,7 @@ import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchPageResponseDto } from './dto/search-page-response.dto';
 import { SearchRequestDto } from './dto/search-request.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
+import { SnsPhotoJsonDto } from './dto/sns-photo-json.dto';
 import { SnsPostRequestDto } from './dto/sns-post-request.dto';
 import { SpotRequestDto } from './dto/spot-request.dto';
 import { SpotsJsonDto } from './dto/spots-json.dto';
@@ -140,6 +141,26 @@ export class SpotsService {
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
+	}
+
+	async updateSnsPostPhotos(file: Express.Multer.File) {
+		if (!file) throw new BadRequestException('File is not exist');
+		const fileName: string = file.filename;
+		const snsPhotos: SnsPhotoJsonDto[] = await this.readCsvSnsPostPhotoUrls(
+			path.resolve('src/database/datas', fileName),
+		);
+		for (const snsPhoto of snsPhotos) {
+			if (snsPhoto.photoUrl === '-') await this.snsPostRepository.delete({ snsPostUrl: snsPhoto.snsPostUrl });
+			else {
+				await this.snsPostRepository.update(
+					{
+						snsPostUrl: snsPhoto.snsPostUrl,
+					},
+					{ photoUrl: snsPhoto.photoUrl },
+				);
+			}
+		}
+		return true;
 	}
 
 	private async saveSpot(metaData: SaveRequestDto[]) {
@@ -516,6 +537,33 @@ export class SpotsService {
 							datetime,
 							like,
 							text,
+						}),
+					);
+				})
+				.on('end', () => {
+					resolve(csvData);
+				});
+		});
+	}
+
+	private async readCsvSnsPostPhotoUrls(filePath: string): Promise<SnsPhotoJsonDto[]> {
+		return new Promise((resolve, reject) => {
+			const csvData: SnsPhotoJsonDto[] = [];
+			const csvStream = fs.createReadStream(filePath);
+			const csvParser = fastcsv.parse({ headers: true });
+
+			csvStream
+				.pipe(csvParser)
+				.on('error', (err) => {
+					throw new InternalServerErrorException(err);
+				})
+				.on('data', (row) => {
+					const snsPostUrl = row.snsPostUrl;
+					const photoUrl = row.photoUrl;
+					csvData.push(
+						new SnsPhotoJsonDto({
+							snsPostUrl,
+							photoUrl,
 						}),
 					);
 				})

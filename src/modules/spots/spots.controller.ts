@@ -55,7 +55,7 @@ export class SpotsController {
 						new HttpException(
 							{
 								message: 1,
-								error: '지원하지 않는 이미지 형식입니다.',
+								error: '지원하지 않는 형식입니다.',
 							},
 							HttpStatus.BAD_REQUEST,
 						),
@@ -80,6 +80,47 @@ export class SpotsController {
 	@ApiDocs.getSnsPostUrls('sns post url들 파일(test.txt)로 출력 (테스트위해)')
 	async getSnsPostUrls() {
 		return await this.spotsService.getSnsPostUrls();
+	}
+
+	@Post('sns-photos')
+	@UseInterceptors(
+		FileInterceptor('file', {
+			storage: diskStorage({
+				destination: (request, file, callback) => {
+					const uploadPath = 'src/database/datas';
+					if (!existsSync(uploadPath)) {
+						mkdirSync(uploadPath);
+					}
+					callback(null, uploadPath);
+				},
+				filename: (request, file, callback) => {
+					const fileOriginName = file.originalname.split(' ').join('');
+					const randomName = `${Date.now()}${fileOriginName}`;
+					randomName.split(' ').join('');
+					callback(null, randomName);
+				},
+			}),
+			fileFilter: (request, file, callback) => {
+				if (file.mimetype.match(/\/(csv)$/)) {
+					callback(null, true);
+				} else {
+					callback(
+						new HttpException(
+							{
+								message: 1,
+								error: '지원하지 않는 형식입니다.',
+							},
+							HttpStatus.BAD_REQUEST,
+						),
+						false,
+					);
+				}
+			},
+		}),
+	)
+	@ApiDocs.updateSnsPostPhotos('sns post의 photourl 업데이트 (유효기간때문)')
+	async updateSnsPostPhotos(@UploadedFile() snsPostPhotosCsvFile: Express.Multer.File) {
+		return await this.spotsService.updateSnsPostPhotos(snsPostPhotosCsvFile);
 	}
 
 	@Get(':spotId')
