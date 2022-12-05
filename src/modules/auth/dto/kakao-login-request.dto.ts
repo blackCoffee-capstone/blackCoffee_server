@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
 export class KakaoLoginRequestDto {
-	@ApiProperty({ description: '카카오 서버에서 받은 엑세스 토큰' })
-	readonly accessToken: string;
+	@IsString()
+	@ApiProperty({ description: '카카오 서버에서 받은 코드' })
+	readonly code: string;
 }

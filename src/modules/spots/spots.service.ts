@@ -16,7 +16,6 @@ import { Spot } from 'src/entities/spots.entity';
 import { Theme } from 'src/entities/theme.entity';
 import { WishSpot } from 'src/entities/wish-spots.entity';
 import { Repository } from 'typeorm';
-import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
 import { RanksService } from '../ranks/ranks.service';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
@@ -124,6 +123,25 @@ export class SpotsService {
 		const metaData: SaveRequestDto[] = spots.map((spot) => new SaveRequestDto(spot));
 		return await this.saveSpot(metaData);
 	}
+
+	async getSnsPostUrls() {
+		try {
+			const snsPostUrls = await this.snsPostRepository
+				.createQueryBuilder('snsPost')
+				.select('snsPost.snsPostUrl')
+				.getMany();
+			let text = '';
+			for (const snsPostUrlData of snsPostUrls) {
+				text += snsPostUrlData.snsPostUrl + '\n';
+			}
+			fs.writeFileSync('./test.txt', text);
+
+			return true;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
+	}
+
 	private async saveSpot(metaData: SaveRequestDto[]) {
 		try {
 			await this.spotsRepository.update({}, { rank: null });
@@ -134,6 +152,7 @@ export class SpotsService {
 			throw new InternalServerErrorException(error.message, error);
 		}
 	}
+
 	private async noDuplicateSpot(metaData: SaveRequestDto[]) {
 		try {
 			const addSpots = metaData.filter((character, idx, arr) => {
