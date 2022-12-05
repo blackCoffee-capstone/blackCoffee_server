@@ -153,7 +153,8 @@ export class UsersService {
 				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
 				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
-				.where('user.id = :userId', { userId })
+				.where('snsPosts.photoUrl is not null')
+				.andWhere('user.id = :userId', { userId })
 				.orderBy('wishSpot.created_at', 'DESC');
 
 			const totalPageWishes = await wishes.getMany();
