@@ -1,18 +1,18 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Rank } from 'src/entities/rank.entity';
-import { Spot } from 'src/entities/spots.entity';
-import { SnsPost } from 'src/entities/sns-posts.entity';
-import { WishSpot } from 'src/entities/wish-spots.entity';
 import { ClickSpot } from 'src/entities/click-spots.entity';
+import { Rank } from 'src/entities/rank.entity';
+import { SnsPost } from 'src/entities/sns-posts.entity';
+import { Spot } from 'src/entities/spots.entity';
+import { WishSpot } from 'src/entities/wish-spots.entity';
 import { RankingListResponseDto } from './dto/ranking-list-response.dto';
 import { RankingMapResponseDto } from './dto/ranking-map-response.dto';
 import { RankingRequestDto } from './dto/ranking-request.dto';
+import { RankingResponseDto } from './dto/ranking-response.dto';
 import { RanksRecordRequestDto } from './dto/ranks-record-request.dto';
 import { RanksUpdateRequestDto } from './dto/ranks-update-request.dto';
-import { RankingResponseDto } from './dto/ranking-response.dto';
 
 @Injectable()
 export class RanksService {
@@ -50,11 +50,46 @@ export class RanksService {
 		const week = await this.weekCalulation(rankingRequest);
 
 		try {
-			const rankingListSpots = await this.spotsRepository
+			let rankingListSpotsQuery = this.spotsRepository
 				.createQueryBuilder('spot')
 				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
+				.andWhere('rankings.rank >= 1')
+				.andWhere('rankings.rank <= 20');
+
+			const rankingListSpotsQueryData = await rankingListSpotsQuery.orderBy('rankings.rank', 'ASC').getMany();
+
+			if (rankingListSpotsQueryData.length !== 20) {
+				let rankIndex = 1;
+				const allOriginRankingsData = await this.spotsRepository
+					.createQueryBuilder('spot')
+					.innerJoinAndSelect('spot.location', 'location')
+					.innerJoinAndSelect('spot.rankings', 'rankings')
+					.where('rankings.date = :date', { date: rankingRequest.date })
+					.orderBy('rankings.rank', 'ASC')
+					.getMany();
+
+				for (const allOriginRanking of allOriginRankingsData) {
+					await this.ranksRepository.update(
+						{ spotId: allOriginRanking.id },
+						{
+							rank: rankIndex++,
+						},
+					);
+					if (rankIndex === 21) break;
+				}
+			}
+
+			rankingListSpotsQuery = this.spotsRepository
+				.createQueryBuilder('spot')
+				.innerJoinAndSelect('spot.location', 'location')
+				.innerJoinAndSelect('spot.rankings', 'rankings')
+				.where('rankings.date = :date', { date: rankingRequest.date })
+				.andWhere('rankings.rank >= 1')
+				.andWhere('rankings.rank <= 20');
+
+			const rankingListSpots = await rankingListSpotsQuery
 				.select('spot.id AS id, spot.name AS name, spot.address AS address')
 				.addSelect('location.id AS location_id, location.metroName AS metro, location.localName AS local')
 				.addSelect((afterRank) => {
@@ -97,11 +132,10 @@ export class RanksService {
 				.orderBy('after_rank', 'ASC')
 				.getRawMany();
 
-			let rank = 1;
 			let ranking = Array.from(rankingListSpots).map(function (spot) {
 				return new RankingListResponseDto({
 					...spot,
-					rank: rank++,
+					rank: spot.after_rank,
 					variance: spot.before_rank ? spot.before_rank - spot.after_rank : null,
 					views: +spot.clicks,
 					wishes: +spot.wishes,
@@ -143,11 +177,10 @@ export class RanksService {
 				.orderBy('current_rank', 'ASC')
 				.getRawMany();
 
-			let rank = 1;
 			const ranking = Array.from(rankingMapSpots).map(function (spot) {
 				return new RankingMapResponseDto({
 					...spot,
-					rank: rank++,
+					rank: spot.current_rank,
 				});
 			});
 			return new RankingResponseDto({
