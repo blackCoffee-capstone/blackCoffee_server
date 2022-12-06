@@ -346,9 +346,29 @@ export class SpotsService {
 		try {
 			let searchSpots = this.spotsRepository
 				.createQueryBuilder('spot')
-				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
-				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
 				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
+				.select('Distinct spot.id AS id, spot.address AS address, spot.name AS name, spot.rank AS rank')
+				.addSelect((clicks) => {
+					return clicks
+						.select('COUNT (*)', 'clickSpots')
+						.from(ClickSpot, 'clickSpots')
+						.where('clickSpots.spotId = spot.id')
+						.limit(1);
+				}, 'clicks')
+				.addSelect((wishes) => {
+					return wishes
+						.select('COUNT (*)', 'wishSpots')
+						.from(WishSpot, 'wishSpots')
+						.where('wishSpots.spotId = spot.id')
+						.limit(1);
+				}, 'wishes')
+				.addSelect((photoUrl) => {
+					return photoUrl
+						.select('snsPosts.photoUrl', 'photoUrl')
+						.from(SnsPost, 'snsPosts')
+						.where('snsPosts.spotId = spot.id')
+						.limit(1);
+				}, 'photoUrl')
 				.where('snsPosts.photoUrl is not null');
 			if (searchRequest.word) {
 				searchSpots = searchSpots.andWhere('spot.name Like :name', { name: `%${searchRequest.word}%` });
@@ -367,14 +387,16 @@ export class SpotsService {
 					.leftJoinAndSelect('snsPosts.theme', 'theme')
 					.andWhere('theme.id IN (:...themeIds)', { themeIds: searchRequest.themeIds });
 			}
-			if (searchRequest.sorter === SortType.Name) searchSpots = searchSpots.orderBy('spot.name', 'ASC');
-			else if (searchRequest.sorter === SortType.Rank) searchSpots = searchSpots.orderBy('spot.rank', 'ASC');
 
-			const totalPageSpots = await searchSpots.getMany();
+			if (searchRequest.sorter === SortType.Rank) searchSpots = searchSpots.orderBy('spot.rank', 'ASC');
+			else if (searchRequest.sorter === SortType.View) searchSpots = searchSpots.orderBy('clicks', 'DESC');
+			else if (searchRequest.sorter === SortType.Wish) searchSpots = searchSpots.orderBy('wishes', 'DESC');
+
+			const totalPageSpots = await searchSpots.getRawMany();
 			const responseSpots = await searchSpots
-				.take(searchRequest.take)
-				.skip((searchRequest.page - 1) * searchRequest.take)
-				.getMany();
+				.limit(searchRequest.take)
+				.offset((searchRequest.page - 1) * searchRequest.take)
+				.getRawMany();
 
 			const totalPage = Math.ceil(totalPageSpots.length / searchRequest.take);
 			let order = totalPageSpots.length - (searchRequest.page - 1) * searchRequest.take;
@@ -391,10 +413,9 @@ export class SpotsService {
 					new SearchResponseDto({
 						...spot,
 						order: order--,
-						views: spot.clickSpots.length,
-						wishes: spot.wishSpots.length,
+						views: +spot.clicks,
+						wishes: +spot.wishes,
 						isWish,
-						photoUrl: spot.snsPosts[0].photoUrl,
 					}),
 				);
 			}

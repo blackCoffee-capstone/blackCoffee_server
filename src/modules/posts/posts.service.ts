@@ -542,8 +542,8 @@ export class PostsService {
 
 			const totalPagePosts = await posts.getRawMany();
 			const responsePosts = await posts
-				.take(searchRequest.take)
-				.skip((searchRequest.page - 1) * searchRequest.take)
+				.limit(searchRequest.take)
+				.offset((searchRequest.page - 1) * searchRequest.take)
 				.getRawMany();
 
 			let order = totalPagePosts.length - (searchRequest.page - 1) * searchRequest.take;
