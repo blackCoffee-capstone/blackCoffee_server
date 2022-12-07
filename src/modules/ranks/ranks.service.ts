@@ -157,11 +157,46 @@ export class RanksService {
 		try {
 			const week = await this.weekCalulation(rankingRequest);
 
-			const rankingMapSpots = await this.spotsRepository
+			let rankingMapSpotsQuery = this.spotsRepository
 				.createQueryBuilder('spot')
 				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
+				.andWhere('rankings.rank >= 1')
+				.andWhere('rankings.rank <= 20');
+
+			const rankingMapSpotsQueryData = await rankingMapSpotsQuery.orderBy('rankings.rank', 'ASC').getMany();
+
+			if (rankingMapSpotsQueryData.length !== 20) {
+				let rankIndex = 1;
+				const allOriginRankingsData = await this.spotsRepository
+					.createQueryBuilder('spot')
+					.innerJoinAndSelect('spot.location', 'location')
+					.innerJoinAndSelect('spot.rankings', 'rankings')
+					.where('rankings.date = :date', { date: rankingRequest.date })
+					.orderBy('rankings.rank', 'ASC')
+					.getMany();
+
+				for (const allOriginRanking of allOriginRankingsData) {
+					await this.ranksRepository.update(
+						{ spotId: allOriginRanking.id },
+						{
+							rank: rankIndex++,
+						},
+					);
+					if (rankIndex === 21) break;
+				}
+			}
+
+			rankingMapSpotsQuery = this.spotsRepository
+				.createQueryBuilder('spot')
+				.innerJoinAndSelect('spot.location', 'location')
+				.innerJoinAndSelect('spot.rankings', 'rankings')
+				.where('rankings.date = :date', { date: rankingRequest.date })
+				.andWhere('rankings.rank >= 1')
+				.andWhere('rankings.rank <= 20');
+
+			const rankingMapSpots = await rankingMapSpotsQuery
 				.select(
 					'spot.id AS id, spot.name AS name, spot.latitude AS latitude, spot.longitude AS longitude, spot.address AS address',
 				)
