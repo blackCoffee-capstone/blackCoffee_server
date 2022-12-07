@@ -2,10 +2,7 @@ import { Body, Controller, Get, Patch, Post, Query, UseGuards } from '@nestjs/co
 import { ApiTags } from '@nestjs/swagger';
 
 import { AuthUser } from 'src/decorators/auth.decorator';
-import { Roles } from 'src/decorators/roles.decorator';
-import { UserType } from 'src/types/users.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/role.guard';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
 import { UpdateUserRequestDto } from './dto/update-user-request.dto';
 import { UserMyPageRequestDto } from './dto/user-mypage-request.dto';
@@ -29,14 +26,6 @@ export class UsersController {
 	@ApiDocs.updateUser('사용자 정보 변경 (이름, 닉네임)')
 	async updateUser(@AuthUser() userData, @Body() updateUserDto: UpdateUserRequestDto) {
 		return await this.usersService.updateUser(userData.id, updateUserDto);
-	}
-
-	@Get('/admin-test')
-	@UseGuards(RolesGuard)
-	@Roles(UserType.Admin)
-	@ApiDocs.adminTest('관리자 전용 api 테스트')
-	async adminTest(@AuthUser() userData) {
-		return 'User is Admin';
 	}
 
 	@Post('/taste-themes')
