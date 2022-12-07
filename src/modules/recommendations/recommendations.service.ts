@@ -255,7 +255,7 @@ export class RecommendationsService {
 											.then(async function () {
 												await ssh
 													.execCommand(
-														`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_training.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_taste_themes.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_spots.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_wish_spots.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_click_spots.json" True`,
+														`bash "/home/iknow/Desktop/blackcoffee/placeRecommender/run_training.sh" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_taste_themes.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_spots.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_click_spots.json" "/home/iknow/Desktop/blackcoffee/placeRecommender/testingData/input_wish_spots.json" True`,
 														{},
 													)
 													.then(async function () {
