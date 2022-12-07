@@ -497,14 +497,14 @@ export class PostsService {
 				.addSelect('user.id AS user, user.nickname AS name')
 				.addSelect((clicks) => {
 					return clicks
-						.select('COUNT (*)', 'clickPosts')
+						.select('COUNT (*)::int AS clicks')
 						.from(ClickPost, 'clickPosts')
 						.where('clickPosts.postId = post.id')
 						.limit(1);
 				}, 'clicks')
 				.addSelect((likes) => {
 					return likes
-						.select('COUNT (*)', 'likePosts')
+						.select('COUNT (*)::int AS likes')
 						.from(LikePost, 'likePosts')
 						.where('likePosts.postId = post.id')
 						.limit(1);
@@ -542,8 +542,8 @@ export class PostsService {
 
 			const totalPagePosts = await posts.getRawMany();
 			const responsePosts = await posts
-				.take(searchRequest.take)
-				.skip((searchRequest.page - 1) * searchRequest.take)
+				.limit(searchRequest.take)
+				.offset((searchRequest.page - 1) * searchRequest.take)
 				.getRawMany();
 
 			let order = totalPagePosts.length - (searchRequest.page - 1) * searchRequest.take;
@@ -553,8 +553,8 @@ export class PostsService {
 					new MainPostsResponseDto({
 						...post,
 						order: order--,
-						views: +post.clicks,
-						likes: +post.likes,
+						views: post.clicks,
+						likes: post.likes,
 						createdAt: post.create,
 						photoUrls: post.photos,
 						isLike: post.likeUsers ? true : false,
