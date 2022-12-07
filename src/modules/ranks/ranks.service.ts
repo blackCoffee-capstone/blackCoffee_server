@@ -52,7 +52,6 @@ export class RanksService {
 		try {
 			let rankingListSpotsQuery = this.spotsRepository
 				.createQueryBuilder('spot')
-				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
 				.andWhere('rankings.rank >= 1')
@@ -64,7 +63,6 @@ export class RanksService {
 				let rankIndex = 1;
 				const allOriginRankingsData = await this.spotsRepository
 					.createQueryBuilder('spot')
-					.innerJoinAndSelect('spot.location', 'location')
 					.innerJoinAndSelect('spot.rankings', 'rankings')
 					.where('rankings.date = :date', { date: rankingRequest.date })
 					.orderBy('rankings.rank', 'ASC')
@@ -83,7 +81,6 @@ export class RanksService {
 
 			rankingListSpotsQuery = this.spotsRepository
 				.createQueryBuilder('spot')
-				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
 				.andWhere('rankings.rank >= 1')
@@ -91,7 +88,6 @@ export class RanksService {
 
 			const rankingListSpots = await rankingListSpotsQuery
 				.select('spot.id AS id, spot.name AS name, spot.address AS address')
-				.addSelect('location.id AS location_id, location.metroName AS metro, location.localName AS local')
 				.addSelect((afterRank) => {
 					return afterRank
 						.select('rankings.rank', 'after_rank')
@@ -159,7 +155,6 @@ export class RanksService {
 
 			let rankingMapSpotsQuery = this.spotsRepository
 				.createQueryBuilder('spot')
-				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
 				.andWhere('rankings.rank >= 1')
@@ -171,7 +166,6 @@ export class RanksService {
 				let rankIndex = 1;
 				const allOriginRankingsData = await this.spotsRepository
 					.createQueryBuilder('spot')
-					.innerJoinAndSelect('spot.location', 'location')
 					.innerJoinAndSelect('spot.rankings', 'rankings')
 					.where('rankings.date = :date', { date: rankingRequest.date })
 					.orderBy('rankings.rank', 'ASC')
@@ -190,7 +184,6 @@ export class RanksService {
 
 			rankingMapSpotsQuery = this.spotsRepository
 				.createQueryBuilder('spot')
-				.innerJoinAndSelect('spot.location', 'location')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
 				.andWhere('rankings.rank >= 1')
@@ -200,7 +193,6 @@ export class RanksService {
 				.select(
 					'spot.id AS id, spot.name AS name, spot.latitude AS latitude, spot.longitude AS longitude, spot.address AS address',
 				)
-				.addSelect('location.id AS location_id, location.metroName AS metro, location.localName AS local')
 				.addSelect((currentRank) => {
 					return currentRank
 						.select('rankings.rank', 'current_rank')
