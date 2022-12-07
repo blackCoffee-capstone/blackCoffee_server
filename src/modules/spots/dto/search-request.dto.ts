@@ -14,10 +14,10 @@ export class SearchRequestDto {
 	@IsOptional()
 	@ApiProperty({
 		enum: SortType,
-		default: SortType.Name,
-		description: '정렬 기준 (이름순: Name, 인기순: Rank)',
+		default: SortType.View,
+		description: '정렬 기준 (조회순: View, 인기순: Wish, 랭킹순: Rank)',
 	})
-	readonly sorter?: SortType = SortType.Name;
+	readonly sorter?: SortType = SortType.View;
 
 	@IsNumber()
 	@IsOptional()

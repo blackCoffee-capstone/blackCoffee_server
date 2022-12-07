@@ -47,7 +47,7 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 			ApiQuery({
 				name: 'sorter',
 				required: false,
-				description: '정렬 기준 (이름순: Name, 인기순: Rank)',
+				description: '정렬 기준 (조회순: View, 인기순: Wish, 랭킹순: Rank)',
 			}),
 			ApiQuery({
 				name: 'page',

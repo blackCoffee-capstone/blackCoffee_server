@@ -1,4 +1,5 @@
 export enum SortType {
-	Name = 'Name',
+	View = 'View',
+	Wish = 'Wish',
 	Rank = 'Rank',
 }

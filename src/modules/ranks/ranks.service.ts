@@ -75,14 +75,14 @@ export class RanksService {
 				}, 'before_rank')
 				.addSelect((wishes) => {
 					return wishes
-						.select('COUNT (*)', 'wishSpots')
+						.select('COUNT (*)::int AS wishes')
 						.from(WishSpot, 'wishSpots')
 						.where('wishSpots.spotId = spot.id')
 						.limit(1);
 				}, 'wishes')
 				.addSelect((clicks) => {
 					return clicks
-						.select('COUNT (*)', 'clickSpots')
+						.select('COUNT (*)::int AS clicks')
 						.from(ClickSpot, 'clickSpots')
 						.where('clickSpots.spotId = spot.id')
 						.limit(1);
@@ -103,8 +103,8 @@ export class RanksService {
 					...spot,
 					rank: rank++,
 					variance: spot.before_rank ? spot.before_rank - spot.after_rank : null,
-					views: +spot.clicks,
-					wishes: +spot.wishes,
+					views: spot.clicks,
+					wishes: spot.wishes,
 					photoUrl: spot.photo,
 				});
 			});
