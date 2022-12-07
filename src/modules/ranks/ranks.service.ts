@@ -47,46 +47,39 @@ export class RanksService {
 	}
 
 	async getRanksList(rankingRequest: RankingRequestDto) {
-		const week = await this.weekCalulation(rankingRequest);
-
 		try {
-			let rankingListSpotsQuery = this.spotsRepository
-				.createQueryBuilder('spot')
-				.innerJoinAndSelect('spot.rankings', 'rankings')
-				.where('rankings.date = :date', { date: rankingRequest.date })
-				.andWhere('rankings.rank >= 1')
-				.andWhere('rankings.rank <= 20');
+			const week = await this.weekCalulation(rankingRequest);
 
-			const rankingListSpotsQueryData = await rankingListSpotsQuery.orderBy('rankings.rank', 'ASC').getMany();
+			const rankingListQuery = await this.ranksRepository
+				.createQueryBuilder('rank')
+				.where('rank.date = :date', { date: rankingRequest.date })
+				.andWhere('rank.rank >= 1')
+				.andWhere('rank.rank <= 20')
+				.orderBy('rank.rank', 'ASC')
+				.getMany();
 
-			if (rankingListSpotsQueryData.length !== 20) {
+			if (rankingListQuery.length !== 20) {
 				let rankIndex = 1;
-				const allOriginRankingsData = await this.spotsRepository
-					.createQueryBuilder('spot')
-					.innerJoinAndSelect('spot.rankings', 'rankings')
-					.where('rankings.date = :date', { date: rankingRequest.date })
-					.orderBy('rankings.rank', 'ASC')
+				const allOriginRankingsData = await this.ranksRepository
+					.createQueryBuilder('rank')
+					.where('rank.date = :date', { date: rankingRequest.date })
+					.orderBy('rank.rank', 'ASC')
 					.getMany();
 
 				for (const allOriginRanking of allOriginRankingsData) {
-					await this.ranksRepository.update(
-						{ spotId: allOriginRanking.id },
-						{
-							rank: rankIndex++,
-						},
-					);
+					await this.ranksRepository.update(allOriginRanking.id, {
+						rank: rankIndex++,
+					});
 					if (rankIndex === 21) break;
 				}
 			}
 
-			rankingListSpotsQuery = this.spotsRepository
+			const rankingListSpots = await this.spotsRepository
 				.createQueryBuilder('spot')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
 				.andWhere('rankings.rank >= 1')
-				.andWhere('rankings.rank <= 20');
-
-			const rankingListSpots = await rankingListSpotsQuery
+				.andWhere('rankings.rank <= 20')
 				.select('spot.id AS id, spot.name AS name, spot.address AS address')
 				.addSelect((afterRank) => {
 					return afterRank
@@ -153,43 +146,36 @@ export class RanksService {
 		try {
 			const week = await this.weekCalulation(rankingRequest);
 
-			let rankingMapSpotsQuery = this.spotsRepository
-				.createQueryBuilder('spot')
-				.innerJoinAndSelect('spot.rankings', 'rankings')
-				.where('rankings.date = :date', { date: rankingRequest.date })
-				.andWhere('rankings.rank >= 1')
-				.andWhere('rankings.rank <= 20');
+			const rankingMapQuery = await this.ranksRepository
+				.createQueryBuilder('rank')
+				.where('rank.date = :date', { date: rankingRequest.date })
+				.andWhere('rank.rank >= 1')
+				.andWhere('rank.rank <= 20')
+				.orderBy('rank.rank', 'ASC')
+				.getMany();
 
-			const rankingMapSpotsQueryData = await rankingMapSpotsQuery.orderBy('rankings.rank', 'ASC').getMany();
-
-			if (rankingMapSpotsQueryData.length !== 20) {
+			if (rankingMapQuery.length !== 20) {
 				let rankIndex = 1;
-				const allOriginRankingsData = await this.spotsRepository
-					.createQueryBuilder('spot')
-					.innerJoinAndSelect('spot.rankings', 'rankings')
-					.where('rankings.date = :date', { date: rankingRequest.date })
-					.orderBy('rankings.rank', 'ASC')
+				const allOriginRankingsData = await this.ranksRepository
+					.createQueryBuilder('rank')
+					.where('rank.date = :date', { date: rankingRequest.date })
+					.orderBy('rank.rank', 'ASC')
 					.getMany();
 
 				for (const allOriginRanking of allOriginRankingsData) {
-					await this.ranksRepository.update(
-						{ spotId: allOriginRanking.id },
-						{
-							rank: rankIndex++,
-						},
-					);
+					await this.ranksRepository.update(allOriginRanking.id, {
+						rank: rankIndex++,
+					});
 					if (rankIndex === 21) break;
 				}
 			}
 
-			rankingMapSpotsQuery = this.spotsRepository
+			const rankingMapSpots = await this.spotsRepository
 				.createQueryBuilder('spot')
 				.innerJoinAndSelect('spot.rankings', 'rankings')
 				.where('rankings.date = :date', { date: rankingRequest.date })
 				.andWhere('rankings.rank >= 1')
-				.andWhere('rankings.rank <= 20');
-
-			const rankingMapSpots = await rankingMapSpotsQuery
+				.andWhere('rankings.rank <= 20')
 				.select(
 					'spot.id AS id, spot.name AS name, spot.latitude AS latitude, spot.longitude AS longitude, spot.address AS address',
 				)
