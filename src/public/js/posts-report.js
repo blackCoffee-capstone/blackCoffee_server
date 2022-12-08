@@ -241,4 +241,8 @@ $(document).ready(function () {
 		sessionStorage.setItem('postNumber', data.post.id);
 		window.open('/admin/posts/detail');
 	});
+
+	$('.icon-home').click(function () {
+		window.location.href = '/admin';
+	});
 });

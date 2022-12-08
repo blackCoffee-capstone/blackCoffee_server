@@ -292,4 +292,8 @@ $(document).ready(function () {
 	$('.btn-update').click(function () {
 		location.reload();
 	});
+
+	$('.icon-home').click(function () {
+		window.location.href = '/admin';
+	});
 });

@@ -237,4 +237,8 @@ $(document).ready(function () {
 			},
 		});
 	});
+
+	$('.icon-home').click(function () {
+		window.location.href = '/admin';
+	});
 });
