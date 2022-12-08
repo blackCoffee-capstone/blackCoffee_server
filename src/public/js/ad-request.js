@@ -1,11 +1,16 @@
 $(document).ready(function () {
 	var accessToken = localStorage.getItem('accessToken');
-	var empty;
+
 	$.ajax({
-		url: '/users/admin-test',
+		url: '/users',
 		type: 'Get',
 		headers: { Authorization: 'Bearer ' + accessToken },
-		success: function (data) {},
+		success: function (data) {
+			if (data.type != 'Admin') {
+				alert('관리자 권한이 필요합니다.');
+				window.location.href = '/admin/login';
+			}
+		},
 		error: function (data) {
 			alert('관리자 권한이 필요합니다.');
 			window.location.href = '/admin/login';
@@ -94,7 +99,6 @@ $(document).ready(function () {
 			$('.modal-body').empty();
 		}
 		var data_list = '';
-		console.log(row_data.id); //row_data 확인
 		$.ajax({
 			url: '/admins/ad-forms/' + row_data.id,
 			type: 'GET',
@@ -102,7 +106,6 @@ $(document).ready(function () {
 			dataSrc: '',
 			headers: { Authorization: 'Bearer ' + accessToken },
 			success: function (adform) {
-				console.log(adform);
 				var img_data = '<img src="' + adform.licenseUrl + '" alt="license">';
 				$('.modal-body').append('<div> 회사명 : ' + adform.businessName + '</div>');
 				$('.modal-body').append('<div> 위치 : ' + adform.address + '</div>');

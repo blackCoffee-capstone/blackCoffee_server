@@ -10,7 +10,6 @@ $(document).ready(function () {
 		headers: { Authorization: 'Bearer ' + accessToken },
 		success: function (post) {
 			photos = post.photoUrls;
-			console.log(photos.length);
 
 			$('.posts-header').append('<div class="title">' + post.title + '</div>');
 			$('.posts-header').append('<div class="id">' + post.user.nickname + '</div>');

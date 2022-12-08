@@ -2,11 +2,14 @@ $(document).ready(function () {
 	var accessToken = localStorage.getItem('accessToken');
 
 	$.ajax({
-		url: '/users/admin-test',
+		url: '/users',
 		type: 'Get',
 		headers: { Authorization: 'Bearer ' + accessToken },
 		success: function (data) {
-			console.log(data);
+			if (data.type != 'Admin') {
+				alert('관리자 권한이 필요합니다.');
+				window.location.href = '/admin/login';
+			}
 		},
 		error: function (data) {
 			alert('관리자 권한이 필요합니다.');
