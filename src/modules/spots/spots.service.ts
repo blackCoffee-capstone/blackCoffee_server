@@ -347,7 +347,7 @@ export class SpotsService {
 			let searchSpots = this.spotsRepository
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
-				.select('Distinct spot.id AS id, spot.address AS address, spot.name AS name, spot.rank AS rank')
+				.select('spot.id AS id, spot.address AS address, spot.name AS name, spot.rank AS rank')
 				.addSelect((clicks) => {
 					return clicks
 						.select('COUNT (*)::int AS clicks')
@@ -369,7 +369,9 @@ export class SpotsService {
 						.where('snsPosts.spotId = spot.id')
 						.limit(1);
 				}, 'photoUrl')
-				.where('snsPosts.photoUrl is not null');
+				.where('snsPosts.photoUrl is not null')
+				.distinct(true);
+
 			if (searchRequest.word) {
 				searchSpots = searchSpots.andWhere('spot.name Like :name', { name: `%${searchRequest.word}%` });
 			}
