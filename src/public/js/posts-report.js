@@ -1,21 +1,46 @@
 $(document).ready(function () {
 	var accessToken = localStorage.getItem('accessToken');
+	var refreshToken = localStorage.getItem('refreshToken');
 
-	$.ajax({
-		url: '/users',
-		type: 'Get',
-		headers: { Authorization: 'Bearer ' + accessToken },
-		success: function (data) {
-			if (data.type != 'Admin') {
+	if ((accessToken != null) & (refreshToken != null)) {
+		jwtPayload = JSON.parse(window.atob(accessToken.split('.')[1]));
+
+		var param = {
+			refreshToken: refreshToken,
+		};
+		if (jwtPayload.exp * 1000 < new Date().getTime()) {
+			$.ajax({
+				url: '/auth/token-refresh',
+				type: 'POST',
+				data: param,
+				headers: { Authorization: 'Bearer ' + accessToken },
+				dataType: 'JSON',
+				success: function (data) {
+					localStorage.setItem('accessToken', data.accessToken);
+					window.location.reload();
+				},
+				error: function (data) {
+					console.log(data);
+				},
+			});
+		}
+	} else {
+		$.ajax({
+			url: '/users',
+			type: 'Get',
+			headers: { Authorization: 'Bearer ' + accessToken },
+			success: function (data) {
+				if (data.type != 'Admin') {
+					alert('관리자 권한이 필요합니다.');
+					window.location.href = '/admin/login';
+				}
+			},
+			error: function () {
 				alert('관리자 권한이 필요합니다.');
 				window.location.href = '/admin/login';
-			}
-		},
-		error: function (data) {
-			alert('관리자 권한이 필요합니다.');
-			window.location.href = '/admin/login';
-		},
-	});
+			},
+		});
+	}
 
 	$('.main_menu').click(function () {
 		$('.sub_menu').slideUp();
@@ -136,7 +161,7 @@ $(document).ready(function () {
 					alert('변경 완료!');
 				},
 				error: function (request, status, error) {
-					alert(
+					console.log(
 						'code:' + request.status + '\n' + 'message:' + request.responseText + '\n' + 'error:' + error,
 					);
 				},

@@ -1,5 +1,6 @@
 $(document).ready(function () {
 	var accessToken = localStorage.getItem('accessToken');
+
 	$.ajax({
 		url: '/users',
 		type: 'Get',

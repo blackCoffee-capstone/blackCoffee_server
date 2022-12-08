@@ -1,6 +1,48 @@
 $(document).ready(function () {
 	var accessToken = localStorage.getItem('accessToken');
+	var refreshToken = localStorage.getItem('refreshToken');
 	var postNum = sessionStorage.getItem('postNumber');
+
+	if ((accessToken != null) & (refreshToken != null)) {
+		jwtPayload = JSON.parse(window.atob(accessToken.split('.')[1]));
+
+		var param = {
+			refreshToken: refreshToken,
+		};
+		if (jwtPayload.exp * 1000 < new Date().getTime()) {
+			console.log('Time Expired');
+			$.ajax({
+				url: '/auth/token-refresh',
+				type: 'POST',
+				data: param,
+				headers: { Authorization: 'Bearer ' + accessToken },
+				dataType: 'JSON',
+				success: function (data) {
+					localStorage.setItem('accessToken', data.accessToken);
+					window.location.reload();
+				},
+				error: function (data) {
+					console.log(data);
+				},
+			});
+		}
+	} else {
+		$.ajax({
+			url: '/users',
+			type: 'Get',
+			headers: { Authorization: 'Bearer ' + accessToken },
+			success: function (data) {
+				if (data.type != 'Admin') {
+					alert('관리자 권한이 필요합니다.');
+					window.location.href = '/admin/login';
+				}
+			},
+			error: function () {
+				alert('관리자 권한이 필요합니다.');
+				window.location.href = '/admin/login';
+			},
+		});
+	}
 
 	$.ajax({
 		url: '/posts/' + postNum,
@@ -25,7 +67,7 @@ $(document).ready(function () {
 			}
 		},
 		error: function (response) {
-			alert(response.responseText);
+			console.log(response.responseText);
 		},
 	});
 
