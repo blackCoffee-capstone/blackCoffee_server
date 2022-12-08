@@ -1,5 +1,11 @@
 import { HttpService } from '@nestjs/axios';
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	InternalServerErrorException,
+	NotFoundException,
+	UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -424,6 +430,8 @@ export class SpotsService {
 
 			return new SearchPageResponseDto({ totalPage: totalPage, spots: spots });
 		} catch (error) {
+			if (error.message === 'invalid signature') throw new UnauthorizedException(error.message, error);
+			if (error.message === 'jwt expired') throw new UnauthorizedException(error.message, error);
 			throw new InternalServerErrorException(error.message, error);
 		}
 	}
@@ -471,9 +479,12 @@ export class SpotsService {
 				neaybyFacility: facilitiesDto,
 			});
 		} catch (error) {
+			if (error.message === 'invalid signature') throw new UnauthorizedException(error.message, error);
+			if (error.message === 'jwt expired') throw new UnauthorizedException(error.message, error);
 			throw new InternalServerErrorException(error.message, error);
 		}
 	}
+
 	async wishSpot(userId: number, spotId: number, isWish: boolean): Promise<boolean> {
 		const IsSpot = await this.spotsRepository
 			.createQueryBuilder('spot')

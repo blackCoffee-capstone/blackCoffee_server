@@ -43,19 +43,6 @@ export const ApiDocs: SwaggerMethodDoc<UsersController> = {
 			ApiBearerAuth('Authorization'),
 		);
 	},
-	adminTest(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '관리자 전용 api 테스트',
-			}),
-			ApiResponse({
-				status: 200,
-				description: '',
-			}),
-			ApiBearerAuth('Authorization'),
-		);
-	},
 	createUsersTasteThemes(summary: string) {
 		return applyDecorators(
 			ApiOperation({
