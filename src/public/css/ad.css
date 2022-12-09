@@ -88,7 +88,8 @@ a {
 	z-index: 1;
 }
 
-.material-symbols-outlined {
+.logout,
+.icon-home {
 	float: right;
 	font-size: 22px;
 	color: gray;
@@ -107,7 +108,8 @@ a {
 	margin-bottom: 20px;
 }
 
-.material-symbols-outlined:hover {
+.logout:hover,
+.icon-home:hover {
 	font-size: 25px;
 	color: #4d377b;
 }
