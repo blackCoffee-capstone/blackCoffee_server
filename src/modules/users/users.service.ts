@@ -17,17 +17,14 @@ import { WishSpot } from 'src/entities/wish-spots.entity';
 import { UserType } from 'src/types/users.types';
 import { HashPassword } from '../auth/hash-password';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
+import { UserLikesDto } from '../likes/dto/user-likes.dto';
 import { UsersTasteThemesResponseDto } from '../taste-themes/dto/users-taste-themes-response.dto';
 import { ChangePwRequestDto } from './dto/change-pw-request.dto';
 import { CommentsUserResponseDto } from './dto/comments-user-response.dto';
 import { UpdateUserRequestDto } from './dto/update-user-request.dto';
-import { UserLikesResponseDto } from './dto/user-likes-response.dto';
-import { UserLikesDto } from './dto/user-likes.dto';
 import { UserMyPageRequestDto } from './dto/user-mypage-request.dto';
 import { UserPostsResponseDto } from './dto/user-posts-response.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-import { UserWishesResponseDto } from './dto/user-wishes-response.dto';
-import { UserWishesDto } from './dto/user-wishes.dto';
 
 @Injectable()
 export class UsersService {
@@ -146,100 +143,6 @@ export class UsersService {
 			await this.usersRepository.update(user.id, foundUser);
 		}
 		return true;
-	}
-
-	async getUsersWishes(userId: number, wishPageData: UserMyPageRequestDto): Promise<UserWishesResponseDto> {
-		try {
-			const wishes = this.wishSpotsRepository
-				.createQueryBuilder('wishSpot')
-				.leftJoinAndSelect('wishSpot.user', 'user')
-				.leftJoinAndSelect('wishSpot.spot', 'spot')
-				.leftJoinAndSelect('spot.clickSpots', 'clickSpots')
-				.leftJoinAndSelect('spot.wishSpots', 'wishSpots')
-				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
-				.where('snsPosts.photoUrl is not null')
-				.andWhere('user.id = :userId', { userId })
-				.orderBy('wishSpot.created_at', 'DESC');
-
-			const totalPageWishes = await wishes.getMany();
-			const responseWishes = await wishes
-				.limit(wishPageData.take)
-				.offset((wishPageData.page - 1) * wishPageData.take)
-				.getMany();
-
-			const totalPage = Math.ceil(totalPageWishes.length / wishPageData.take);
-			const wishesDto = Array.from(responseWishes).map(
-				(wish) =>
-					new UserWishesDto({
-						id: wish.spot.id,
-						name: wish.spot.name,
-						address: wish.spot.address,
-						views: wish.spot.clickSpots.length,
-						wishes: wish.spot.wishSpots.length,
-						isWish: true,
-						photoUrl: wish.spot.snsPosts[0].photoUrl,
-					}),
-			);
-			return new UserWishesResponseDto({
-				totalPage: totalPage,
-				totalWishSpots: totalPageWishes.length,
-				wishSpots: wishesDto,
-			});
-		} catch (error) {
-			throw new InternalServerErrorException(error.message, error);
-		}
-	}
-
-	async getUsersLikes(userId: number, likePageData: UserMyPageRequestDto): Promise<UserLikesResponseDto> {
-		try {
-			const likes = this.likePostsRepository
-				.createQueryBuilder('likePost')
-				.leftJoinAndSelect('likePost.user', 'user')
-				.leftJoinAndSelect('likePost.post', 'post')
-				.leftJoinAndSelect('post.clickPosts', 'clickPosts')
-				.leftJoinAndSelect('post.likePosts', 'likePosts')
-				.leftJoinAndSelect('post.location', 'location')
-				.where('user.id = :userId', { userId })
-				.orderBy('likePost.created_at', 'DESC');
-
-			const totalPageLikes = await likes.getMany();
-			const responseLikes = await likes
-				.limit(likePageData.take)
-				.offset((likePageData.page - 1) * likePageData.take)
-				.getMany();
-
-			const totalPage = Math.ceil(totalPageLikes.length / likePageData.take);
-			const likesDto = [];
-			for (const like of responseLikes) {
-				const postsUser = await this.usersRepository
-					.createQueryBuilder('user')
-					.where('user.id = :postUserId', { postUserId: like.post.userId })
-					.getOne();
-
-				likesDto.push(
-					new UserLikesDto({
-						id: like.post.id,
-						title: like.post.title,
-						address: like.post.address,
-						createdAt: like.post.createdAt,
-						views: like.post.clickPosts.length,
-						likes: like.post.likePosts.length,
-						photoUrls: like.post.photoUrls,
-						isLike: true,
-						user: new CommentsUserResponseDto(postsUser),
-						location: new LocationResponseDto(like.post.location),
-					}),
-				);
-			}
-
-			return new UserLikesResponseDto({
-				totalPage: totalPage,
-				totalLikePosts: totalPageLikes.length,
-				likePosts: likesDto,
-			});
-		} catch (error) {
-			throw new InternalServerErrorException(error.message, error);
-		}
 	}
 
 	async getUsersPosts(userId: number, usersPostPageData: UserMyPageRequestDto): Promise<UserPostsResponseDto> {
