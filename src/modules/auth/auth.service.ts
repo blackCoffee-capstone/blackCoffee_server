@@ -189,10 +189,10 @@ export class AuthService {
 	}
 
 	async adminLogin(user: UserResponseDto): Promise<LoginResponseDto> {
+		if (user.type !== UserType.Admin) {
+			throw new UnauthorizedException('User is not admin');
+		}
 		try {
-			if (user.type !== UserType.Admin) {
-				throw new UnauthorizedException('User is not admin');
-			}
 			const payload = { id: user.id, role: user.type };
 			const jwtAccessTokenExpire: string = this.jwtAccessTokenExpireByType(user.type);
 

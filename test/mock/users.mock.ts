@@ -16,6 +16,8 @@ export class MockUsersRepository {
 	save = jest.fn();
 	findOne = jest.fn();
 	update = jest.fn();
+	create = jest.fn();
+	delete = jest.fn();
 	createQueryBuilder = jest.fn().mockReturnValue({
 		innerJoin: jest.fn().mockReturnThis(),
 		leftJoin: jest.fn().mockReturnThis(),
@@ -34,13 +36,3 @@ export class MockUsersRepository {
 		return mockUser;
 	}
 }
-
-// export const MockUsersService = {
-// 	findOne: jest.fn((id) => {
-// 		if (id === mockUser.id) {
-// 			return mockUser;
-// 		} else {
-// 			throw new InternalServerErrorException();
-// 		}
-// 	}),
-// };
