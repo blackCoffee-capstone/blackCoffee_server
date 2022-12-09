@@ -354,13 +354,13 @@ export class SpotsService {
 				.createQueryBuilder('spot')
 				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
 				.select('spot.id AS id, spot.address AS address, spot.name AS name, spot.rank AS rank')
-				.addSelect((clicks) => {
-					return clicks
-						.select('COUNT (*)::int AS clicks')
+				.addSelect((views) => {
+					return views
+						.select('COUNT (*)::int AS views')
 						.from(ClickSpot, 'clickSpots')
 						.where('clickSpots.spotId = spot.id')
 						.limit(1);
-				}, 'clicks')
+				}, 'views')
 				.addSelect((wishes) => {
 					return wishes
 						.select('COUNT (*)::int AS wishes')
@@ -396,7 +396,7 @@ export class SpotsService {
 			}
 
 			if (searchRequest.sorter === SortType.Rank) searchSpots = searchSpots.orderBy('spot.rank', 'ASC');
-			else if (searchRequest.sorter === SortType.View) searchSpots = searchSpots.orderBy('clicks', 'DESC');
+			else if (searchRequest.sorter === SortType.View) searchSpots = searchSpots.orderBy('views', 'DESC');
 			else if (searchRequest.sorter === SortType.Wish) searchSpots = searchSpots.orderBy('wishes', 'DESC');
 
 			const totalPageSpots = await searchSpots.getRawMany();
@@ -420,7 +420,7 @@ export class SpotsService {
 					new SearchResponseDto({
 						...spot,
 						order: order--,
-						views: spot.clicks,
+						views: spot.views,
 						wishes: spot.wishes,
 						isWish,
 					}),
