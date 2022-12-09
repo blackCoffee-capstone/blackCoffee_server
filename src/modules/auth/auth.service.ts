@@ -289,7 +289,7 @@ export class AuthService {
 		});
 		if (user) {
 			return { id: user.id, type: user.type };
-		} else throw new UnauthorizedException();
+		} else throw new NotFoundException('User is not found');
 	}
 
 	private oauthUserIsCompareUser(compareUser: any, oauthUser: OauthUserDto, userType: UserType): boolean {

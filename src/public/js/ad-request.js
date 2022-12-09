@@ -1,16 +1,47 @@
 $(document).ready(function () {
 	var accessToken = localStorage.getItem('accessToken');
-	var empty;
-	$.ajax({
-		url: '/users/admin-test',
-		type: 'Get',
-		headers: { Authorization: 'Bearer ' + accessToken },
-		success: function (data) {},
-		error: function (data) {
-			alert('관리자 권한이 필요합니다.');
-			window.location.href = '/admin/login';
-		},
-	});
+	var refreshToken = localStorage.getItem('refreshToken');
+
+	if ((accessToken != null) & (refreshToken != null)) {
+		jwtPayload = JSON.parse(window.atob(accessToken.split('.')[1]));
+
+		var param = {
+			refreshToken: refreshToken,
+		};
+		if (jwtPayload.exp * 1000 < new Date().getTime()) {
+			console.log('Time Expired');
+			$.ajax({
+				url: '/auth/token-refresh',
+				type: 'POST',
+				data: param,
+				headers: { Authorization: 'Bearer ' + accessToken },
+				dataType: 'JSON',
+				success: function (data) {
+					localStorage.setItem('accessToken', data.accessToken);
+					window.location.reload();
+				},
+				error: function (data) {
+					console.log(data);
+				},
+			});
+		}
+	} else {
+		$.ajax({
+			url: '/users',
+			type: 'Get',
+			headers: { Authorization: 'Bearer ' + accessToken },
+			success: function (data) {
+				if (data.type != 'Admin') {
+					alert('관리자 권한이 필요합니다.');
+					window.location.href = '/admin/login';
+				}
+			},
+			error: function () {
+				alert('관리자 권한이 필요합니다.');
+				window.location.href = '/admin/login';
+			},
+		});
+	}
 
 	$('.main_menu').click(function () {
 		$('.sub_menu').slideUp();
@@ -94,7 +125,6 @@ $(document).ready(function () {
 			$('.modal-body').empty();
 		}
 		var data_list = '';
-		console.log(row_data.id); //row_data 확인
 		$.ajax({
 			url: '/admins/ad-forms/' + row_data.id,
 			type: 'GET',
@@ -102,7 +132,6 @@ $(document).ready(function () {
 			dataSrc: '',
 			headers: { Authorization: 'Bearer ' + accessToken },
 			success: function (adform) {
-				console.log(adform);
 				var img_data = '<img src="' + adform.licenseUrl + '" alt="license">';
 				$('.modal-body').append('<div> 회사명 : ' + adform.businessName + '</div>');
 				$('.modal-body').append('<div> 위치 : ' + adform.address + '</div>');
@@ -227,5 +256,9 @@ $(document).ready(function () {
 
 	$('.btn-update').click(function () {
 		location.reload();
+	});
+
+	$('.icon-home').click(function () {
+		window.location.href = '/admin';
 	});
 });

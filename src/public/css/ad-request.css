@@ -12,11 +12,8 @@ body {
 .home {
 	text-align: center;
 	background: #4d377b;
-	color: #fff;
 	padding-top: 25px;
 	padding-bottom: 25px;
-	font-size: 16px;
-	font-weight: 600;
 	border-bottom: 2px solid white;
 }
 
@@ -88,7 +85,8 @@ a {
 	z-index: 1;
 }
 
-.material-symbols-outlined {
+.logout,
+.icon-home {
 	float: right;
 	font-size: 22px;
 	color: gray;
@@ -107,7 +105,8 @@ a {
 	margin-bottom: 20px;
 }
 
-.material-symbols-outlined:hover {
+.logout:hover,
+.icon-home:hover {
 	font-size: 25px;
 	color: #4d377b;
 }
