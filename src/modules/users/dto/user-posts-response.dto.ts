@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNumber } from 'class-validator';
-import { UserLikesDto } from './user-likes.dto';
+import { UserLikesDto } from 'src/modules/likes/dto/user-likes.dto';
 
 export class UserPostsResponseDto {
 	@IsNumber()

@@ -139,13 +139,6 @@ export class PostsController {
 		return await this.postsService.deletePostsComment(userData.id, postId, commentId);
 	}
 
-	@Post(':postId/likes/:isLike')
-	@ApiDocs.likePost('커뮤니티 게시글 좋아요')
-	async likePost(@AuthUser() userData, @Param('postId') postId: number, @Param('isLike') isLike: number) {
-		const isLikeBool = isLike === 1 ? true : false;
-		return await this.postsService.likePost(userData.id, postId, isLikeBool);
-	}
-
 	@Post(':postId/reports')
 	@ApiDocs.reportPost('커뮤니티 게시글 신고하기')
 	async reportPost(@AuthUser() userData, @Param('postId') postId: number, @Body() reportData: ReportPostsRequestDto) {

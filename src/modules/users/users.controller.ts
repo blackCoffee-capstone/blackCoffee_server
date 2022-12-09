@@ -46,18 +46,6 @@ export class UsersController {
 		return await this.usersService.updateUsersPw(userData, changePwDto);
 	}
 
-	@Get('/wishes')
-	@ApiDocs.getUsersWishes('사용자의 찜 목록 반환')
-	async getUsersWishes(@AuthUser() userData, @Query() usersWishes: UserMyPageRequestDto) {
-		return await this.usersService.getUsersWishes(userData.id, usersWishes);
-	}
-
-	@Get('/likes')
-	@ApiDocs.getUsersLikes('사용자의 좋아요 목록 반환')
-	async getUsersLikes(@AuthUser() userData, @Query() usersLikes: UserMyPageRequestDto) {
-		return await this.usersService.getUsersLikes(userData.id, usersLikes);
-	}
-
 	@Get('/posts')
 	@ApiDocs.getUsersPosts('사용자의 게시글 목록 반환')
 	async getUsersPosts(@AuthUser() userData, @Query() usersPosts: UserMyPageRequestDto) {

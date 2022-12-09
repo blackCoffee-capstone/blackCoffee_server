@@ -14,8 +14,8 @@ import { PostTheme } from 'src/entities/post-themes.entity';
 import { Post } from 'src/entities/posts.entity';
 import { ReportPost } from 'src/entities/report-posts.entity';
 import { Theme } from 'src/entities/theme.entity';
-import { UserType } from 'src/types/users.types';
 import { PostsSortType } from 'src/types/posts-sort.types';
+import { UserType } from 'src/types/users.types';
 import { AdFormsService } from '../ad-forms/ad-forms.service';
 import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { CommentsUserResponseDto } from '../users/dto/comments-user-response.dto';
@@ -273,33 +273,6 @@ export class PostsService {
 			throw new NotFoundException('Comment is not found');
 		}
 		await this.postCommentsRepository.delete(commentId);
-		return true;
-	}
-
-	async likePost(userId: number, postId: number, isLike: boolean): Promise<boolean> {
-		const foundPost = await this.getPostUserId(postId);
-		if (!foundPost) {
-			throw new NotFoundException('Post is not found');
-		}
-		if (isLike) {
-			const isLikePost = await this.likePostsRepository
-				.createQueryBuilder('likePost')
-				.where('likePost.userId = :userId', { userId })
-				.andWhere('likePost.postId = :postId', { postId })
-				.getOne();
-			if (!isLikePost) {
-				const likePost = this.likePostsRepository.create({
-					userId,
-					postId,
-				});
-				await this.likePostsRepository.save(likePost);
-			} else throw new BadRequestException('User already likes post');
-		} else {
-			await this.likePostsRepository.delete({
-				userId,
-				postId,
-			});
-		}
 		return true;
 	}
 
