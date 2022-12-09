@@ -5,6 +5,7 @@ export const mockAuthCode = {
 	email: 'testtest@email.com',
 	type: AuthCodeType.SignUpAble,
 	code: 'asdfghh',
+	updatedAt: new Date(),
 };
 
 export class MockAuthCodesRepository {
