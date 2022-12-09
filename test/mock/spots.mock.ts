@@ -15,15 +15,6 @@ export const mockSpot = [
 		wishes: 0,
 		isWish: false,
 		photoUrl: 'testUrl',
-		nearByFacility: [
-			{
-				name: 'tmp',
-				placeUrl: 'tmpUrl',
-				address: 'tmpAddress',
-				distance: 'tmpDistance',
-				category: 'tmpCategory',
-			},
-		],
 	},
 ];
 
@@ -31,6 +22,7 @@ export class MockSpotsRepository {
 	save = jest.fn();
 	findOne = jest.fn().mockReturnThis();
 	createQueryBuilder = jest.fn().mockReturnValue({
+		innerJoinAndSelect: jest.fn().mockReturnThis(),
 		innerJoin: jest.fn().mockReturnThis(),
 		leftJoin: jest.fn().mockReturnThis(),
 		leftJoinAndSelect: jest.fn().mockReturnThis(),
