@@ -24,13 +24,10 @@ import { SpotsService } from './spots.service';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { SortType } from 'src/types/sort.types';
 import { BadRequestException } from '@nestjs/common';
-import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 
 describe('SpotsController', () => {
 	let spotsController: SpotsController;
-	let configServie: ConfigService;
 	let spotsRepository: MockSpotsRepository;
-	let snsPostsRepository: MockSnsPostsRepository;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -90,7 +87,6 @@ describe('SpotsController', () => {
 
 		spotsController = module.get<SpotsController>(SpotsController);
 		spotsRepository = module.get(getRepositoryToken(Spot));
-		snsPostsRepository = module.get(getRepositoryToken(SnsPost));
 	});
 	it('should be defined', () => {
 		expect(spotsController).toBeDefined();
