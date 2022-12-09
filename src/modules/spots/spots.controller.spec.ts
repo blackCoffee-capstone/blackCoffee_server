@@ -24,13 +24,10 @@ import { SpotsService } from './spots.service';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { SortType } from 'src/types/sort.types';
 import { BadRequestException } from '@nestjs/common';
-import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 
 describe('SpotsController', () => {
 	let spotsController: SpotsController;
-	let configServie: ConfigService;
 	let spotsRepository: MockSpotsRepository;
-	let snsPostsRepository: MockSnsPostsRepository;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -90,7 +87,6 @@ describe('SpotsController', () => {
 
 		spotsController = module.get<SpotsController>(SpotsController);
 		spotsRepository = module.get(getRepositoryToken(Spot));
-		snsPostsRepository = module.get(getRepositoryToken(SnsPost));
 	});
 	it('should be defined', () => {
 		expect(spotsController).toBeDefined();
@@ -126,20 +122,6 @@ describe('SpotsController', () => {
 				totalPage: 1,
 				spots: expectSpots,
 			});
-		});
-	});
-	describe('detailSpot()', () => {
-		it('여행지 상세 페이지 정보를 반환한다.', async () => {
-			const spot = await spotsRepository.find();
-			const snsPosts = await snsPostsRepository.find();
-			const snsPostsDto = snsPosts.map((sns) => new DetailSnsPostResponseDto(sns));
-			await spotsRepository.createQueryBuilder().getOne.mockResolvedValue(spot[0]);
-			await snsPostsRepository.createQueryBuilder().getMany.mockResolvedValue(snsPosts);
-
-			// await expect(spotsController.detailSpot({ headers: null }, { take: 20 }, 1)).resolves.toEqual({
-			// 	...spot,
-			// 	detailSnsPost: snsPostsDto,
-			// });
 		});
 	});
 });
