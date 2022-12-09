@@ -23,23 +23,23 @@ export class LikesService {
 
 	async likePost(userId: number, postId: number, isLike: boolean): Promise<boolean> {
 		const foundPost = await this.getPostUserId(postId);
-		if (!foundPost) {
-			throw new NotFoundException('Post is not found');
-		}
-		if (isLike) {
-			const isLikePost = await this.likePostsRepository
-				.createQueryBuilder('likePost')
-				.where('likePost.userId = :userId', { userId })
-				.andWhere('likePost.postId = :postId', { postId })
-				.getOne();
-			if (!isLikePost) {
-				const likePost = this.likePostsRepository.create({
-					userId,
-					postId,
-				});
-				await this.likePostsRepository.save(likePost);
-			} else throw new BadRequestException('User already likes post');
-		} else {
+		if (!foundPost) throw new NotFoundException('Post is not found');
+
+		const isLikePost = await this.likePostsRepository
+			.createQueryBuilder('likePost')
+			.where('likePost.userId = :userId', { userId })
+			.andWhere('likePost.postId = :postId', { postId })
+			.getOne();
+
+		if (isLike && isLikePost) throw new BadRequestException('User already likes post');
+		else if (!isLike && !isLikePost) throw new BadRequestException('User already no likes post');
+		else if (isLike && !isLikePost) {
+			const likePost = this.likePostsRepository.create({
+				userId,
+				postId,
+			});
+			await this.likePostsRepository.save(likePost);
+		} else if (!isLike && isLikePost) {
 			await this.likePostsRepository.delete({
 				userId,
 				postId,

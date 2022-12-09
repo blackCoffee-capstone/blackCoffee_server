@@ -1,3 +1,4 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Spot } from 'src/entities/spots.entity';
@@ -12,6 +13,7 @@ import { WishesService } from './wishes.service';
 describe('WishesController', () => {
 	let wishesController: WishesController;
 	let wishSpotsRepository: MockWishSpotsRepository;
+	let spotsRepository: MockSpotsRepository;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -31,10 +33,102 @@ describe('WishesController', () => {
 
 		wishesController = module.get<WishesController>(WishesController);
 		wishSpotsRepository = module.get(getRepositoryToken(WishSpot));
+		spotsRepository = module.get(getRepositoryToken(Spot));
 	});
 
 	it('should be defined', () => {
 		expect(wishesController).toBeDefined();
+	});
+	describe('wishSpot()', () => {
+		it('여행지 찜하기 등록을 한다.', async () => {
+			const spot = await spotsRepository.find();
+			const wishSpot = await wishSpotsRepository.find();
+			spotsRepository.createQueryBuilder().getOne.mockResolvedValue(spot);
+			wishSpotsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
+			wishSpotsRepository.create.mockResolvedValue(wishSpot);
+			wishSpotsRepository.createQueryBuilder().save.mockResolvedValue(wishSpot);
+
+			await expect(
+				wishesController.wishSpot(
+					{
+						id: 1,
+						role: UserType.Normal,
+					},
+					{ spotId: 1, isWish: true },
+				),
+			).resolves.toEqual(true);
+		});
+		it('여행지 찜하기 취소를 한다.', async () => {
+			const spot = await spotsRepository.find();
+			const wishSpot = await wishSpotsRepository.find();
+			spotsRepository.createQueryBuilder().getOne.mockResolvedValue(spot);
+			wishSpotsRepository.createQueryBuilder().getOne.mockResolvedValue(wishSpot);
+			wishSpotsRepository.create.mockResolvedValue(wishSpot);
+			wishSpotsRepository.createQueryBuilder().save.mockResolvedValue(wishSpot);
+
+			await expect(
+				wishesController.wishSpot(
+					{
+						id: 1,
+						role: UserType.Normal,
+					},
+					{ spotId: 1, isWish: false },
+				),
+			).resolves.toEqual(true);
+		});
+		it('여행지가 없다면 NotFoundException 에러를 반환한다.', async () => {
+			const wishSpot = await wishSpotsRepository.find();
+			spotsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
+			wishSpotsRepository.createQueryBuilder().getOne.mockResolvedValue(wishSpot);
+			wishSpotsRepository.create.mockResolvedValue(wishSpot);
+			wishSpotsRepository.createQueryBuilder().save.mockResolvedValue(wishSpot);
+
+			await expect(
+				wishesController.wishSpot(
+					{
+						id: 1,
+						role: UserType.Normal,
+					},
+					{ spotId: 1, isWish: true },
+				),
+			).rejects.toThrow(NotFoundException);
+		});
+		it('이미 찜하기를 했다면 BadRequestException 에러를 반환한다.', async () => {
+			const spot = await spotsRepository.find();
+			const wishSpot = await wishSpotsRepository.find();
+			spotsRepository.createQueryBuilder().getOne.mockResolvedValue(spot);
+			wishSpotsRepository.createQueryBuilder().getOne.mockResolvedValue(wishSpot);
+			wishSpotsRepository.create.mockResolvedValue(wishSpot);
+			wishSpotsRepository.createQueryBuilder().save.mockResolvedValue(wishSpot);
+
+			await expect(
+				wishesController.wishSpot(
+					{
+						id: 1,
+						role: UserType.Normal,
+					},
+					{ spotId: 1, isWish: true },
+				),
+			).rejects.toThrow(BadRequestException);
+		});
+		it('이미 찜하기를 하지 않았다면 BadRequestException 에러를 반환한다.', async () => {
+			const spot = await spotsRepository.find();
+			const wishSpot = await wishSpotsRepository.find();
+			spotsRepository.createQueryBuilder().getOne.mockResolvedValue(spot);
+			wishSpotsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
+			wishSpotsRepository.create.mockResolvedValue(wishSpot);
+			wishSpotsRepository.createQueryBuilder().save.mockResolvedValue(wishSpot);
+
+			await expect(
+				wishesController.wishSpot(
+					{
+						id: 1,
+						role: UserType.Normal,
+					},
+					{ spotId: 1, isWish: false },
+				),
+			).rejects.toThrow(BadRequestException);
+		});
 	});
 	describe('getUsersWishes()', () => {
 		it('사용자의 찜목록을 반환한다.', async () => {

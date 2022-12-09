@@ -14,7 +14,7 @@ export const mockPost = [
 ];
 
 export class MockPostsRepository {
-	save = jest.fn().mockResolvedValue(mockPost);
+	save = jest.fn();
 	createQueryBuilder = jest.fn().mockReturnValue({
 		innerJoin: jest.fn().mockReturnThis(),
 		leftJoin: jest.fn().mockReturnThis(),

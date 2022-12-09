@@ -14,7 +14,9 @@ export const mockLikePost = [
 ];
 
 export class MockLikePostsRepository {
-	save = jest.fn().mockResolvedValue(mockLikePost);
+	save = jest.fn();
+	create = jest.fn();
+	delete = jest.fn();
 	createQueryBuilder = jest.fn().mockReturnValue({
 		innerJoin: jest.fn().mockReturnThis(),
 		leftJoin: jest.fn().mockReturnThis(),
@@ -30,6 +32,7 @@ export class MockLikePostsRepository {
 		execute: jest.fn().mockReturnThis(),
 		limit: jest.fn().mockReturnThis(),
 		offset: jest.fn().mockReturnThis(),
+		save: jest.fn().mockReturnThis(),
 	});
 	async find() {
 		return mockLikePost;

@@ -1,7 +1,8 @@
-import { Post } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { LikePost } from 'src/entities/like-posts.entity';
+import { Post } from 'src/entities/posts.entity';
 import { User } from 'src/entities/users.entity';
 import { UserType } from 'src/types/users.types';
 import { MockLikePostsRepository } from 'test/mock/like-posts.mock';
@@ -15,6 +16,7 @@ describe('LikesController', () => {
 	let likesController: LikesController;
 	let likePostsRepository: MockLikePostsRepository;
 	let usersRepository: MockUsersRepository;
+	let postsRepository: MockPostsRepository;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -39,10 +41,103 @@ describe('LikesController', () => {
 		likesController = module.get<LikesController>(LikesController);
 		likePostsRepository = module.get(getRepositoryToken(LikePost));
 		usersRepository = module.get(getRepositoryToken(User));
+		postsRepository = module.get(getRepositoryToken(Post));
 	});
 
 	it('should be defined', () => {
 		expect(likesController).toBeDefined();
+	});
+	describe('likePost()', () => {
+		it('커뮤니티 게시글 좋아요 등록을 한다.', async () => {
+			const post = await postsRepository.find();
+			const likePosts = await likePostsRepository.find()[0];
+			postsRepository.createQueryBuilder().getOne.mockResolvedValue(post);
+			likePostsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
+			likePostsRepository.create.mockResolvedValue(likePosts);
+			likePostsRepository.createQueryBuilder().save.mockResolvedValue(likePosts);
+
+			await expect(
+				likesController.likePost(
+					{
+						id: 1,
+						role: UserType.Normal,
+					},
+					{ postId: 1, isLike: true },
+				),
+			).resolves.toEqual(true);
+		});
+		it('커뮤니티 게시글 좋아요 취소를 한다.', async () => {
+			const post = await postsRepository.find();
+			const likePosts = await likePostsRepository.find();
+			postsRepository.createQueryBuilder().getOne.mockResolvedValue(post);
+			likePostsRepository.createQueryBuilder().getOne.mockResolvedValue(likePosts);
+			likePostsRepository.create.mockResolvedValue(likePosts);
+			likePostsRepository.delete.mockResolvedValue(true);
+			likePostsRepository.createQueryBuilder().save.mockResolvedValue(likePosts);
+
+			await expect(
+				likesController.likePost(
+					{
+						id: 1,
+						role: UserType.Normal,
+					},
+					{ postId: 1, isLike: false },
+				),
+			).resolves.toEqual(true);
+		});
+		it('커뮤니티 게시글이 없다면 NotFoundException 에러를 반환한다.', async () => {
+			const likePosts = await likePostsRepository.find();
+			postsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
+			likePostsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
+			likePostsRepository.create.mockResolvedValue(likePosts);
+			likePostsRepository.createQueryBuilder().save.mockResolvedValue(likePosts);
+
+			await expect(
+				likesController.likePost(
+					{
+						id: 1,
+						role: UserType.Normal,
+					},
+					{ postId: 1, isLike: true },
+				),
+			).rejects.toThrow(NotFoundException);
+		});
+		it('이미 좋아요를 했다면 BadRequestException 에러를 반환한다.', async () => {
+			const post = await postsRepository.find();
+			const likePosts = await likePostsRepository.find();
+			postsRepository.createQueryBuilder().getOne.mockResolvedValue(post);
+			likePostsRepository.createQueryBuilder().getOne.mockResolvedValue(likePosts);
+			likePostsRepository.create.mockResolvedValue(likePosts);
+			likePostsRepository.createQueryBuilder().save.mockResolvedValue(likePosts);
+
+			await expect(
+				likesController.likePost(
+					{
+						id: 1,
+						role: UserType.Normal,
+					},
+					{ postId: 1, isLike: true },
+				),
+			).rejects.toThrow(BadRequestException);
+		});
+		it('이미 좋아요를 하지 않았다면 BadRequestException 에러를 반환한다.', async () => {
+			const post = await postsRepository.find();
+			const likePosts = await likePostsRepository.find();
+			postsRepository.createQueryBuilder().getOne.mockResolvedValue(post);
+			likePostsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
+			likePostsRepository.create.mockResolvedValue(likePosts);
+			likePostsRepository.createQueryBuilder().save.mockResolvedValue(likePosts);
+
+			await expect(
+				likesController.likePost(
+					{
+						id: 1,
+						role: UserType.Normal,
+					},
+					{ postId: 1, isLike: false },
+				),
+			).rejects.toThrow(BadRequestException);
+		});
 	});
 	describe('getUsersLikes()', () => {
 		it('사용자의 좋아요 목록을 반환한다.', async () => {
