@@ -484,34 +484,6 @@ export class SpotsService {
 		}
 	}
 
-	async wishSpot(userId: number, spotId: number, isWish: boolean): Promise<boolean> {
-		const IsSpot = await this.spotsRepository
-			.createQueryBuilder('spot')
-			.where('spot.id = :spotId', { spotId })
-			.getOne();
-
-		if (!IsSpot) throw new NotFoundException('Spot is not found');
-		if (isWish) {
-			const isWishSpot = await this.wishSpotsRepository
-				.createQueryBuilder('wishSpot')
-				.where('wishSpot.userId = :userId', { userId })
-				.andWhere('wishSpot.spotId = :spotId', { spotId })
-				.getOne();
-			if (!isWishSpot) {
-				const wishSpot = this.wishSpotsRepository.create({
-					userId,
-					spotId,
-				});
-				await this.wishSpotsRepository.save(wishSpot);
-			} else throw new BadRequestException('User already wishes spot');
-		} else {
-			await this.wishSpotsRepository.delete({
-				userId,
-				spotId,
-			});
-		}
-		return true;
-	}
 	private async getNearbyFacility(latitude, longitude) {
 		try {
 			const kakaoRequestApiMapResult = await firstValueFrom(

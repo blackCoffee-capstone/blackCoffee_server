@@ -22,10 +22,9 @@ import { MockThemeRepository } from 'test/mock/theme.mock';
 import { MockUsersRepository } from 'test/mock/users.mock';
 import { MockWishSpotsRepository } from 'test/mock/wish-spots.mock';
 import { HashPassword } from '../auth/hash-password';
+import { UserLikesDto } from '../likes/dto/user-likes.dto';
 import { UsersTasteThemesResponseDto } from '../taste-themes/dto/users-taste-themes-response.dto';
-import { UserLikesDto } from './dto/user-likes.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-import { UserWishesDto } from './dto/user-wishes.dto';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
@@ -34,8 +33,6 @@ describe('UsersController', () => {
 	let usersRepository: MockUsersRepository;
 	let tasteThemesRepository: MockTasteThemesRepository;
 	let themesRepository: MockThemeRepository;
-	let wishSpotsRepository: MockWishSpotsRepository;
-	let likePostsRepository: MockLikePostsRepository;
 	let postsRepository: MockPostsRepository;
 
 	beforeEach(async () => {
@@ -75,8 +72,6 @@ describe('UsersController', () => {
 		usersRepository = module.get(getRepositoryToken(User));
 		tasteThemesRepository = module.get(getRepositoryToken(TasteTheme));
 		themesRepository = module.get(getRepositoryToken(Theme));
-		wishSpotsRepository = module.get(getRepositoryToken(WishSpot));
-		likePostsRepository = module.get(getRepositoryToken(LikePost));
 		postsRepository = module.get(getRepositoryToken(Post));
 	});
 
@@ -359,74 +354,6 @@ describe('UsersController', () => {
 					{ originPw: '1234abcd!', newPw: '1234abcd!!' },
 				),
 			).rejects.toThrow(UnauthorizedException);
-		});
-	});
-	describe('getUsersWishes()', () => {
-		it('사용자의 찜목록을 반환한다.', async () => {
-			const wishSpots = await wishSpotsRepository.find();
-			const expectWishSpots = wishSpots.map((item) => new UserWishesDto(item));
-			wishSpotsRepository.createQueryBuilder().getMany.mockResolvedValue([
-				{
-					spot: {
-						id: 1,
-						name: 'test',
-						address: '부산 해운대구',
-						clickSpots: [1],
-						wishSpots: [1],
-						snsPosts: [{ photoUrl: 'test' }],
-					},
-				},
-			]);
-
-			await expect(
-				usersController.getUsersWishes(
-					{
-						id: 1,
-						role: UserType.Normal,
-					},
-					{ page: 1, take: 10 },
-				),
-			).resolves.toEqual({
-				totalPage: 1,
-				totalWishSpots: 1,
-				wishSpots: expectWishSpots,
-			});
-		});
-	});
-	describe('getUsersLikes()', () => {
-		it('사용자의 좋아요 목록을 반환한다.', async () => {
-			const user = await usersRepository.find();
-			const likePosts = await likePostsRepository.find();
-			const expectLikePosts = likePosts.map((item) => new UserLikesDto(item));
-			usersRepository.createQueryBuilder().getOne.mockResolvedValue(user);
-			likePostsRepository.createQueryBuilder().getMany.mockResolvedValue([
-				{
-					post: {
-						id: 1,
-						title: 'test',
-						address: '부산 해운대구',
-						createdAt: '2022-12-01',
-						clickPosts: [1],
-						likePosts: [1],
-						photoUrls: 'test',
-						location: { id: 1, metroName: '부산', localName: '해운대구' },
-					},
-				},
-			]);
-
-			await expect(
-				usersController.getUsersLikes(
-					{
-						id: 1,
-						role: UserType.Normal,
-					},
-					{ page: 1, take: 10 },
-				),
-			).resolves.toEqual({
-				totalPage: 1,
-				totalLikePosts: 1,
-				likePosts: expectLikePosts,
-			});
 		});
 	});
 	describe('getUsersPosts()', () => {
