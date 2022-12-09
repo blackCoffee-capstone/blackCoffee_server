@@ -41,6 +41,7 @@ export class MockThemeRepository {
 		getOne: jest.fn().mockReturnThis(),
 		orderBy: jest.fn().mockReturnThis(),
 		execute: jest.fn().mockReturnThis(),
+		limit: jest.fn().mockReturnThis(),
 	});
 	async find() {
 		return mockTheme;
