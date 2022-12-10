@@ -194,12 +194,18 @@ td {
 	font-weight: 600;
 }
 
+.adform-img {
+	object-fit: contain;
+	width: auto;
+	max-height: 800px;
+}
+
 #popup {
 	display: none;
 	width: 800px;
-	height: 500px;
+	height: 600px;
 	position: absolute;
-	top: 50%;
+	top: 40%;
 	left: 50%;
 	margin: -250px 0 0 -350px;
 	background-color: #fff;

@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { RankingResponseDto } from './dto/ranking-response.dto';
@@ -22,6 +22,7 @@ export const ApiDocs: SwaggerMethodDoc<RanksController> = {
 				description: '',
 				type: RankingResponseDto,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	ranksMap(summary: string) {

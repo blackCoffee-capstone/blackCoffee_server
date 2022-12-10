@@ -1,10 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 import { Rank } from 'src/entities/rank.entity';
 import { Spot } from 'src/entities/spots.entity';
+import { WishSpot } from 'src/entities/wish-spots.entity';
 import { MockRankRepository } from 'test/mock/rank.mock';
 import { MockSpotsRepository } from 'test/mock/spots.mock';
+import { MockWishSpotsRepository } from 'test/mock/wish-spots.mock';
 import { RankingListResponseDto } from './dto/ranking-list-response.dto';
 import { RankingMapResponseDto } from './dto/ranking-map-response.dto';
 import { RankingRequestDto } from './dto/ranking-request.dto';
@@ -25,10 +29,30 @@ describe('RanksController', () => {
 					provide: getRepositoryToken(Rank),
 					useClass: MockRankRepository,
 				},
-				RanksService,
 				{
 					provide: getRepositoryToken(Spot),
 					useClass: MockSpotsRepository,
+				},
+				{
+					provide: getRepositoryToken(WishSpot),
+					useClass: MockWishSpotsRepository,
+				},
+				{
+					provide: ConfigService,
+					useValue: {
+						get: jest.fn((key: string) => {
+							if (key === 'oauthConfig' || key === 'jwtConfig') {
+								return 1;
+							}
+							return null;
+						}),
+					},
+				},
+				{
+					provide: JwtService,
+					useValue: {
+						sign: () => '',
+					},
 				},
 			],
 		}).compile();
@@ -54,11 +78,12 @@ describe('RanksController', () => {
 					variance: null,
 					photoUrl: spot.photo,
 					views: spot.clicks,
+					isWish: false,
 				});
 			});
 
 			const rankingRequest = new RankingRequestDto();
-			await expect(ranksController.ranksList(rankingRequest)).resolves.toEqual({
+			await expect(ranksController.ranksList({ header: null }, rankingRequest)).resolves.toEqual({
 				prev: null,
 				next: null,
 				ranking: ranking,
