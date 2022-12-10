@@ -23,6 +23,8 @@ import { Theme } from 'src/entities/theme.entity';
 import { WishSpot } from 'src/entities/wish-spots.entity';
 import { SortType } from 'src/types/sort.types';
 import { Repository } from 'typeorm';
+import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
+import { RanksService } from '../ranks/ranks.service';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
@@ -54,7 +56,7 @@ export class SpotsService {
 		private readonly clickSpotsRepository: Repository<ClickSpot>,
 		@InjectRepository(WishSpot)
 		private readonly wishSpotsRepository: Repository<WishSpot>,
-		//private readonly ranksService: RanksService,
+		private readonly ranksService: RanksService,
 		private readonly configService: ConfigService,
 		private readonly httpService: HttpService,
 		private readonly jwtService: JwtService,
@@ -211,7 +213,17 @@ export class SpotsService {
 			);
 		const resultFile = fs.readFileSync(localResultPath);
 		const resultJson = JSON.parse(resultFile.toString());
-		console.log(resultJson);
+		return await this.createRanks(resultJson);
+	}
+
+	private async createRanks(resultJson) {
+		for (const week of resultJson) {
+			for (const rank of week.ranks) {
+				await this.ranksService.updateRank(
+					new RanksUpdateRequestDto({ week: week.week, spotId: rank.spotId, rank: rank.rank }),
+				);
+			}
+		}
 		return true;
 	}
 
