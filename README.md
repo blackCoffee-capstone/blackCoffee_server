@@ -1,3 +1,29 @@
+# 프로젝트 소개
+## '지금, 여기'
+
+<br>
+<p align="center"><img src="./src/image/logo-primary.svg" alt="now_here" width="200px" /></p>
+<br>
+
+'지금, 여기'는 SNS 빅데이터를 분석하여 새롭게 떠오르는 여행지를 추천해주고 관련 정보를 제공해주는 서비스입니다.  
+아주대학교 캡스톤디자인 수업의 일환으로 04.blackCoffee 팀이 개발하였습니다.  
+이 프로젝트는 해당 서비스의 백엔드 서버를 구성합니다.  
+'지금, 여기' 사이트 주소: https://www.jigeumyeogi.com  
+
+<br>
+
+## 04.blackCoffee 팀
+| role | name | part | email | 
+| :--: | :--: | :-- | :-- |
+| 팀장 | 임종용 | 프론트 개발 | bellmir@ajou.ac.kr |
+| 팀원 | 이수민 | 백엔드 개발 | tnals1178@ajou.ac.kr |
+| 팀원 | 이동훈 | 빅데이터 분석 모델 개발 | oss002@ajou.ac.kr |
+| 팀원 | 정예은 | SNS 데이터 크롤링 및 백엔드 개발| skqhs7276@ajou.ac.kr |
+| 팀원 | 공민경 | 개발자 페이지 개발 | alsrud991026@ajou.ac.kr |
+
+<br>
+
+# 사용 라이브러리 및 개발 환경 (NestJS)
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
@@ -57,6 +83,24 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
+
+## 폴더 구조
+
+- config : 설정파일
+- decorators : 데코레이터 설정파일
+- entities : entity 파일
+- mailer : mail 설정파일
+- public : 정적파일 (js, css)
+- views : hbs 파일
+- mock : mock db 파일
+- types : enum 파일
+- database : database 설정파일
+  - seeds : seed data
+- modules : module 파일
+  - dto : data type 명시 파일
+  - guards : guard 파일 (미들웨어)
+  - strategies : strategy 파일 (미들웨어)
+  - .docs.ts : swagger 작성파일 (API 문서)
 
 # How to run
 
