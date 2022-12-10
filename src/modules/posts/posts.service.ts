@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	InternalServerErrorException,
+	NotFoundException,
+	UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as AWS from 'aws-sdk';
@@ -119,6 +125,9 @@ export class PostsService {
 		postData?: UpdatePostsRequestDto,
 	): Promise<PostsResponseDto> {
 		const foundUsersPost = await this.getUsersPost(userId, postId);
+		if (!foundUsersPost) {
+			throw new UnauthorizedException('User is not writer');
+		}
 		if (photos && photos.length > 5) {
 			throw new BadRequestException('Files length exeeds 5');
 		}
@@ -234,13 +243,17 @@ export class PostsService {
 		if (!foundPost) {
 			throw new NotFoundException('Post is not found');
 		}
-		const comment = this.postCommentsRepository.create({
-			userId,
-			postId,
-			content: commentData.content,
-		});
-		const result = await this.postCommentsRepository.save(comment);
-		return new PostCommentsResponseDto(result);
+		try {
+			const comment = this.postCommentsRepository.create({
+				userId,
+				postId,
+				content: commentData.content,
+			});
+			const result = await this.postCommentsRepository.save(comment);
+			return new PostCommentsResponseDto(result);
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async getPostsComments(userId: number, postId: number): Promise<GetPostsCommentsResponseDto[]> {
@@ -248,19 +261,23 @@ export class PostsService {
 		if (!foundPost) {
 			throw new NotFoundException('Post is not found');
 		}
-		const foundComments = await this.getComments(postId);
+		try {
+			const foundComments = await this.getComments(postId);
 
-		return foundComments.map(
-			(comment) =>
-				new GetPostsCommentsResponseDto({
-					...comment,
-					isWriter: comment.user_id === userId ? true : false,
-					user: new CommentsUserResponseDto({
-						id: comment.user_id,
-						nickname: comment.nickname,
+			return foundComments.map(
+				(comment) =>
+					new GetPostsCommentsResponseDto({
+						...comment,
+						isWriter: comment.user_id === userId ? true : false,
+						user: new CommentsUserResponseDto({
+							id: comment.user_id,
+							nickname: comment.nickname,
+						}),
 					}),
-				}),
-		);
+			);
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async deletePostsComment(userId: number, postId: number, commentId: number): Promise<boolean> {
@@ -268,12 +285,19 @@ export class PostsService {
 		if (!foundPost) {
 			throw new NotFoundException('Post is not found');
 		}
-		const foundComment = await this.getComment(postId, commentId, userId);
+		const foundComment = await this.getComment(postId, commentId);
 		if (!foundComment) {
 			throw new NotFoundException('Comment is not found');
 		}
-		await this.postCommentsRepository.delete(commentId);
-		return true;
+		if (foundComment && userId !== foundComment.user_id) {
+			throw new BadRequestException('User is not writer');
+		}
+		try {
+			await this.postCommentsRepository.delete(commentId);
+			return true;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async reportPost(
@@ -291,14 +315,18 @@ export class PostsService {
 		if (await this.getUsersReportPost(userId, postId)) {
 			throw new BadRequestException('User already reports post');
 		}
-		const reportPost = this.reportPostsRepository.create({
-			userId,
-			postId,
-			reason: reportData.reason,
-		});
-		const result = await this.reportPostsRepository.save(reportPost);
+		try {
+			const reportPost = this.reportPostsRepository.create({
+				userId,
+				postId,
+				reason: reportData.reason,
+			});
+			const result = await this.reportPostsRepository.save(reportPost);
 
-		return new ReportPostsResponseDto({ id: result.id });
+			return new ReportPostsResponseDto({ id: result.id });
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	private async uploadFilesToS3(folder: string, files: Array<Express.Multer.File>): Promise<string[]> {
@@ -414,17 +442,14 @@ export class PostsService {
 			.getRawMany();
 	}
 
-	private async getComment(postId: number, commentId: number, userId: number) {
+	private async getComment(postId: number, commentId: number) {
 		return await this.postCommentsRepository
 			.createQueryBuilder('post_comment')
-			.select(
-				'post_comment.id, post_comment.content, post_comment.is_writer, post_comment.created_at, user.id AS user_id, user.nickname',
-			)
+			.select('post_comment.id, post_comment.content, post_comment.created_at, user.id AS user_id, user.nickname')
 			.leftJoin('post_comment.user', 'user')
 			.leftJoin('post_comment.post', 'post')
 			.where('post.id = :postId', { postId })
 			.andWhere('post_comment.id = :commentId', { commentId })
-			.andWhere('user.id = :userId', { userId })
 			.getRawOne();
 	}
 
@@ -468,13 +493,13 @@ export class PostsService {
 					'post.id AS id, post.title AS title, post.address AS address, post.createdAt AS create, post.photoUrls AS photos',
 				)
 				.addSelect('user.id AS user, user.nickname AS name')
-				.addSelect((clicks) => {
-					return clicks
-						.select('COUNT (*)::int AS clicks')
+				.addSelect((views) => {
+					return views
+						.select('COUNT (*)::int AS views')
 						.from(ClickPost, 'clickPosts')
 						.where('clickPosts.postId = post.id')
 						.limit(1);
-				}, 'clicks')
+				}, 'views')
 				.addSelect((likes) => {
 					return likes
 						.select('COUNT (*)::int AS likes')
@@ -503,13 +528,19 @@ export class PostsService {
 				posts = posts.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
 			}
 			if (searchRequest.themeIds && searchRequest.themeIds[0] !== 0) {
-				posts = posts
-					.leftJoinAndSelect('post.postThemes', 'postThemes')
-					.leftJoinAndSelect('postThemes.theme', 'theme')
-					.andWhere('theme.id IN (:...themeIds)', { themeIds: searchRequest.themeIds });
+				posts = posts.andWhere((postIds) => {
+					const subQuery = postIds
+						.subQuery()
+						.select('postTheme.postId')
+						.distinctOn(['postTheme.postId'])
+						.from(PostTheme, 'postTheme')
+						.where('postTheme.themeId IN (:...themeIds)', { themeIds: searchRequest.themeIds })
+						.getQuery();
+					return 'post.id IN' + subQuery;
+				});
 			}
 
-			if (searchRequest.sorter === PostsSortType.View) posts = posts.orderBy('clicks', 'DESC');
+			if (searchRequest.sorter === PostsSortType.View) posts = posts.orderBy('views', 'DESC');
 			else if (searchRequest.sorter === PostsSortType.Like) posts = posts.orderBy('likes', 'DESC');
 			else if (searchRequest.sorter === PostsSortType.CreatedAt) posts = posts.orderBy('post.createdAt', 'DESC');
 
@@ -526,7 +557,7 @@ export class PostsService {
 					new MainPostsResponseDto({
 						...post,
 						order: order--,
-						views: post.clicks,
+						views: post.views,
 						likes: post.likes,
 						createdAt: post.create,
 						photoUrls: post.photos,

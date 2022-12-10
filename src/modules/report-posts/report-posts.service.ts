@@ -7,7 +7,6 @@ import { UserResponseDto } from '../users/dto/user-response.dto';
 import { AllReportsRequestDto } from './dto/all-reports-request.dto';
 import { ReportsResponseDto } from './dto/reports-response.dto';
 import { UpdateMultiReportsRequestDto } from './dto/update-multi-reports-request.dto';
-import { UpdateReportsRequestDto } from './dto/update-reports-request.dto';
 
 @Injectable()
 export class ReportPostsService {
@@ -57,19 +56,6 @@ export class ReportPostsService {
 				},
 				{ status: multiReportData.status },
 			);
-			return true;
-		} catch (error) {
-			throw new InternalServerErrorException(error.message, error);
-		}
-	}
-
-	async updateReportsStatus(reportId: number, updateReportData: UpdateReportsRequestDto): Promise<boolean> {
-		const foundReport = await this.foundReportData(reportId);
-		if (!foundReport) {
-			throw new NotFoundException('Report is not found');
-		}
-		try {
-			await this.reportPostsRepository.update(reportId, updateReportData);
 			return true;
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);

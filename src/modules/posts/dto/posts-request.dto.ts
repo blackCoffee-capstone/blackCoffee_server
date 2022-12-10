@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsOptional, IsString } from 'class-validator';
 
 export class PostsRequestDto {
@@ -19,7 +19,7 @@ export class PostsRequestDto {
 	@IsArray()
 	@ArrayMinSize(1)
 	@ArrayMaxSize(5)
-	@Type(() => Number)
-	@ApiProperty({ example: [1, 2, 3], description: '테마 아이디 배열 (1~5개)' })
+	@Transform((params) => params.value.split(',').map(Number))
+	@ApiProperty({ example: '[1, 2, 3]', description: '테마 아이디 배열 (1~5개)' })
 	readonly themes: number[];
 }

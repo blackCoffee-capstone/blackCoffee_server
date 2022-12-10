@@ -63,11 +63,13 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 				name: 'locationIds',
 				required: false,
 				description: '위치 필터링 id list',
+				type: String,
 			}),
 			ApiQuery({
 				name: 'themeIds',
 				required: false,
 				description: '테마 필터링 id list',
+				type: String,
 			}),
 			ApiResponse({
 				status: 200,
