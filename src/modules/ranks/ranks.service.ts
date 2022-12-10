@@ -241,17 +241,17 @@ export class RanksService {
 			const rank = await this.ranksRepository.findOne({
 				where: { date: updateRequest.week, rank: updateRequest.rank },
 			});
-			if (rank && rank.spotId !== updateRequest.spotId) {
-				await this.ranksRepository.update(
-					{ date: updateRequest.week, rank: updateRequest.rank },
-					{ spotId: updateRequest.spotId },
-				);
-			}
-			if (!rank && updateRequest.rank) {
+			if (rank) {
+				if (rank.spotId !== updateRequest.spotId) {
+					await this.ranksRepository.update(
+						{ date: updateRequest.week, rank: updateRequest.rank },
+						{ spotId: updateRequest.spotId },
+					);
+				}
+			} else {
 				const ranksRequestDto = new RanksRecordRequestDto({
 					date: updateRequest.week,
-					spotId: updateRequest.spotId,
-					rank: updateRequest.rank,
+					...updateRequest,
 				});
 				await this.ranksRepository.save(ranksRequestDto);
 			}
