@@ -180,6 +180,7 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 				description: '',
 				type: Boolean,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	deleteUser(summary: string) {
@@ -196,6 +197,7 @@ export const ApiDocs: SwaggerMethodDoc<AuthController> = {
 				description: '',
 				type: Boolean,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 };

@@ -23,7 +23,7 @@ import { SpotsController } from './spots.controller';
 import { SpotsService } from './spots.service';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { SortType } from 'src/types/sort.types';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('SpotsController', () => {
 	let spotsController: SpotsController;
@@ -122,6 +122,22 @@ describe('SpotsController', () => {
 				totalPage: 1,
 				spots: expectSpots,
 			});
+		});
+	});
+
+	describe('DetailSpot()', () => {
+		it('여행지 상세 페이지가 없으면 NotFoundException error를 throw한다.', async () => {
+			await spotsRepository.find();
+			spotsRepository.createQueryBuilder().getOne.mockResolvedValue();
+			await expect(
+				spotsController.detailSpot(
+					{ header: null },
+					{
+						take: 20,
+					},
+					2,
+				),
+			).rejects.toThrow(NotFoundException);
 		});
 	});
 });
