@@ -1,6 +1,6 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { getMaxListeners } from 'process';
 import { ReportPost } from 'src/entities/report-posts.entity';
 import { AdFormType } from 'src/types/ad-form.types';
 import { MockReportPostsRepository } from 'test/mock/report-posts.mock';
@@ -41,14 +41,43 @@ describe('ReportPostsController', () => {
 			await expect(reportPostscontroller.getAllReports({})).resolves.toEqual(expectReports);
 		});
 	});
-
-	describe('getAllReport()', () => {
-		it('신고 목록을 반환한다.', async () => {
+	describe('updateMultiReportsStatus()', () => {
+		it('여러 신고 목록의 상태를 수정한다.', async () => {
 			const reports = await reportPostsRepository.find();
-			const expectReports = reports.map((item) => new ReportsResponseDto(item));
-			reportPostsRepository.createQueryBuilder().getMany.mockResolvedValue(expectReports);
+			reportPostsRepository.createQueryBuilder().getMany.mockResolvedValue(reports);
+			reportPostsRepository.update.mockResolvedValue(reports);
 
-			await expect(reportPostscontroller.getAllReports({})).resolves.toEqual(expectReports);
+			await expect(
+				reportPostscontroller.updateMultiReportsStatus({ reportIds: [1], status: AdFormType.Approve }),
+			).resolves.toEqual(true);
+		});
+		it('신고 목록이 중복되면 BadRequestException 에러를 반환한다', async () => {
+			// usersRepository.save.mockResolvedValue(user);
+
+			await expect(
+				reportPostscontroller.updateMultiReportsStatus({ reportIds: [1, 1], status: AdFormType.Approve }),
+			).rejects.toThrow(BadRequestException);
+		});
+		it('신고글을 찾을 수 없는 경우 NotFoundException 에러를 반환한다', async () => {
+			reportPostsRepository.createQueryBuilder().getMany.mockResolvedValue([1]);
+
+			await expect(
+				reportPostscontroller.updateMultiReportsStatus({ reportIds: [1, 3], status: AdFormType.Approve }),
+			).rejects.toThrow(NotFoundException);
+		});
+	});
+	describe('deleteReports()', () => {
+		it('신고를 삭제한다.', async () => {
+			const reports = await reportPostsRepository.find();
+			reportPostsRepository.createQueryBuilder().getOne.mockResolvedValue(reports[0]);
+			reportPostsRepository.delete.mockResolvedValue(true);
+
+			await expect(reportPostscontroller.deleteReports(1)).resolves.toEqual(true);
+		});
+		it('신고글을 찾을 수 없는 경우 NotFoundException 에러를 반환한다', async () => {
+			reportPostsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
+
+			await expect(reportPostscontroller.deleteReports(2)).rejects.toThrow(NotFoundException);
 		});
 	});
 });
