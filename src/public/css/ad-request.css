@@ -197,7 +197,9 @@ td {
 .adform-img {
 	object-fit: contain;
 	width: auto;
+	height: auto;
 	max-height: 800px;
+	max-width: 600px;
 }
 
 #popup {

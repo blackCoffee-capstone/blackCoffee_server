@@ -214,7 +214,7 @@ td {
 .popup-register {
 	width: 500px;
 	height: 400px;
-	margin: -250px 0 0 -150px;
+	margin: -200px 0 0 -200px;
 }
 
 .modal-header {
@@ -235,6 +235,7 @@ td {
 	object-fit: contain;
 	max-width: 800px;
 	height: auto;
+	max-height: 1000px;
 }
 
 .input {
@@ -251,12 +252,6 @@ td {
 
 .ad-register-body div {
 	text-align: center;
-}
-
-.photo-url {
-	object-fit: contain;
-	max-width: 800px;
-	height: auto;
 }
 
 .modal-footer {
