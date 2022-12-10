@@ -238,21 +238,18 @@ export class RanksService {
 
 	async updateRank(updateRequest: RanksUpdateRequestDto) {
 		try {
-			await this.spotsRepository.update(updateRequest.spotId, { rank: updateRequest.rank });
-
-			const rankingRequestDto = new RankingRequestDto();
 			const rank = await this.ranksRepository.findOne({
-				where: { date: rankingRequestDto.getDate, rank: updateRequest.rank },
+				where: { date: updateRequest.week, rank: updateRequest.rank },
 			});
 			if (rank && rank.spotId !== updateRequest.spotId) {
 				await this.ranksRepository.update(
-					{ date: rankingRequestDto.getDate, rank: updateRequest.rank },
+					{ date: updateRequest.week, rank: updateRequest.rank },
 					{ spotId: updateRequest.spotId },
 				);
 			}
 			if (!rank && updateRequest.rank) {
 				const ranksRequestDto = new RanksRecordRequestDto({
-					date: rankingRequestDto.getDate,
+					date: updateRequest.week,
 					spotId: updateRequest.spotId,
 					rank: updateRequest.rank,
 				});
