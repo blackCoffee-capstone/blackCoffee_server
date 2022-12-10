@@ -31,6 +31,8 @@ export class MockWishSpotsRepository {
 		limit: jest.fn().mockReturnThis(),
 		offset: jest.fn().mockReturnThis(),
 		save: jest.fn().mockReturnThis(),
+		take: jest.fn().mockReturnThis(),
+		skip: jest.fn().mockReturnThis(),
 	});
 	async find() {
 		return mockWishSpot;
