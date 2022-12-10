@@ -367,7 +367,7 @@ describe('UsersController', () => {
 					id: 1,
 					title: 'test',
 					address: '부산 해운대구',
-					createdAt: '2022-12-01',
+					createdAt: '2022-12-06 23:07:57.787562+09',
 					clickPosts: [1],
 					likePosts: [{ userId: 1 }],
 					photoUrls: ['test1', 'test2'],
