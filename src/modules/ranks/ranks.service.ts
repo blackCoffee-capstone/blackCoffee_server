@@ -241,20 +241,13 @@ export class RanksService {
 			const rank = await this.ranksRepository.findOne({
 				where: { date: updateRequest.week, rank: updateRequest.rank },
 			});
-			if (rank) {
-				if (rank.spotId !== updateRequest.spotId) {
-					await this.ranksRepository.update(
-						{ date: updateRequest.week, rank: updateRequest.rank },
-						{ spotId: updateRequest.spotId },
-					);
-				}
-			} else {
-				const ranksRequestDto = new RanksRecordRequestDto({
-					date: updateRequest.week,
-					...updateRequest,
-				});
-				await this.ranksRepository.save(ranksRequestDto);
-			}
+			if (rank) await this.ranksRepository.delete(rank.id);
+
+			const ranksRequestDto = new RanksRecordRequestDto({
+				date: updateRequest.week,
+				...updateRequest,
+			});
+			await this.ranksRepository.save(ranksRequestDto);
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
