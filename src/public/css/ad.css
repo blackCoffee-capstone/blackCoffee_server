@@ -192,10 +192,10 @@ td {
 
 .popup {
 	display: none;
-	width: 800px;
-	height: 500px;
+	width: 1000px;
+	height: 600px;
 	position: absolute;
-	top: 50%;
+	top: 40%;
 	left: 50%;
 	background-color: #fff;
 	z-index: 2;
@@ -206,7 +206,7 @@ td {
 }
 
 .popup-detail {
-	margin: -250px 0 0 -350px;
+	margin: -250px 0 0 -450px;
 	text-align: center;
 }
 
@@ -228,6 +228,12 @@ td {
 .modal-title {
 	font-size: 18px;
 	font-weight: 800;
+}
+
+.photo-url {
+	object-fit: contain;
+	max-width: 800px;
+	height: auto;
 }
 
 .input {
