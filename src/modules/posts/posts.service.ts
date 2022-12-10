@@ -234,13 +234,17 @@ export class PostsService {
 		if (!foundPost) {
 			throw new NotFoundException('Post is not found');
 		}
-		const comment = this.postCommentsRepository.create({
-			userId,
-			postId,
-			content: commentData.content,
-		});
-		const result = await this.postCommentsRepository.save(comment);
-		return new PostCommentsResponseDto(result);
+		try {
+			const comment = this.postCommentsRepository.create({
+				userId,
+				postId,
+				content: commentData.content,
+			});
+			const result = await this.postCommentsRepository.save(comment);
+			return new PostCommentsResponseDto(result);
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async getPostsComments(userId: number, postId: number): Promise<GetPostsCommentsResponseDto[]> {
@@ -248,19 +252,23 @@ export class PostsService {
 		if (!foundPost) {
 			throw new NotFoundException('Post is not found');
 		}
-		const foundComments = await this.getComments(postId);
+		try {
+			const foundComments = await this.getComments(postId);
 
-		return foundComments.map(
-			(comment) =>
-				new GetPostsCommentsResponseDto({
-					...comment,
-					isWriter: comment.user_id === userId ? true : false,
-					user: new CommentsUserResponseDto({
-						id: comment.user_id,
-						nickname: comment.nickname,
+			return foundComments.map(
+				(comment) =>
+					new GetPostsCommentsResponseDto({
+						...comment,
+						isWriter: comment.user_id === userId ? true : false,
+						user: new CommentsUserResponseDto({
+							id: comment.user_id,
+							nickname: comment.nickname,
+						}),
 					}),
-				}),
-		);
+			);
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async deletePostsComment(userId: number, postId: number, commentId: number): Promise<boolean> {
@@ -272,8 +280,15 @@ export class PostsService {
 		if (!foundComment) {
 			throw new NotFoundException('Comment is not found');
 		}
-		await this.postCommentsRepository.delete(commentId);
-		return true;
+		if (foundComment && userId !== foundComment.user_id) {
+			throw new BadRequestException('User is not writer');
+		}
+		try {
+			await this.postCommentsRepository.delete(commentId);
+			return true;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	async reportPost(
@@ -291,14 +306,18 @@ export class PostsService {
 		if (await this.getUsersReportPost(userId, postId)) {
 			throw new BadRequestException('User already reports post');
 		}
-		const reportPost = this.reportPostsRepository.create({
-			userId,
-			postId,
-			reason: reportData.reason,
-		});
-		const result = await this.reportPostsRepository.save(reportPost);
+		try {
+			const reportPost = this.reportPostsRepository.create({
+				userId,
+				postId,
+				reason: reportData.reason,
+			});
+			const result = await this.reportPostsRepository.save(reportPost);
 
-		return new ReportPostsResponseDto({ id: result.id });
+			return new ReportPostsResponseDto({ id: result.id });
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
+		}
 	}
 
 	private async uploadFilesToS3(folder: string, files: Array<Express.Multer.File>): Promise<string[]> {
@@ -417,9 +436,7 @@ export class PostsService {
 	private async getComment(postId: number, commentId: number, userId: number) {
 		return await this.postCommentsRepository
 			.createQueryBuilder('post_comment')
-			.select(
-				'post_comment.id, post_comment.content, post_comment.is_writer, post_comment.created_at, user.id AS user_id, user.nickname',
-			)
+			.select('post_comment.id, post_comment.content, post_comment.created_at, user.id AS user_id, user.nickname')
 			.leftJoin('post_comment.user', 'user')
 			.leftJoin('post_comment.post', 'post')
 			.where('post.id = :postId', { postId })
