@@ -166,12 +166,12 @@ $(document).ready(function () {
 			dataSrc: '',
 			headers: { Authorization: 'Bearer ' + accessToken },
 			success: function (adform) {
-				var img_data = '<img src="' + adform.photoUrl + '" alt="license">';
+				var img_data = '<img src="' + adform.photoUrl + '" alt="license" class="photo-url">';
 				$('.modal-body').append('<div> 회사명 : ' + adform.businessName + '</div>');
 				$('.modal-body').append('<div> 위치 : ' + adform.address + '</div>');
 				$('.modal-body').append('<div> 이메일 : ' + adform.email + '</div>');
 				$('.modal-body').append(
-					'<div> 홈페이지 : <a href = "' +
+					'<div> 홈페이지 : <a href = "//' +
 						adform.pageUrl +
 						'" target="_blank">' +
 						adform.pageUrl +
