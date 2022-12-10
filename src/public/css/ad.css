@@ -231,6 +231,12 @@ td {
 	font-weight: 800;
 }
 
+.photo-url {
+	object-fit: contain;
+	max-width: 800px;
+	height: auto;
+}
+
 .input {
 	margin-bottom: 5px;
 }
