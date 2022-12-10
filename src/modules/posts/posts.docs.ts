@@ -1,5 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { string } from 'joi';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
 import { GetPostsCommentsResponseDto } from './dto/get-posts-comments-response.dto';
@@ -30,7 +31,7 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 						content: {
 							type: 'string',
 						},
-						location: {
+						address: {
 							type: 'string',
 						},
 						themes: {
@@ -74,7 +75,7 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 						content: {
 							type: 'string',
 						},
-						location: {
+						address: {
 							type: 'string',
 						},
 						themes: {
@@ -230,11 +231,13 @@ export const ApiDocs: SwaggerMethodDoc<PostsController> = {
 				name: 'locationIds',
 				required: false,
 				description: '위치 필터링 id list',
+				type: String,
 			}),
 			ApiQuery({
 				name: 'themeIds',
 				required: false,
 				description: '테마 필터링 id list',
+				type: String,
 			}),
 			ApiResponse({
 				status: 200,
