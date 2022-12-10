@@ -6,7 +6,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/role.guard';
 import { AllReportsRequestDto } from './dto/all-reports-request.dto';
 import { UpdateMultiReportsRequestDto } from './dto/update-multi-reports-request.dto';
-import { UpdateReportsRequestDto } from './dto/update-reports-request.dto';
 import { ApiDocs } from './report-posts.docs';
 import { ReportPostsService } from './report-posts.service';
 
@@ -30,14 +29,6 @@ export class ReportPostsController {
 	@ApiDocs.updateMultiReportsStatus('여러 신고 상태 수정하기')
 	async updateMultiReportsStatus(@Body() reportIdsData: UpdateMultiReportsRequestDto) {
 		return await this.reportPostsService.updateMultiReportsStatus(reportIdsData);
-	}
-
-	@Patch(':reportId')
-	@UseGuards(RolesGuard)
-	@Roles(UserType.Admin)
-	@ApiDocs.updateReportsStatus('신고 상태 수정하기')
-	async updateReportsStatus(@Param('reportId') reportId: number, @Body() updateReportData: UpdateReportsRequestDto) {
-		return await this.reportPostsService.updateReportsStatus(reportId, updateReportData);
 	}
 
 	@HttpCode(204)
