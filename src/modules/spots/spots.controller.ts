@@ -25,6 +25,11 @@ import { SpotsService } from './spots.service';
 export class SpotsController {
 	constructor(private readonly spotsService: SpotsService) {}
 
+	@Get('/test-ml')
+	async mltest() {
+		return await this.spotsService.sendAllSnsPostsToMl();
+	}
+
 	@Post()
 	@ApiDocs.createSpots('csv 파일 속 데이터를 DB에 저장')
 	@UseInterceptors(

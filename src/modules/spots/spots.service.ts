@@ -23,11 +23,11 @@ import { Theme } from 'src/entities/theme.entity';
 import { WishSpot } from 'src/entities/wish-spots.entity';
 import { SortType } from 'src/types/sort.types';
 import { Repository } from 'typeorm';
-import { RanksUpdateRequestDto } from '../ranks/dto/ranks-update-request.dto';
-import { RanksService } from '../ranks/ranks.service';
 import { DetailSnsPostResponseDto } from './dto/detail-sns-post-response.dto';
 import { DetailSpotRequestDto } from './dto/detail-spot-request.dto';
 import { DetailSpotResponseDto } from './dto/detail-spot-response.dto';
+import { MlSnsRequestDto } from './dto/ml-sns-request.dto';
+import { MlSpotSnsRequestDto } from './dto/ml-spot-sns-request.dto';
 import { NeayByFacilityResponseDto } from './dto/neayby-facility-response.dto';
 import { SaveRequestDto } from './dto/save-request.dto';
 import { SearchPageResponseDto } from './dto/search-page-response.dto';
@@ -54,7 +54,7 @@ export class SpotsService {
 		private readonly clickSpotsRepository: Repository<ClickSpot>,
 		@InjectRepository(WishSpot)
 		private readonly wishSpotsRepository: Repository<WishSpot>,
-		private readonly ranksService: RanksService,
+		//private readonly ranksService: RanksService,
 		private readonly configService: ConfigService,
 		private readonly httpService: HttpService,
 		private readonly jwtService: JwtService,
@@ -129,7 +129,90 @@ export class SpotsService {
 		const spotsFile = fs.readFileSync(localResultPath);
 		const spots = JSON.parse(spotsFile.toString());
 		const metaData: SaveRequestDto[] = spots.map((spot) => new SaveRequestDto(spot));
-		return await this.saveSpot(metaData);
+		await this.saveSpot(metaData);
+
+		// 2번째 Ml 통신
+	}
+
+	async sendAllSnsPostsToMl() {
+		const allSpotsWithSnsPosts = await this.spotsRepository
+			.createQueryBuilder('spot')
+			.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
+			.where('snsPosts.id is not null')
+			.getMany();
+
+		const allSpotsWithSnsPostsDto = allSpotsWithSnsPosts.map(
+			(spotData) =>
+				new MlSpotSnsRequestDto({
+					spotId: spotData.id,
+					snsPosts: spotData.snsPosts.map(
+						(sns) =>
+							new MlSnsRequestDto({
+								likeNumber: sns.likeNumber,
+								week: sns.createdAt,
+							}),
+					),
+				}),
+		);
+		const inputJsonFile = JSON.stringify(allSpotsWithSnsPostsDto);
+
+		fs.writeFileSync('./src/modules/spots/inputs/rank-input.json', inputJsonFile);
+
+		const localInputPath = './src/modules/spots/inputs/rank-input.json';
+		const localResultPath = './src/modules/spots/results/rank-result.json';
+
+		await ssh
+			.connect({
+				host: this.#sshConfig.host,
+				username: this.#sshConfig.userName,
+				port: this.#sshConfig.port,
+				password: this.#sshConfig.password,
+			})
+			.then(
+				async function () {
+					await ssh
+						.putFile(localInputPath, `/home/iknow/Desktop/blackcoffee/trend_analysis/data/rank-input.json`)
+						.then(
+							async function () {
+								await ssh
+									.execCommand(
+										`bash "/home/iknow/Desktop/blackcoffee/trend_analysis/run_trend.sh" "/home/iknow/Desktop/blackcoffee/trend_analysis/data/rank-input.json" "/home/iknow/Desktop/blackcoffee/trend_analysis/data/rank-result.json"`,
+										{},
+									)
+									.then(
+										async function () {
+											await ssh
+												.getFile(
+													localResultPath,
+													'/home/iknow/Desktop/blackcoffee/trend_analysis/data/rank-result.json',
+												)
+												.then(
+													async function () {
+														await ssh.dispose();
+													},
+													function (error) {
+														throw new InternalServerErrorException(error.message, error);
+													},
+												);
+										},
+										function (error) {
+											throw new InternalServerErrorException(error.message, error);
+										},
+									);
+							},
+							function (error) {
+								throw new InternalServerErrorException(error.message, error);
+							},
+						);
+				},
+				function (error) {
+					throw new InternalServerErrorException(error.message, error);
+				},
+			);
+		const resultFile = fs.readFileSync(localResultPath);
+		const resultJson = JSON.parse(resultFile.toString());
+		console.log(resultJson);
+		return true;
 	}
 
 	async getSnsPostUrls() {
@@ -297,18 +380,10 @@ export class SpotsService {
 		try {
 			if (!IsSpot) {
 				if (requestSpot.rank === 0) requestSpot.rank = null;
-				const spot = await this.spotsRepository.save({
+				await this.spotsRepository.save({
 					...requestSpot,
 					location: location,
 				});
-				if (requestSpot.rank)
-					await this.ranksService.updateRank(
-						new RanksUpdateRequestDto({ spotId: spot.id, rank: requestSpot.rank }),
-					);
-			} else {
-				await this.ranksService.updateRank(
-					new RanksUpdateRequestDto({ spotId: IsSpot.id, rank: requestSpot.rank }),
-				);
 			}
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
