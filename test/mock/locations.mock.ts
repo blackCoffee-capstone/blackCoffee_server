@@ -50,6 +50,7 @@ export class MockLocationsRepository {
 		andWhere: jest.fn().mockReturnThis(),
 		getRawMany: jest.fn().mockReturnThis(),
 		distinctOn: jest.fn().mockReturnThis(),
+		getOne: jest.fn().mockReturnThis(),
 	});
 
 	async find() {
