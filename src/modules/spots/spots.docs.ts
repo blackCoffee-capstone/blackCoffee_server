@@ -76,6 +76,7 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 				description: '',
 				type: SearchPageResponseDto,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	updateSnsPostPhotos(summary: string) {
