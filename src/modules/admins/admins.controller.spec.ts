@@ -28,6 +28,7 @@ import {
 import { GetAdFilterResponseDto } from './dto/get-ad-filter-response.dto';
 import { AdsResponseDto } from './dto/ads-response.dto';
 import { GetAdResponseDto } from './dto/get-ad-response.dto';
+import { LocationResponseDto } from '../filters/dto/location-response.dto';
 
 describe('AdminsController', () => {
 	let adminsController: AdminsController;
@@ -117,7 +118,7 @@ describe('AdminsController', () => {
 			await expect(adminsController.getAdForm(1)).resolves.toEqual(adForms);
 		});
 
-		it('요청 광고를 찾을 수 없으면 에러를 반환한다.', async () => {
+		it('요청 광고를 찾을 수 없으면 NotFoundException error를 throw한다.', async () => {
 			const adForms = {
 				id: 1,
 				businessName: 'blackCoffee',
@@ -157,7 +158,7 @@ describe('AdminsController', () => {
 
 			await expect(adminsController.changeAdsStatus(1, { status: AdFormType.Todo })).resolves.toEqual(true);
 		});
-		it('요청 광고 없이 상태를 변경하면 에러를 반환한다.', async () => {
+		it('요청 광고 없이 상태를 변경하면 NotFoundException error를 throw한다.', async () => {
 			adFormsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
 
 			await expect(adminsController.changeAdsStatus(1, { status: AdFormType.Todo })).rejects.toThrow(
@@ -167,7 +168,7 @@ describe('AdminsController', () => {
 	});
 
 	describe('deleteAdForm()', () => {
-		it('존재하지 않는 요청 광고를 삭제하면 에러를 반환한다.', async () => {
+		it('존재하지 않는 요청 광고를 삭제하면 NotFoundException error를 throw한다.', async () => {
 			adFormsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
 			adFormsRepository.delete.mockResolvedValue(true);
 			await expect(adminsController.deleteAdForm(1)).rejects.toThrow(NotFoundException);
@@ -192,8 +193,40 @@ describe('AdminsController', () => {
 		});
 	});
 
+	describe('getAds()', () => {
+		it('광고 상세 정보를 반환한다.', async () => {
+			const ads = await adsRepository.find();
+			adsRepository.findOne.mockResolvedValue(ads[0]);
+			locationsRepository.findOne.mockResolvedValue(ads[0].location);
+
+			const ad = new GetAdResponseDto({
+				...ads[0],
+				location: new LocationResponseDto(ads[0].location),
+			});
+
+			await expect(adminsController.getAds(1)).resolves.toEqual(ad);
+		});
+		it('존재하지 않는 광고의 상세 정보를 반환하면 NotFoundException error를 throw한다.', async () => {
+			await adsRepository.find();
+			await expect(adminsController.getAds(3)).rejects.toThrow(NotFoundException);
+		});
+	});
+
+	describe('registerAds', () => {
+		it('광고 배너 사진이 없으면 BadRequestException error를 throw한다.', async () => {
+			await expect(
+				adminsController.registerAds(null, {
+					businessName: 'test',
+					email: 'test',
+					pageUrl: 'www.test.com',
+					address: '경기 수원시',
+				}),
+			).rejects.toThrow(BadRequestException);
+		});
+	});
+
 	describe('updateAds', () => {
-		it('존재하지 않는 광고를 수정하면 에러를 발생시킨다.', async () => {
+		it('존재하지 않는 광고를 수정하면 NotFoundException error를 throw한다.', async () => {
 			adFormsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
 			adFormsRepository.update.mockResolvedValue(true);
 			await expect(adminsController.updateAds(1)).rejects.toThrow(NotFoundException);
@@ -201,7 +234,7 @@ describe('AdminsController', () => {
 	});
 
 	describe('deleteAds', () => {
-		it('존재하지 않는 광고를 삭제하면 에러를 발생시킨다.', async () => {
+		it('존재하지 않는 광고를 삭제하면 NotFoundException error를 throw한다.', async () => {
 			adFormsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
 			adFormsRepository.delete.mockResolvedValue(true);
 			await expect(adminsController.deleteAdForm(1)).rejects.toThrow(NotFoundException);
