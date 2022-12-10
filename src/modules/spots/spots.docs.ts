@@ -120,6 +120,7 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 				description: '',
 				type: DetailSpotResponseDto,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	getSnsPostUrls(summary: string) {
