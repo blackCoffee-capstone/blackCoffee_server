@@ -2,7 +2,7 @@
 ## '지금, 여기'
 
 <br>
-<p align="center"><img src="./src/assets/image/common/logo-primary.svg" alt="now_here" width="200px" /></p>
+<p align="center"><img src="./src/image/logo-primary.svg" alt="now_here" width="200px" /></p>
 <br>
 
 '지금, 여기'는 SNS 빅데이터를 분석하여 새롭게 떠오르는 여행지를 추천해주고 관련 정보를 제공해주는 서비스입니다.  
