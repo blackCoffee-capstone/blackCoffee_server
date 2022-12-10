@@ -11,7 +11,7 @@ export const ApiDocs: SwaggerMethodDoc<AdFormsController> = {
 				summary,
 				description: '광고 요청 등록',
 			}),
-			ApiConsumes('multipart/form-data'), //TODO: form-data안에 json 넣는 방식으로 추후 수정 예정
+			ApiConsumes('multipart/form-data'),
 			ApiBody({
 				schema: {
 					type: 'object',
