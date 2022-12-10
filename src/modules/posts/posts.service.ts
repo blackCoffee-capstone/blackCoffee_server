@@ -292,7 +292,7 @@ export class PostsService {
 			throw new NotFoundException('Comment is not found');
 		}
 		if (foundComment && userId !== foundComment.user_id) {
-			throw new BadRequestException('User is not writer');
+			throw new UnauthorizedException('User is not writer');
 		}
 		try {
 			await this.postCommentsRepository.delete(commentId);

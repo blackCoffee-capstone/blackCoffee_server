@@ -161,57 +161,57 @@ export class SpotsService {
 		const localInputPath = './src/modules/spots/inputs/rank-input.json';
 		const localResultPath = './src/modules/spots/results/rank-result.json';
 
-		await ssh
-			.connect({
-				host: this.#sshConfig.host,
-				username: this.#sshConfig.userName,
-				port: this.#sshConfig.port,
-				password: this.#sshConfig.password,
-			})
-			.then(
-				async function () {
-					await ssh
-						.putFile(localInputPath, `/home/iknow/Desktop/blackcoffee/trend_analysis/data/rank-input.json`)
-						.then(
-							async function () {
-								await ssh
-									.execCommand(
-										`bash "/home/iknow/Desktop/blackcoffee/trend_analysis/run_trend.sh" "/home/iknow/Desktop/blackcoffee/trend_analysis/data/rank-input.json" "/home/iknow/Desktop/blackcoffee/trend_analysis/data/rank-result.json"`,
-										{},
-									)
-									.then(
-										async function () {
-											await ssh
-												.getFile(
-													localResultPath,
-													'/home/iknow/Desktop/blackcoffee/trend_analysis/data/rank-result.json',
-												)
-												.then(
-													async function () {
-														await ssh.dispose();
-													},
-													function (error) {
-														throw new InternalServerErrorException(error.message, error);
-													},
-												);
-										},
-										function (error) {
-											throw new InternalServerErrorException(error.message, error);
-										},
-									);
-							},
-							function (error) {
-								throw new InternalServerErrorException(error.message, error);
-							},
-						);
-				},
-				function (error) {
-					throw new InternalServerErrorException(error.message, error);
-				},
-			);
-		const resultFile = fs.readFileSync(localResultPath);
-		const resultJson = JSON.parse(resultFile.toString());
-		console.log(resultJson);
+		// await ssh
+		// 	.connect({
+		// 		host: this.#sshConfig.host,
+		// 		username: this.#sshConfig.userName,
+		// 		port: this.#sshConfig.port,
+		// 		password: this.#sshConfig.password,
+		// 	})
+		// 	.then(
+		// 		async function () {
+		// 			await ssh
+		// 				.putFile(localInputPath, `/home/iknow/Desktop/blackcoffee/trend_analysis/data/rank-input.json`)
+		// 				.then(
+		// 					async function () {
+		// 						await ssh
+		// 							.execCommand(
+		// 								`bash "/home/iknow/Desktop/blackcoffee/trend_analysis/run_trend.sh" "/home/iknow/Desktop/blackcoffee/trend_analysis/data/rank-input.json" "/home/iknow/Desktop/blackcoffee/trend_analysis/data/rank-result.json"`,
+		// 								{},
+		// 							)
+		// 							.then(
+		// 								async function () {
+		// 									await ssh
+		// 										.getFile(
+		// 											localResultPath,
+		// 											'/home/iknow/Desktop/blackcoffee/trend_analysis/data/rank-result.json',
+		// 										)
+		// 										.then(
+		// 											async function () {
+		// 												await ssh.dispose();
+		// 											},
+		// 											function (error) {
+		// 												throw new InternalServerErrorException(error.message, error);
+		// 											},
+		// 										);
+		// 								},
+		// 								function (error) {
+		// 									throw new InternalServerErrorException(error.message, error);
+		// 								},
+		// 							);
+		// 					},
+		// 					function (error) {
+		// 						throw new InternalServerErrorException(error.message, error);
+		// 					},
+		// 				);
+		// 		},
+		// 		function (error) {
+		// 			throw new InternalServerErrorException(error.message, error);
+		// 		},
+		// 	);
+		// const resultFile = fs.readFileSync(localResultPath);
+		// const resultJson = JSON.parse(resultFile.toString());
+		// console.log(resultJson);
 		return true;
 	}
 
