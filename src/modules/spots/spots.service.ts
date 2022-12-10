@@ -390,9 +390,16 @@ export class SpotsService {
 					.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
 			}
 			if (searchRequest.themeIds && searchRequest.themeIds[0] !== 0) {
-				searchSpots = searchSpots
-					.leftJoinAndSelect('snsPosts.theme', 'theme')
-					.andWhere('theme.id IN (:...themeIds)', { themeIds: searchRequest.themeIds });
+				searchSpots = searchSpots.andWhere((spotIds) => {
+					const subQuery = spotIds
+						.subQuery()
+						.select('snsPost.spotId')
+						.distinctOn(['snsPost.spotId'])
+						.from(SnsPost, 'snsPost')
+						.where('snsPost.themeId IN (:...themeIds)', { themeIds: searchRequest.themeIds })
+						.getQuery();
+					return 'spot.id IN' + subQuery;
+				});
 			}
 
 			if (searchRequest.sorter === SortType.Rank) searchSpots = searchSpots.orderBy('spot.rank', 'ASC');
