@@ -493,13 +493,13 @@ export class PostsService {
 					'post.id AS id, post.title AS title, post.address AS address, post.createdAt AS create, post.photoUrls AS photos',
 				)
 				.addSelect('user.id AS user, user.nickname AS name')
-				.addSelect((clicks) => {
-					return clicks
-						.select('COUNT (*)::int AS clicks')
+				.addSelect((views) => {
+					return views
+						.select('COUNT (*)::int AS views')
 						.from(ClickPost, 'clickPosts')
 						.where('clickPosts.postId = post.id')
 						.limit(1);
-				}, 'clicks')
+				}, 'views')
 				.addSelect((likes) => {
 					return likes
 						.select('COUNT (*)::int AS likes')
@@ -528,13 +528,19 @@ export class PostsService {
 				posts = posts.andWhere('location.id IN (:...locationIds)', { locationIds: locationIds });
 			}
 			if (searchRequest.themeIds && searchRequest.themeIds[0] !== 0) {
-				posts = posts
-					.leftJoinAndSelect('post.postThemes', 'postThemes')
-					.leftJoinAndSelect('postThemes.theme', 'theme')
-					.andWhere('theme.id IN (:...themeIds)', { themeIds: searchRequest.themeIds });
+				posts = posts.andWhere((postIds) => {
+					const subQuery = postIds
+						.subQuery()
+						.select('postTheme.postId')
+						.distinctOn(['postTheme.postId'])
+						.from(PostTheme, 'postTheme')
+						.where('postTheme.themeId IN (:...themeIds)', { themeIds: searchRequest.themeIds })
+						.getQuery();
+					return 'post.id IN' + subQuery;
+				});
 			}
 
-			if (searchRequest.sorter === PostsSortType.View) posts = posts.orderBy('clicks', 'DESC');
+			if (searchRequest.sorter === PostsSortType.View) posts = posts.orderBy('views', 'DESC');
 			else if (searchRequest.sorter === PostsSortType.Like) posts = posts.orderBy('likes', 'DESC');
 			else if (searchRequest.sorter === PostsSortType.CreatedAt) posts = posts.orderBy('post.createdAt', 'DESC');
 
@@ -551,7 +557,7 @@ export class PostsService {
 					new MainPostsResponseDto({
 						...post,
 						order: order--,
-						views: post.clicks,
+						views: post.views,
 						likes: post.likes,
 						createdAt: post.create,
 						photoUrls: post.photos,
