@@ -1,7 +1,10 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 
+import { JwtConfig } from 'src/config/config.constant';
 import { ClickSpot } from 'src/entities/click-spots.entity';
 import { Rank } from 'src/entities/rank.entity';
 import { SnsPost } from 'src/entities/sns-posts.entity';
@@ -21,7 +24,12 @@ export class RanksService {
 		private readonly spotsRepository: Repository<Spot>,
 		@InjectRepository(Rank)
 		private readonly ranksRepository: Repository<Rank>,
+		@InjectRepository(WishSpot)
+		private readonly wishSpotsRepository: Repository<WishSpot>,
+		private readonly configService: ConfigService,
+		private readonly jwtService: JwtService,
 	) {}
+	#jwtConfig = this.configService.get<JwtConfig>('jwtConfig');
 
 	private async weekCalulation(rankingRequest: RankingRequestDto) {
 		const nextCheckWeek = await this.ranksRepository.createQueryBuilder('rank').orderBy('date', 'DESC').getOne();
@@ -46,7 +54,7 @@ export class RanksService {
 		return [weekList[dateIdx - 1], weekList[dateIdx + 1]];
 	}
 
-	async getRanksList(rankingRequest: RankingRequestDto) {
+	async getRanksList(header: string, rankingRequest: RankingRequestDto) {
 		try {
 			const week = await this.weekCalulation(rankingRequest);
 
@@ -121,16 +129,27 @@ export class RanksService {
 				.orderBy('after_rank', 'ASC')
 				.getRawMany();
 
-			let ranking = Array.from(rankingListSpots).map(function (spot) {
-				return new RankingListResponseDto({
-					...spot,
-					rank: spot.after_rank,
-					variance: spot.before_rank ? spot.before_rank - spot.after_rank : null,
-					views: spot.clicks,
-					wishes: spot.wishes,
-					photoUrl: spot.photo,
-				});
-			});
+			let ranking = [];
+			for (const spot of rankingListSpots) {
+				let isWish = false;
+				if (header) {
+					const token = header.replace('Bearer ', '');
+					const user = this.jwtService.verify(token, { secret: this.#jwtConfig.jwtAccessTokenSecret });
+
+					if (await this.isUsersWishSpot(user.id, spot.id)) isWish = true;
+				}
+				ranking.push(
+					new RankingListResponseDto({
+						...spot,
+						rank: spot.after_rank,
+						variance: spot.before_rank ? spot.before_rank - spot.after_rank : null,
+						views: spot.clicks,
+						wishes: spot.wishes,
+						photoUrl: spot.photo,
+						isWish,
+					}),
+				);
+			}
 			ranking = ranking.filter((spot) => spot.photoUrl !== null);
 			return new RankingResponseDto({
 				prev: week[0] ? week[0] : null,
@@ -140,6 +159,17 @@ export class RanksService {
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}
+	}
+
+	private async isUsersWishSpot(userId: number, spotId: number): Promise<boolean> {
+		const usersWishData = await this.wishSpotsRepository
+			.createQueryBuilder('wishSpot')
+			.where('wishSpot.userId = :userId', { userId })
+			.andWhere('wishSpot.spotId = :spotId', { spotId })
+			.getOne();
+
+		if (usersWishData) return true;
+		return false;
 	}
 
 	async getRanksMap(rankingRequest: RankingRequestDto) {
