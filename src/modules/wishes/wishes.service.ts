@@ -57,12 +57,12 @@ export class WishesService {
 				.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
 				.where('snsPosts.photoUrl is not null')
 				.andWhere('user.id = :userId', { userId })
-				.orderBy('wishSpot.created_at', 'DESC');
+				.orderBy('wishSpot.createdAt', 'DESC');
 
 			const totalPageWishes = await wishes.getMany();
 			const responseWishes = await wishes
-				.limit(wishPageData.take)
-				.offset((wishPageData.page - 1) * wishPageData.take)
+				.take(wishPageData.take)
+				.skip((wishPageData.page - 1) * wishPageData.take)
 				.getMany();
 
 			const totalPage = Math.ceil(totalPageWishes.length / wishPageData.take);

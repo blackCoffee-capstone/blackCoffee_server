@@ -58,12 +58,12 @@ export class LikesService {
 				.leftJoinAndSelect('post.likePosts', 'likePosts')
 				.leftJoinAndSelect('post.location', 'location')
 				.where('user.id = :userId', { userId })
-				.orderBy('likePost.created_at', 'DESC');
+				.orderBy('likePost.createdAt', 'DESC');
 
 			const totalPageLikes = await likes.getMany();
 			const responseLikes = await likes
-				.limit(likePageData.take)
-				.offset((likePageData.page - 1) * likePageData.take)
+				.take(likePageData.take)
+				.skip((likePageData.page - 1) * likePageData.take)
 				.getMany();
 
 			const totalPage = Math.ceil(totalPageLikes.length / likePageData.take);
