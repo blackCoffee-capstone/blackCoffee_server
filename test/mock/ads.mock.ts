@@ -6,6 +6,11 @@ export const mockAd = [
 		pageUrl: 'https~',
 		photoUrl: 'https~',
 		address: test,
+		location: {
+			id: 31,
+			metroName: '인천',
+			localName: '연수구',
+		},
 		createdAt: '2022-12-09',
 	},
 ];
