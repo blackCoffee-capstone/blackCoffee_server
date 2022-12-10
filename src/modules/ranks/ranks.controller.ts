@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Headers } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { RankingRequestDto } from './dto/ranking-request.dto';
@@ -12,8 +12,8 @@ export class RanksController {
 
 	@Get('/list')
 	@ApiDocs.ranksList('최신 트렌드 랭킹 페이지 리스트 기준')
-	async ranksList(@Query() rankingRequest: RankingRequestDto) {
-		return await this.ranksService.getRanksList(rankingRequest);
+	async ranksList(@Headers() headers, @Query() rankingRequest: RankingRequestDto) {
+		return await this.ranksService.getRanksList(headers.authorization, rankingRequest);
 	}
 
 	@Get('/map')

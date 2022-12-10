@@ -124,8 +124,11 @@ export class PostsService {
 		photos?: Array<Express.Multer.File>,
 		postData?: UpdatePostsRequestDto,
 	): Promise<PostsResponseDto> {
-		const foundUsersPost = await this.getUsersPost(userId, postId);
+		const foundUsersPost = await this.getUsersPost(postId);
 		if (!foundUsersPost) {
+			throw new NotFoundException('Post is not found');
+		}
+		if (foundUsersPost && foundUsersPost.user.id !== userId) {
 			throw new UnauthorizedException('User is not writer');
 		}
 		if (photos && photos.length > 5) {
@@ -146,9 +149,6 @@ export class PostsService {
 			locationId: postData.address ? 0 : foundUsersPost.location.id,
 		};
 
-		if (!foundUsersPost) {
-			throw new NotFoundException('Post is not found');
-		}
 		if (postData.address) {
 			const metroLocalName = this.adFormsService.getMetroLocalName(postData.address);
 			updateData.locationId = await this.adFormsService.getAddressLocationId(
@@ -224,9 +224,11 @@ export class PostsService {
 		if (role === UserType.Admin) {
 			foundUsersPost = await this.getPostUserId(postId);
 		} else {
-			foundUsersPost = await this.getUsersPost(userId, postId);
+			foundUsersPost = await this.getUsersPost(postId);
 			if (!foundUsersPost) {
 				throw new NotFoundException('Post is not found');
+			} else if (foundUsersPost.user.id !== userId) {
+				throw new UnauthorizedException('User is not writer');
 			}
 		}
 		await this.deleteFilesToS3('posts', foundUsersPost.photoUrls);
@@ -290,7 +292,7 @@ export class PostsService {
 			throw new NotFoundException('Comment is not found');
 		}
 		if (foundComment && userId !== foundComment.user_id) {
-			throw new BadRequestException('User is not writer');
+			throw new UnauthorizedException('User is not writer');
 		}
 		try {
 			await this.postCommentsRepository.delete(commentId);
@@ -393,13 +395,12 @@ export class PostsService {
 		return true;
 	}
 
-	private async getUsersPost(userId: number, postId: number) {
+	private async getUsersPost(postId: number) {
 		return await this.postsRepository
 			.createQueryBuilder('post')
 			.leftJoinAndSelect('post.user', 'user')
 			.leftJoinAndSelect('post.location', 'location')
-			.where('user.id = :userId', { userId })
-			.andWhere('post.id = :postId', { postId })
+			.where('post.id = :postId', { postId })
 			.getOne();
 	}
 
@@ -492,7 +493,7 @@ export class PostsService {
 				.select(
 					'post.id AS id, post.title AS title, post.address AS address, post.createdAt AS create, post.photoUrls AS photos',
 				)
-				.addSelect('user.id AS user, user.nickname AS name')
+				.addSelect('user.id AS userid, user.nickname AS name')
 				.addSelect((views) => {
 					return views
 						.select('COUNT (*)::int AS views')
@@ -562,7 +563,7 @@ export class PostsService {
 						createdAt: post.create,
 						photoUrls: post.photos,
 						isLike: post.likeUsers ? true : false,
-						user: new CommentsUserResponseDto({ id: post.user, nickname: post.name }),
+						user: new CommentsUserResponseDto({ id: post.userid, nickname: post.name }),
 					}),
 			);
 			return new MainPostsPageResponseDto({ totalPage: totalPage, posts: postsDto });

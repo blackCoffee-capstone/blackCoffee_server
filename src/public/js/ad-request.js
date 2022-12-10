@@ -132,7 +132,7 @@ $(document).ready(function () {
 			dataSrc: '',
 			headers: { Authorization: 'Bearer ' + accessToken },
 			success: function (adform) {
-				var img_data = '<img src="' + adform.licenseUrl + '" alt="license">';
+				var img_data = '<img src="' + adform.licenseUrl + '" alt="license" class="adform-img">';
 				$('.modal-body').append('<div> 회사명 : ' + adform.businessName + '</div>');
 				$('.modal-body').append('<div> 위치 : ' + adform.address + '</div>');
 				$('.modal-body').append('<div> 이메일 : ' + adform.email + '</div>');

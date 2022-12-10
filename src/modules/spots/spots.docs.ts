@@ -76,6 +76,7 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 				description: '',
 				type: SearchPageResponseDto,
 			}),
+			ApiBearerAuth('Authorization'),
 		);
 	},
 	updateSnsPostPhotos(summary: string) {
@@ -133,6 +134,19 @@ export const ApiDocs: SwaggerMethodDoc<SpotsController> = {
 				type: Boolean,
 			}),
 			ApiBearerAuth('Authorization'),
+		);
+	},
+	mltest(summary: string) {
+		return applyDecorators(
+			ApiOperation({
+				summary,
+				description: 'sns post url들 파일(test.txt)로 출력 (테스트위해)',
+			}),
+			ApiResponse({
+				status: 200,
+				description: '',
+				type: Boolean,
+			}),
 		);
 	},
 };

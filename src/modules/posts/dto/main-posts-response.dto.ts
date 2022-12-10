@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsBoolean, IsDateString, IsNumber, IsString } from 'class-validator';
-import { LocationResponseDto } from 'src/modules/filters/dto/location-response.dto';
 import { CommentsUserResponseDto } from 'src/modules/users/dto/comments-user-response.dto';
 
 export class MainPostsResponseDto {
