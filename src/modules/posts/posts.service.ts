@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	InternalServerErrorException,
+	NotFoundException,
+	UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as AWS from 'aws-sdk';
@@ -119,6 +125,9 @@ export class PostsService {
 		postData?: UpdatePostsRequestDto,
 	): Promise<PostsResponseDto> {
 		const foundUsersPost = await this.getUsersPost(userId, postId);
+		if (!foundUsersPost) {
+			throw new UnauthorizedException('User is not writer');
+		}
 		if (photos && photos.length > 5) {
 			throw new BadRequestException('Files length exeeds 5');
 		}
