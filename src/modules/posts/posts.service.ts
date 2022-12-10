@@ -276,7 +276,7 @@ export class PostsService {
 		if (!foundPost) {
 			throw new NotFoundException('Post is not found');
 		}
-		const foundComment = await this.getComment(postId, commentId, userId);
+		const foundComment = await this.getComment(postId, commentId);
 		if (!foundComment) {
 			throw new NotFoundException('Comment is not found');
 		}
@@ -433,7 +433,7 @@ export class PostsService {
 			.getRawMany();
 	}
 
-	private async getComment(postId: number, commentId: number, userId: number) {
+	private async getComment(postId: number, commentId: number) {
 		return await this.postCommentsRepository
 			.createQueryBuilder('post_comment')
 			.select('post_comment.id, post_comment.content, post_comment.created_at, user.id AS user_id, user.nickname')
@@ -441,7 +441,6 @@ export class PostsService {
 			.leftJoin('post_comment.post', 'post')
 			.where('post.id = :postId', { postId })
 			.andWhere('post_comment.id = :commentId', { commentId })
-			.andWhere('user.id = :userId', { userId })
 			.getRawOne();
 	}
 
