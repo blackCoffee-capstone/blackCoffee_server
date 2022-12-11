@@ -23,6 +23,6 @@ services:
         restart: always
         env_file:
             - ./.env.integ
-        command: sh -c "npm run seed:run && npm run start:integ"
+        command: sh -c "npm i --force && npm run seed:run && npm run start:integ"
         depends_on:
             - db
