@@ -270,13 +270,14 @@ export class SpotsService {
 				for (const spot of snsPostsSpot) {
 					deleteSpotIds.push(spot.id);
 				}
-
-				await this.spotsRepository
-					.createQueryBuilder('spot')
-					.delete()
-					.from(Spot)
-					.where('id IN (:...ids)', { ids: deleteSpotIds })
-					.execute();
+				if (deleteSpotIds.length > 0) {
+					await this.spotsRepository
+						.createQueryBuilder('spot')
+						.delete()
+						.from(Spot)
+						.where('id IN (:...ids)', { ids: deleteSpotIds })
+						.execute();
+				}
 			} else {
 				await this.snsPostRepository.update(
 					{
