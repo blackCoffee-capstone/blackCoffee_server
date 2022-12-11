@@ -465,7 +465,9 @@ export class SpotsService {
 				.where('snsPosts.photoUrl is not null')
 				.distinct(true);
 			if (searchRequest.word) {
-				searchSpots = searchSpots.andWhere('spot.name Like :name', { name: `%${searchRequest.word}%` });
+				searchSpots = searchSpots.andWhere(`REPLACE(LOWER(spot.name), ' ', '') Like LOWER(:name)`, {
+					name: `%${searchRequest.word.split(' ').join('')}%`,
+				});
 			}
 			if (searchRequest.locationIds && searchRequest.locationIds[0] !== 0) {
 				let locationIds = searchRequest.locationIds;
