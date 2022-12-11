@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Ad } from 'src/entities/ad.entity';
@@ -43,6 +44,23 @@ describe('AdsController', () => {
 			const expectAds = ads.map((item) => new GetAdFilterResponseDto(item));
 			await adsRepository.createQueryBuilder().getMany.mockResolvedValue(expectAds);
 			await expect(adsController.getAdsFilter({})).resolves.toEqual(expectAds);
+		});
+	});
+	describe('clickAds()', () => {
+		it('광고가 없으면 NotFoundException error를 반환한다.', async () => {
+			const expectAd = adsRepository.createQueryBuilder().getOne.mockResolvedValue();
+
+			await expect(adsController.clickAds({ adId: 3 })).rejects.toThrow(NotFoundException);
+		});
+		it('광고 클릭 요청 올 때마다 횟수 증가한다.', async () => {
+			const ad = await adsRepository.find();
+			const expectAd = adsRepository.createQueryBuilder().getOne.mockResolvedValue(ad[0]);
+
+			await adsRepository.update.mockResolvedValue({
+				...expectAd,
+				click: () => 'click+1',
+			});
+			await expect(adsController.clickAds({ adId: 1 })).resolves.toEqual(true);
 		});
 	});
 });
