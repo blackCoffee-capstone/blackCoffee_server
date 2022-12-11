@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import { SshConfig } from 'src/config/config.constant';
@@ -200,6 +201,7 @@ export class RecommendationsService {
 		);
 	}
 
+	@Interval('intervalTask', 30 * 60 * 1000)
 	async updateMlRecommendations(): Promise<boolean> {
 		const spots: UsersTasteThemesResponseDto[] = await this.getSpotsThemes();
 		const allTasteThemes = await this.getAllTasteThemes();
