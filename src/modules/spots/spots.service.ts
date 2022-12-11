@@ -132,11 +132,10 @@ export class SpotsService {
 		const spots = JSON.parse(spotsFile.toString());
 		const metaData: SaveRequestDto[] = spots.map((spot) => new SaveRequestDto(spot));
 		await this.saveSpot(metaData);
-
-		// 2번째 Ml 통신
+		return await this.sendAllSnsPostsToMl();
 	}
 
-	async sendAllSnsPostsToMl() {
+	private async sendAllSnsPostsToMl() {
 		const allSpotsWithSnsPosts = await this.spotsRepository
 			.createQueryBuilder('spot')
 			.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
@@ -257,9 +256,28 @@ export class SpotsService {
 		const snsPhotos: SnsPhotoJsonDto[] = await this.readCsvSnsPostPhotoUrls(
 			path.resolve('src/database/datas', fileName),
 		);
+
 		for (const snsPhoto of snsPhotos) {
-			if (snsPhoto.photoUrl === '-') await this.snsPostRepository.delete({ snsPostUrl: snsPhoto.snsPostUrl });
-			else {
+			if (snsPhoto.photoUrl === '-') {
+				const deleteSpotIds = [];
+				await this.snsPostRepository.delete({ snsPostUrl: snsPhoto.snsPostUrl });
+				const snsPostsSpot = await this.spotsRepository
+					.createQueryBuilder('spot')
+					.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
+					.where('snsPosts.id is null')
+					.getMany();
+
+				for (const spot of snsPostsSpot) {
+					deleteSpotIds.push(spot.id);
+				}
+
+				await this.spotsRepository
+					.createQueryBuilder('spot')
+					.delete()
+					.from(Spot)
+					.where('id IN (:...ids)', { ids: deleteSpotIds })
+					.execute();
+			} else {
 				await this.snsPostRepository.update(
 					{
 						snsPostUrl: snsPhoto.snsPostUrl,
