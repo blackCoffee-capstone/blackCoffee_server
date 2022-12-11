@@ -124,6 +124,7 @@ $(document).ready(function () {
 							return date.substring(0, 10);
 						},
 					},
+					{ data: 'click' },
 					{
 						data: null,
 						render: function (data) {
