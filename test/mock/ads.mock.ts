@@ -5,6 +5,7 @@ export const mockAd = [
 		email: 'test@gmail.com',
 		pageUrl: 'https~',
 		photoUrl: 'https~',
+		click: 0,
 		address: test,
 		location: {
 			id: 31,

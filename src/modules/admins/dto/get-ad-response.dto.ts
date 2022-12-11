@@ -15,6 +15,10 @@ export class GetAdResponseDto {
 	@ApiProperty({ example: 'test@gmail.com', description: '이메일' })
 	readonly email: string;
 
+	@IsNumber()
+	@ApiProperty({ example: 1, description: '광고 클릭 수' })
+	readonly click: number;
+
 	@IsString()
 	@ApiProperty({ example: '경기 수원시 ~', description: '주소' })
 	readonly address: string;
@@ -34,10 +38,11 @@ export class GetAdResponseDto {
 	@ApiProperty({ example: '2022-11-11', description: '광고 등록 날짜' })
 	readonly createdAt: Date;
 
-	constructor({ id, businessName, email, pageUrl, photoUrl, address, location, createdAt }) {
+	constructor({ id, businessName, email, click, pageUrl, photoUrl, address, location, createdAt }) {
 		this.id = id;
 		this.businessName = businessName;
 		this.email = email;
+		this.click = click;
 		this.pageUrl = pageUrl;
 		this.photoUrl = photoUrl;
 		this.address = address;

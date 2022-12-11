@@ -158,7 +158,12 @@ export class AdminsService {
 				metroLocalName.metroName,
 				metroLocalName.localName,
 			);
-			await this.adsRepository.save({ ...AdsRegisterRequest, photoUrl: adBackgroundUrl, locationId: locationId });
+			await this.adsRepository.save({
+				...AdsRegisterRequest,
+				photoUrl: adBackgroundUrl,
+				locationId: locationId,
+				click: 0,
+			});
 			return true;
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);

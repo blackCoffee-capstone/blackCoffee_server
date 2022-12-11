@@ -11,20 +11,9 @@ import { AdminsController } from './admins.controller';
 import { AdminsService } from './admins.service';
 import { ConfigService } from '@nestjs/config';
 import { AdFormsService } from '../ad-forms/ad-forms.service';
-import { AdFormsRequestDto } from '../ad-forms/dto/ad-forms-request.dto';
 import { AdFormsResponseDto } from './dto/ad-forms-response.dto';
-import { GetAdFormResponseDto } from './dto/get-ad-form.response.dto';
 import { AdFormType } from 'src/types/ad-form.types';
-import { UserType } from 'src/types/users.types';
-import { User } from 'src/entities/users.entity';
-import { AdFormsFilterRequestDto } from './dto/ad-forms-filter-request.dto';
-import {
-	Controller,
-	InternalServerErrorException,
-	BadRequestException,
-	NotFoundException,
-	UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { GetAdFilterResponseDto } from './dto/get-ad-filter-response.dto';
 import { AdsResponseDto } from './dto/ads-response.dto';
 import { GetAdResponseDto } from './dto/get-ad-response.dto';
