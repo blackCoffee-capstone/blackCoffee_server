@@ -64,4 +64,5 @@ jobs:
                       cd blackCoffee_server/
                       git pull
                       docker-compose -f docker-compose.dev.yml stop
+                      npm i --force
                       docker-compose -f docker-compose.dev.yml up -d
