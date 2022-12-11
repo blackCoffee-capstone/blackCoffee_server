@@ -2,12 +2,11 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 import { SwaggerMethodDoc } from 'src/swagger/swagger-method-doc-type';
-import { AdsResponseDto } from './dto/ads-response.dto';
-import { GetAdResponseDto } from './dto/get-ad-response.dto';
-import { AdFormsResponseDto } from './dto/ad-forms-response.dto';
-import { GetAdFormResponseDto } from './dto/get-ad-form.response.dto';
-import { GetAdFilterResponseDto } from './dto/get-ad-filter-response.dto';
 import { AdminsController } from './admins.controller';
+import { AdFormsResponseDto } from './dto/ad-forms-response.dto';
+import { AdsResponseDto } from './dto/ads-response.dto';
+import { GetAdFormResponseDto } from './dto/get-ad-form.response.dto';
+import { GetAdResponseDto } from './dto/get-ad-response.dto';
 
 export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 	getAllAdForms(summary: string) {
@@ -79,24 +78,6 @@ export const ApiDocs: SwaggerMethodDoc<AdminsController> = {
 				type: Boolean,
 			}),
 			ApiBearerAuth('Authorization'),
-		);
-	},
-	getAdsFilter(summary: string) {
-		return applyDecorators(
-			ApiOperation({
-				summary,
-				description: '게시용 광고 목록 반환',
-			}),
-			ApiQuery({
-				name: 'locationIds',
-				required: false,
-				description: '위치 필터링 id list',
-			}),
-			ApiResponse({
-				status: 200,
-				description: '',
-				type: [GetAdFilterResponseDto],
-			}),
 		);
 	},
 	getAllAds(summary: string) {

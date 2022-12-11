@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as AWS from 'aws-sdk';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
 
 import { NcloudConfig } from 'src/config/config.constant';
@@ -16,8 +16,6 @@ import { AdFormsResponseDto } from './dto/ad-forms-response.dto';
 import { AdFormsStatusRequestDto } from './dto/ad-forms-status-request.dto';
 import { AdsRegisterRequestDto } from './dto/ads-register-request.dto';
 import { AdsResponseDto } from './dto/ads-response.dto';
-import { GetAdFilterRequestDto } from './dto/get-ad-filter-request.dto';
-import { GetAdFilterResponseDto } from './dto/get-ad-filter-response.dto';
 import { GetAdFormResponseDto } from './dto/get-ad-form.response.dto';
 import { GetAdResponseDto } from './dto/get-ad-response.dto';
 import { UpdateAdsRequestDto } from './dto/update-ads-request.dto';
@@ -78,45 +76,6 @@ export class AdminsService {
 			await this.deleteFileToS3('licenses', adForm.licenseUrl);
 			await this.adFormsRepository.delete(adForm.id);
 			return true;
-		} catch (error) {
-			throw new InternalServerErrorException(error.message, error);
-		}
-	}
-
-	private async allSelection(locationIds) {
-		return await this.locationsRepository
-			.createQueryBuilder('location')
-			.leftJoinAndSelect('location.ads', 'ads')
-			.select('location.id AS id')
-			.where((metroNames) => {
-				const subQuery = metroNames
-					.subQuery()
-					.select('location.metroName')
-					.where('location.localName is null')
-					.andWhere('location.id IN (:...ids)', { ids: locationIds })
-					.from(Location, 'location')
-					.getQuery();
-				return 'location.metroName IN' + subQuery;
-			})
-			.andWhere('ads.id is not null')
-			.distinctOn(['location.id'])
-			.getRawMany();
-	}
-
-	async getAdsFilter(getAdRequest?: GetAdFilterRequestDto) {
-		try {
-			const ads = this.adsRepository.createQueryBuilder('ad');
-			if (getAdRequest.locationIds && getAdRequest.locationIds[0] !== 0) {
-				let locationIds = getAdRequest.locationIds;
-				const allSelection = await this.allSelection(locationIds);
-				const localsIds = allSelection.flatMap(({ id }) => [id]);
-				locationIds = [...new Set(locationIds.concat(localsIds))];
-
-				ads.where('ad.locationId IN (:...ids)', { ids: locationIds });
-			}
-			const finalAds = await ads.orderBy('RANDOM()').limit(5).getMany();
-
-			return finalAds.map((ad) => new GetAdFilterResponseDto(ad));
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}

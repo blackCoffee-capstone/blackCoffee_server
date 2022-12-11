@@ -1,23 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
-import { Ad } from 'src/entities/ad.entity';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AdForm } from 'src/entities/ad-form.entity';
+import { Ad } from 'src/entities/ad.entity';
 import { Location } from 'src/entities/locations.entity';
-import { MockAdsRepository } from 'test/mock/ads.mock';
+import { AdFormType } from 'src/types/ad-form.types';
 import { MockAdFormsRepository } from 'test/mock/ad-forms.mock';
+import { MockAdsRepository } from 'test/mock/ads.mock';
 import { MockLocationsRepository } from 'test/mock/locations.mock';
+import { AdFormsService } from '../ad-forms/ad-forms.service';
+import { LocationResponseDto } from '../filters/dto/location-response.dto';
 import { AdminsController } from './admins.controller';
 import { AdminsService } from './admins.service';
-import { ConfigService } from '@nestjs/config';
-import { AdFormsService } from '../ad-forms/ad-forms.service';
 import { AdFormsResponseDto } from './dto/ad-forms-response.dto';
-import { AdFormType } from 'src/types/ad-form.types';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { GetAdFilterResponseDto } from './dto/get-ad-filter-response.dto';
 import { AdsResponseDto } from './dto/ads-response.dto';
 import { GetAdResponseDto } from './dto/get-ad-response.dto';
-import { LocationResponseDto } from '../filters/dto/location-response.dto';
 
 describe('AdminsController', () => {
 	let adminsController: AdminsController;
@@ -161,15 +160,6 @@ describe('AdminsController', () => {
 			adFormsRepository.createQueryBuilder().getOne.mockResolvedValue(null);
 			adFormsRepository.delete.mockResolvedValue(true);
 			await expect(adminsController.deleteAdForm(1)).rejects.toThrow(NotFoundException);
-		});
-	});
-
-	describe('getAdsFilter()', () => {
-		it('게시용 광고 목록을 반환한다.', async () => {
-			const ads = await adsRepository.find();
-			const expectAds = ads.map((item) => new GetAdFilterResponseDto(item));
-			await adsRepository.createQueryBuilder().getMany.mockResolvedValue(expectAds);
-			await expect(adminsController.getAdsFilter({})).resolves.toEqual(expectAds);
 		});
 	});
 

@@ -1,32 +1,31 @@
 import {
-	Controller,
-	Get,
-	Post,
 	Body,
-	Patch,
-	Param,
+	Controller,
 	Delete,
-	Query,
-	UseInterceptors,
+	Get,
 	HttpException,
 	HttpStatus,
+	Param,
+	Patch,
+	Post,
+	Query,
 	UploadedFile,
 	UseGuards,
+	UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 
-import { UserType } from 'src/types/users.types';
 import { Roles } from 'src/decorators/roles.decorator';
+import { UserType } from 'src/types/users.types';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/role.guard';
 import { ApiDocs } from './admins.docs';
 import { AdminsService } from './admins.service';
-import { RolesGuard } from '../auth/guards/role.guard';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { GetAdFilterRequestDto } from './dto/get-ad-filter-request.dto';
-import { AdsRegisterRequestDto } from './dto/ads-register-request.dto';
-import { UpdateAdsRequestDto } from './dto/update-ads-request.dto';
 import { AdFormsFilterRequestDto } from './dto/ad-forms-filter-request.dto';
 import { AdFormsStatusRequestDto } from './dto/ad-forms-status-request.dto';
+import { AdsRegisterRequestDto } from './dto/ads-register-request.dto';
+import { UpdateAdsRequestDto } from './dto/update-ads-request.dto';
 
 @Controller('admins')
 @ApiTags('admins - 관리자 페이지')
@@ -63,12 +62,6 @@ export class AdminsController {
 	@ApiDocs.deleteAdForm('광고 요청 삭제')
 	async deleteAdForm(@Param('adFormId') adFormId: number) {
 		return await this.adminsService.deleteAdForm(adFormId);
-	}
-
-	@Get('/ads')
-	@ApiDocs.getAdsFilter('게시용 광고 목록 반환')
-	async getAdsFilter(@Query() getAdRequest?: GetAdFilterRequestDto) {
-		return await this.adminsService.getAdsFilter(getAdRequest);
 	}
 
 	@Get('/adsAll')

@@ -17,7 +17,7 @@ export class Ad extends CommonEntity {
 	email: string;
 
 	@IsNumber()
-	@Column({ name: 'click', type: 'int', nullable: false })
+	@Column({ name: 'click', type: 'int', nullable: false, default: 0 })
 	click: number;
 
 	@IsString()
