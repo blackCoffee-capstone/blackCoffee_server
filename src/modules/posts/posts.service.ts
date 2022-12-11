@@ -518,7 +518,9 @@ export class PostsService {
 				}, 'likeUsers');
 
 			if (searchRequest.word) {
-				posts = posts.where('LOWER(post.title) Like LOWER(:title)', { title: `%${searchRequest.word}%` });
+				posts = posts.where(`REPLACE(LOWER(post.title), ' ', '') Like LOWER(:title)`, {
+					title: `%${searchRequest.word.split(' ').join('')}%`,
+				});
 			}
 			if (searchRequest.locationIds && searchRequest.locationIds[0] !== 0) {
 				let locationIds = searchRequest.locationIds;
