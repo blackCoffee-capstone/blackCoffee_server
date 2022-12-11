@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { MailerModule } from './mailer/mailer.module';
 import { AdFormsModule } from './modules/ad-forms/ad-forms.module';
 import { AdminsModule } from './modules/admins/admins.module';
+import { AdsModule } from './modules/ads/ads.module';
 import { AuthCodesModule } from './modules/auth-codes/auth-codes.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FiltersModule } from './modules/filters/filters.module';
@@ -40,6 +41,7 @@ import { ViewController } from './views/view.controller';
 		ReportPostsModule,
 		WishesModule,
 		LikesModule,
+		AdsModule,
 	],
 	controllers: [AppController, ViewController],
 	providers: [AppService],

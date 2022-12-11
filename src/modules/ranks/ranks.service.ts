@@ -248,6 +248,9 @@ export class RanksService {
 				...updateRequest,
 			});
 			await this.ranksRepository.save(ranksRequestDto);
+			await this.spotsRepository.update(updateRequest.spotId, {
+				rank: updateRequest.rank,
+			});
 		} catch (error) {
 			throw new InternalServerErrorException(error.message, error);
 		}

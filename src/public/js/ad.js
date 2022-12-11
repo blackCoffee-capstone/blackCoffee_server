@@ -79,6 +79,7 @@ $(document).ready(function () {
 							return date.substring(0, 10);
 						},
 					},
+					{ data: 'click' },
 					{
 						orderable: false,
 						data: null,
@@ -177,6 +178,7 @@ $(document).ready(function () {
 						adform.pageUrl +
 						'</a></div>',
 				);
+				$('.modal-body').append('<div> 광고 클릭 수 : ' + adform.click + '</div>');
 				$('.modal-body').append('<div>광고 배너</div>');
 				$('.modal-body').append(img_data);
 				$('body').append('<div class="backon"></div>');

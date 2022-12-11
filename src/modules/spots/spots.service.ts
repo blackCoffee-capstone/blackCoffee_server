@@ -217,14 +217,20 @@ export class SpotsService {
 	}
 
 	private async createRanks(resultJson) {
-		for (const week of resultJson) {
-			for (const rank of week.ranks) {
-				await this.ranksService.updateRank(
-					new RanksUpdateRequestDto({ week: week.week, spotId: rank.spotId, rank: rank.rank }),
-				);
+		try {
+			await this.spotsRepository.update({}, { rank: null });
+
+			for (const week of resultJson) {
+				for (const rank of week.ranks) {
+					await this.ranksService.updateRank(
+						new RanksUpdateRequestDto({ week: week.week, spotId: rank.spotId, rank: rank.rank }),
+					);
+				}
 			}
+			return true;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message, error);
 		}
-		return true;
 	}
 
 	async getSnsPostUrls() {
@@ -267,7 +273,6 @@ export class SpotsService {
 
 	private async saveSpot(metaData: SaveRequestDto[]) {
 		try {
-			await this.spotsRepository.update({}, { rank: null });
 			await this.noDuplicateSpot(metaData);
 			await this.noDuplicateSnsPost(metaData);
 			return true;
@@ -465,7 +470,9 @@ export class SpotsService {
 				.where('snsPosts.photoUrl is not null')
 				.distinct(true);
 			if (searchRequest.word) {
-				searchSpots = searchSpots.andWhere('spot.name Like :name', { name: `%${searchRequest.word}%` });
+				searchSpots = searchSpots.andWhere(`REPLACE(LOWER(spot.name), ' ', '') Like LOWER(:name)`, {
+					name: `%${searchRequest.word.split(' ').join('')}%`,
+				});
 			}
 			if (searchRequest.locationIds && searchRequest.locationIds[0] !== 0) {
 				let locationIds = searchRequest.locationIds;
