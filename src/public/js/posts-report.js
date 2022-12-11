@@ -159,6 +159,7 @@ $(document).ready(function () {
 				headers: { Authorization: 'Bearer ' + accessToken },
 				success: function (data) {
 					alert('변경 완료!');
+					window.location.reload();
 				},
 				error: function (request, status, error) {
 					console.log(
@@ -193,6 +194,7 @@ $(document).ready(function () {
 				headers: { Authorization: 'Bearer ' + accessToken },
 				success: function (data) {
 					alert('변경 완료!');
+					window.location.reload();
 				},
 				error: function (request, status, error) {
 					alert(
