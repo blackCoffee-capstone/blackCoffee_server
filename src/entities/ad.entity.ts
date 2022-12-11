@@ -16,6 +16,10 @@ export class Ad extends CommonEntity {
 	@Column({ type: 'varchar', length: 100, nullable: false })
 	email: string;
 
+	@IsNumber()
+	@Column({ name: 'click', type: 'int', nullable: false })
+	click: number;
+
 	@IsString()
 	@IsNotEmpty()
 	@Column({ name: 'page_url', type: 'text', nullable: false, unique: true })
