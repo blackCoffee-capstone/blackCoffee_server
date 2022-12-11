@@ -132,11 +132,10 @@ export class SpotsService {
 		const spots = JSON.parse(spotsFile.toString());
 		const metaData: SaveRequestDto[] = spots.map((spot) => new SaveRequestDto(spot));
 		await this.saveSpot(metaData);
-
-		// 2번째 Ml 통신
+		return await this.sendAllSnsPostsToMl();
 	}
 
-	async sendAllSnsPostsToMl() {
+	private async sendAllSnsPostsToMl() {
 		const allSpotsWithSnsPosts = await this.spotsRepository
 			.createQueryBuilder('spot')
 			.leftJoinAndSelect('spot.snsPosts', 'snsPosts')
