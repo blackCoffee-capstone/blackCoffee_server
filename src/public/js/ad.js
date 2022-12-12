@@ -172,7 +172,7 @@ $(document).ready(function () {
 				$('.modal-body').append('<div> 위치 : ' + adform.address + '</div>');
 				$('.modal-body').append('<div> 이메일 : ' + adform.email + '</div>');
 				$('.modal-body').append(
-					'<div> 홈페이지 : <a href = "//' +
+					'<div> 홈페이지 : <a href = "' +
 						adform.pageUrl +
 						'" target="_blank">' +
 						adform.pageUrl +
